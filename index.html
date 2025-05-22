@@ -1,0 +1,40 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Catálogo XP Orçamento</title>
+    <meta name="description" content="Gere orçamentos rápidos e diretos com nosso catálogo interativo." />
+    <meta name="author" content="XP Orçamento" />
+
+    <meta property="og:title" content="Catálogo XP Orçamento" />
+    <meta property="og:description" content="Gere orçamentos rápidos e diretos com nosso catálogo interativo." />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="/new-icon.png" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:image" content="/new-icon.png" />
+    
+    <link rel="manifest" href="/manifest.json" />
+    <link rel="icon" type="image/png" href="/new-icon.png" />
+    <link rel="apple-touch-icon" href="/new-icon.png" />
+    <meta name="theme-color" content="#000000" />
+  </head>
+
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js').then(registration => {
+            console.log('SW registrado com sucesso:', registration);
+          }).catch(error => {
+            console.log('Falha ao registrar SW:', error);
+          });
+        });
+      }
+    </script>
+  </body>
+</html>
