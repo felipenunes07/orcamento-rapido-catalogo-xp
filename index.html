@@ -20,11 +20,32 @@
     <link rel="icon" type="image/png" href="/new-icon.png" />
     <link rel="apple-touch-icon" href="/new-icon.png" />
     <meta name="theme-color" content="#000000" />
+    <script src="https://cdn.jsdelivr.net/npm/@chatvolt/embeds@latest/dist/chatbox/index.umd.js"></script>
   </head>
 
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+    <script>
+      window.addEventListener('DOMContentLoaded', () => {
+        ChatvoltChatbox.initBubble({ 
+          agentId: 'cmb81qy5f0bswhy5npr0p9sxh', 
+          contact: { 
+            firstName: 'John', 
+            lastName: 'Doe', 
+            email: 'customer@email.com', 
+            phoneNumber: '+33612345644', 
+          }, 
+          interface: { 
+            initialMessages: [ 
+              'Hello Marcos how are you doing today?', 
+              'How can I help you ?', 
+            ], 
+          }, 
+          context: "The user lives in the city of São Paulo and is interested in learning more details about the online consulting service.",
+        });
+      });
+    </script>
     <script>
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
