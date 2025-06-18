@@ -8,7 +8,6 @@ const HomePage: React.FC = () => {
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const [showManualInstructions, setShowManualInstructions] = useState(false);
   const [platform, setPlatform] = useState<'ios' | 'android' | 'desktop'>('desktop');
-  const [canInstall, setCanInstall] = useState(false);
 
   useEffect(() => {
     // Detectar plataforma
@@ -96,30 +95,25 @@ const HomePage: React.FC = () => {
       return;
     }
 
-    // Capturar o evento beforeinstallprompt
-    const beforeInstallHandler = (e: any) => {
-      console.log('[PWA] Evento beforeinstallprompt capturado');
+    let promptEvent: any = null;
+    function beforeInstallHandler(e: any) {
       e.preventDefault();
+      promptEvent = e;
       setDeferredPrompt(e);
-      setCanInstall(true);
-      
-      // Mostrar popup após 2 segundos se o evento for capturado
+      console.log('[PWA] beforeinstallprompt capturado');
       setTimeout(() => {
         setShowPwaPrompt(true);
-        console.log('[PWA] Popup de instalação exibido (evento capturado)');
+        console.log('[PWA] Popup de instalação exibido');
       }, 2000);
-    };
-
+    }
     window.addEventListener('beforeinstallprompt', beforeInstallHandler);
-
-    // Fallback: se o evento não for capturado em 3 segundos, mostrar instruções manuais
+    // Forçar exibir o popup mesmo se o evento não disparar (debug)
     setTimeout(() => {
-      if (!deferredPrompt) {
-        console.log('[PWA] Evento beforeinstallprompt não capturado, mostrando instruções manuais');
-        setShowManualInstructions(true);
+      if (!promptEvent) {
+        setShowPwaPrompt(true);
+        console.log('[PWA] Forçando popup de instalação (sem evento)');
       }
-    }, 3000);
-
+    }, 2000);
     return () => {
       window.removeEventListener('beforeinstallprompt', beforeInstallHandler);
     };
@@ -135,7 +129,6 @@ const HomePage: React.FC = () => {
         
         const { outcome } = await deferredPrompt.userChoice;
         console.log('[PWA] Resultado do usuário:', outcome);
-        console.log('Resultado da escolha:', outcome);
         
         if (outcome === 'accepted') {
           console.log('[PWA] Instalação aceita pelo usuário');
@@ -148,16 +141,10 @@ const HomePage: React.FC = () => {
           alert('❌ Instalação cancelada. Você pode instalar manualmente seguindo as instruções.');
           setShowManualInstructions(true);
         }
-        
-        // Limpar o deferredPrompt após o uso
-        setDeferredPrompt(null);
-        setCanInstall(false);
       } catch (error) {
         console.error('[PWA] Erro na instalação automática:', error);
         alert('⚠️ Instalação automática falhou. Mostrando instruções manuais.');
         setShowManualInstructions(true);
-        setDeferredPrompt(null);
-        setCanInstall(false);
       }
     } else {
       console.log('[PWA] Instalação automática não suportada neste navegador/dispositivo');
@@ -352,46 +339,24 @@ const HomePage: React.FC = () => {
               <h2 style={{ fontSize: 22, fontWeight: 700, margin: 0 }}>Instale o App!</h2>
               <p style={{ color: '#444', margin: '12px 0 0 0', fontSize: 16 }}>Tenha acesso rápido e fácil ao catálogo direto na sua tela inicial.</p>
             </div>
-            {canInstall ? (
-              <button
-                onClick={handleInstallClick}
-                style={{
-                  background: 'linear-gradient(90deg, #f9ce34 0%, #ee2a7b 50%, #6228d7 100%)',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: 8,
-                  padding: '12px 28px',
-                  fontSize: 18,
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                  marginBottom: 12,
-                  boxShadow: '0 2px 8px rgba(0,0,0,0.10)',
-                  transition: 'transform 0.1s',
-                }}
-              >
-                Instalar Agora
-              </button>
-            ) : (
-              <button
-                onClick={() => setShowManualInstructions(true)}
-                style={{
-                  background: 'linear-gradient(90deg, #f9ce34 0%, #ee2a7b 50%, #6228d7 100%)',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: 8,
-                  padding: '12px 28px',
-                  fontSize: 18,
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                  marginBottom: 12,
-                  boxShadow: '0 2px 8px rgba(0,0,0,0.10)',
-                  transition: 'transform 0.1s',
-                }}
-              >
-                Ver Instruções de Instalação
-              </button>
-            )}
-            <br />
+            <button
+              onClick={handleInstallClick}
+              style={{
+                background: 'linear-gradient(90deg, #f9ce34 0%, #ee2a7b 50%, #6228d7 100%)',
+                color: 'white',
+                border: 'none',
+                borderRadius: 8,
+                padding: '12px 28px',
+                fontSize: 18,
+                fontWeight: 600,
+                cursor: 'pointer',
+                marginBottom: 12,
+                boxShadow: '0 2px 8px rgba(0,0,0,0.10)',
+                transition: 'transform 0.1s',
+              }}
+            >
+              Instalar Agora
+            </button>
             <button
               onClick={() => {
                 // Salvar no localStorage que o usuário fechou o popup
