@@ -52,6 +52,7 @@ const HomePage: React.FC = () => {
       }
       setShowPwaPrompt(false);
     } else {
+      // Não faz nada, só exibe instruções manuais
       setInstallStatus('Não foi possível iniciar a instalação automática. Siga as instruções abaixo para instalar manualmente.');
     }
   };
