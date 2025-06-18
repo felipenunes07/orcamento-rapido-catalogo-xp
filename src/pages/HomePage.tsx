@@ -8,6 +8,7 @@ const HomePage: React.FC = () => {
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const [showManualInstructions, setShowManualInstructions] = useState(false);
   const [platform, setPlatform] = useState<'ios' | 'android' | 'desktop'>('desktop');
+  const [canInstall, setCanInstall] = useState(false);
 
   useEffect(() => {
     // Detectar plataforma
@@ -74,15 +75,6 @@ const HomePage: React.FC = () => {
         return true;
       }
       
-      // Verificação específica para desktop - só mostrar se for Chrome/Edge
-      const isDesktop = !(/android|iphone|ipad|ipod|mobile|tablet/.test(userAgent));
-      const isChromeOrEdge = /chrome|edge/.test(userAgent) && !/firefox|safari/.test(userAgent);
-      
-      if (isDesktop && !isChromeOrEdge) {
-        console.log('[PWA] Desktop detectado mas não é Chrome/Edge, pulando popup');
-        return true;
-      }
-      
       console.log('[PWA] App não detectado como instalado, permitindo popup');
       return false;
     };
@@ -104,25 +96,30 @@ const HomePage: React.FC = () => {
       return;
     }
 
-    let promptEvent: any = null;
-    function beforeInstallHandler(e: any) {
+    // Capturar o evento beforeinstallprompt
+    const beforeInstallHandler = (e: any) => {
+      console.log('[PWA] Evento beforeinstallprompt capturado');
       e.preventDefault();
-      promptEvent = e;
       setDeferredPrompt(e);
-      console.log('[PWA] beforeinstallprompt capturado');
+      setCanInstall(true);
+      
+      // Mostrar popup após 2 segundos se o evento for capturado
       setTimeout(() => {
         setShowPwaPrompt(true);
-        console.log('[PWA] Popup de instalação exibido');
+        console.log('[PWA] Popup de instalação exibido (evento capturado)');
       }, 2000);
-    }
+    };
+
     window.addEventListener('beforeinstallprompt', beforeInstallHandler);
-    // Forçar exibir o popup mesmo se o evento não disparar (debug)
+
+    // Fallback: se o evento não for capturado em 3 segundos, mostrar instruções manuais
     setTimeout(() => {
-      if (!promptEvent) {
-        setShowPwaPrompt(true);
-        console.log('[PWA] Forçando popup de instalação (sem evento)');
+      if (!deferredPrompt) {
+        console.log('[PWA] Evento beforeinstallprompt não capturado, mostrando instruções manuais');
+        setShowManualInstructions(true);
       }
-    }, 2000);
+    }, 3000);
+
     return () => {
       window.removeEventListener('beforeinstallprompt', beforeInstallHandler);
     };
@@ -138,6 +135,7 @@ const HomePage: React.FC = () => {
         
         const { outcome } = await deferredPrompt.userChoice;
         console.log('[PWA] Resultado do usuário:', outcome);
+        console.log('Resultado da escolha:', outcome);
         
         if (outcome === 'accepted') {
           console.log('[PWA] Instalação aceita pelo usuário');
@@ -150,10 +148,16 @@ const HomePage: React.FC = () => {
           alert('❌ Instalação cancelada. Você pode instalar manualmente seguindo as instruções.');
           setShowManualInstructions(true);
         }
+        
+        // Limpar o deferredPrompt após o uso
+        setDeferredPrompt(null);
+        setCanInstall(false);
       } catch (error) {
         console.error('[PWA] Erro na instalação automática:', error);
         alert('⚠️ Instalação automática falhou. Mostrando instruções manuais.');
         setShowManualInstructions(true);
+        setDeferredPrompt(null);
+        setCanInstall(false);
       }
     } else {
       console.log('[PWA] Instalação automática não suportada neste navegador/dispositivo');
@@ -190,43 +194,14 @@ const HomePage: React.FC = () => {
           iconHint: 'Procure os três pontos verticais no canto superior direito'
         };
       default:
-        // Detectar sistema operacional específico para desktop
-        const userAgent = navigator.userAgent.toLowerCase();
-        let osSpecificSteps = [];
-        let osSpecificHint = '';
-        
-        if (userAgent.includes('windows')) {
-          osSpecificSteps = [
-            'Clique no ícone de instalação na barra de endereços (ícone +)',
-            'Ou clique no menu (três pontos) > "Instalar [Nome do App]"',
-            'Confirme a instalação',
-            'O app será adicionado ao menu Iniciar e à área de trabalho'
-          ];
-          osSpecificHint = 'Procure o ícone + na barra de endereços ou três pontos no menu';
-        } else if (userAgent.includes('mac')) {
-          osSpecificSteps = [
-            'Clique no ícone de instalação na barra de endereços (ícone +)',
-            'Ou clique no menu (três pontos) > "Instalar [Nome do App]"',
-            'Confirme a instalação',
-            'O app será adicionado ao Launchpad e à pasta Aplicativos'
-          ];
-          osSpecificHint = 'Procure o ícone + na barra de endereços ou três pontos no menu';
-        } else {
-          // Linux e outros
-          osSpecificSteps = [
-            'Clique no ícone de instalação na barra de endereços (ícone +)',
-            'Ou clique no menu (três pontos) > "Instalar [Nome do App]"',
-            'Confirme a instalação',
-            'O app será adicionado ao menu de aplicativos'
-          ];
-          osSpecificHint = 'Procure o ícone + na barra de endereços ou três pontos no menu';
-        }
-        
         return {
           title: 'Como instalar no Desktop',
-          steps: osSpecificSteps,
-          iconHint: osSpecificHint,
-          additionalInfo: '💡 Dica: Se não aparecer o ícone de instalação, você pode criar um atalho manualmente arrastando o ícone da aba para a área de trabalho.'
+          steps: [
+            'Clique no ícone de instalação na barra de endereços (ícone +)',
+            'Ou clique no menu (três pontos) > "Instalar [Nome do App]"',
+            'Confirme a instalação'
+          ],
+          iconHint: 'Procure o ícone + na barra de endereços ou três pontos no menu'
         };
     }
   };
@@ -236,65 +211,65 @@ const HomePage: React.FC = () => {
   return (
     <>
       <Layout>
-        <div className="container-custom py-8">
-          <div className="max-w-3xl mx-auto">
-            <section className="mb-12 text-center">
-              <h1 className="text-3xl sm:text-4xl font-bold mb-4">
-                Catálogo Orçamento Fácil
-              </h1>
-              <p className="text-lg mb-8 text-muted-foreground">Crie orçamentos rápidos e simples</p>
-              <Button asChild size="lg" className="btn-accent">
-                <Link to="/catalogo">
-                  Ver Catálogo
-                </Link>
-              </Button>
-            </section>
+      <div className="container-custom py-8">
+        <div className="max-w-3xl mx-auto">
+          <section className="mb-12 text-center">
+            <h1 className="text-3xl sm:text-4xl font-bold mb-4">
+              Catálogo Orçamento Fácil
+            </h1>
+            <p className="text-lg mb-8 text-muted-foreground">Crie orçamentos rápidos e simples</p>
+            <Button asChild size="lg" className="btn-accent">
+              <Link to="/catalogo">
+                Ver Catálogo
+              </Link>
+            </Button>
+          </section>
+          
+          <section className="bg-muted p-6 rounded-lg">
+            <h2 className="text-xl font-semibold mb-4">Como funciona:</h2>
             
-            <section className="bg-muted p-6 rounded-lg">
-              <h2 className="text-xl font-semibold mb-4">Como funciona:</h2>
-              
-              <div className="space-y-4">
-                <div className="bg-white p-4 rounded-md shadow-sm">
-                  <h3 className="font-semibold mb-2 flex items-center">
-                    <span className="bg-accent text-white rounded-full w-6 h-6 inline-flex items-center justify-center mr-2">1</span>
-                    Navegue pelo catálogo
-                  </h3>
-                  <p className="text-muted-foreground text-sm">
-                    Explore todos os produtos disponíveis com seus preços atualizados.
-                  </p>
-                </div>
-                
-                <div className="bg-white p-4 rounded-md shadow-sm">
-                  <h3 className="font-semibold mb-2 flex items-center">
-                    <span className="bg-accent text-white rounded-full w-6 h-6 inline-flex items-center justify-center mr-2">2</span>
-                    Selecione as quantidades
-                  </h3>
-                  <p className="text-muted-foreground text-sm">
-                    Adicione os produtos desejados e defina a quantidade de cada item.
-                  </p>
-                </div>
-                
-                <div className="bg-white p-4 rounded-md shadow-sm">
-                  <h3 className="font-semibold mb-2 flex items-center">
-                    <span className="bg-accent text-white rounded-full w-6 h-6 inline-flex items-center justify-center mr-2">3</span>
-                    Finalize o orçamento
-                  </h3>
-                  <p className="text-muted-foreground text-sm">
-                    Revise o orçamento, e compartilhe via WhatsApp.
-                  </p>
-                </div>
+            <div className="space-y-4">
+              <div className="bg-white p-4 rounded-md shadow-sm">
+                <h3 className="font-semibold mb-2 flex items-center">
+                  <span className="bg-accent text-white rounded-full w-6 h-6 inline-flex items-center justify-center mr-2">1</span>
+                  Navegue pelo catálogo
+                </h3>
+                <p className="text-muted-foreground text-sm">
+                  Explore todos os produtos disponíveis com seus preços atualizados.
+                </p>
               </div>
-            </section>
-            
-            <div className="mt-8 text-center">
-              <Button asChild size="lg" className="btn-accent">
-                <Link to="/catalogo">
-                  Começar Agora
-                </Link>
-              </Button>
+              
+              <div className="bg-white p-4 rounded-md shadow-sm">
+                <h3 className="font-semibold mb-2 flex items-center">
+                  <span className="bg-accent text-white rounded-full w-6 h-6 inline-flex items-center justify-center mr-2">2</span>
+                  Selecione as quantidades
+                </h3>
+                <p className="text-muted-foreground text-sm">
+                  Adicione os produtos desejados e defina a quantidade de cada item.
+                </p>
+              </div>
+              
+              <div className="bg-white p-4 rounded-md shadow-sm">
+                <h3 className="font-semibold mb-2 flex items-center">
+                  <span className="bg-accent text-white rounded-full w-6 h-6 inline-flex items-center justify-center mr-2">3</span>
+                  Finalize o orçamento
+                </h3>
+                <p className="text-muted-foreground text-sm">
+                  Revise o orçamento, e compartilhe via WhatsApp.
+                </p>
+              </div>
             </div>
+          </section>
+          
+          <div className="mt-8 text-center">
+            <Button asChild size="lg" className="btn-accent">
+              <Link to="/catalogo">
+                Começar Agora
+              </Link>
+            </Button>
           </div>
         </div>
+      </div>
       </Layout>
       {/* Bolha flutuante do Instagram */}
       <a
@@ -377,24 +352,46 @@ const HomePage: React.FC = () => {
               <h2 style={{ fontSize: 22, fontWeight: 700, margin: 0 }}>Instale o App!</h2>
               <p style={{ color: '#444', margin: '12px 0 0 0', fontSize: 16 }}>Tenha acesso rápido e fácil ao catálogo direto na sua tela inicial.</p>
             </div>
-            <button
-              onClick={handleInstallClick}
-              style={{
-                background: 'linear-gradient(90deg, #f9ce34 0%, #ee2a7b 50%, #6228d7 100%)',
-                color: 'white',
-                border: 'none',
-                borderRadius: 8,
-                padding: '12px 28px',
-                fontSize: 18,
-                fontWeight: 600,
-                cursor: 'pointer',
-                marginBottom: 12,
-                boxShadow: '0 2px 8px rgba(0,0,0,0.10)',
-                transition: 'transform 0.1s',
-              }}
-            >
-              Instalar Agora
-            </button>
+            {canInstall ? (
+              <button
+                onClick={handleInstallClick}
+                style={{
+                  background: 'linear-gradient(90deg, #f9ce34 0%, #ee2a7b 50%, #6228d7 100%)',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: 8,
+                  padding: '12px 28px',
+                  fontSize: 18,
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  marginBottom: 12,
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.10)',
+                  transition: 'transform 0.1s',
+                }}
+              >
+                Instalar Agora
+              </button>
+            ) : (
+              <button
+                onClick={() => setShowManualInstructions(true)}
+                style={{
+                  background: 'linear-gradient(90deg, #f9ce34 0%, #ee2a7b 50%, #6228d7 100%)',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: 8,
+                  padding: '12px 28px',
+                  fontSize: 18,
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  marginBottom: 12,
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.10)',
+                  transition: 'transform 0.1s',
+                }}
+              >
+                Ver Instruções de Instalação
+              </button>
+            )}
+            <br />
             <button
               onClick={() => {
                 // Salvar no localStorage que o usuário fechou o popup
@@ -487,21 +484,6 @@ const HomePage: React.FC = () => {
                 </div>
               ))}
             </div>
-
-            {instructions.additionalInfo && (
-              <div style={{
-                background: '#f0f8ff',
-                border: '1px solid #e0e0e0',
-                borderRadius: 8,
-                padding: 12,
-                marginBottom: 20,
-                fontSize: 14,
-                color: '#666',
-                fontStyle: 'italic'
-              }}>
-                {instructions.additionalInfo}
-              </div>
-            )}
 
             <button
               onClick={() => {
