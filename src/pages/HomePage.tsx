@@ -6,8 +6,16 @@ import Layout from '../components/layout/Layout';
 const HomePage: React.FC = () => {
   const [showPwaPrompt, setShowPwaPrompt] = useState(false);
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+  const [installStatus, setInstallStatus] = useState<string | null>(null);
+  const [isIos, setIsIos] = useState(false);
+  const [isInStandaloneMode, setIsInStandaloneMode] = useState(false);
 
   useEffect(() => {
+    // Detecta iOS
+    const userAgent = window.navigator.userAgent.toLowerCase();
+    setIsIos(/iphone|ipad|ipod/.test(userAgent));
+    setIsInStandaloneMode(('standalone' in window.navigator) && (window.navigator as any).standalone);
+
     let promptEvent: any = null;
     function beforeInstallHandler(e: any) {
       e.preventDefault();
@@ -37,16 +45,20 @@ const HomePage: React.FC = () => {
       deferredPrompt.prompt();
       const { outcome } = await deferredPrompt.userChoice;
       console.log('[PWA] Resultado do usuário:', outcome);
+      if (outcome === 'accepted') {
+        setInstallStatus('App instalado com sucesso!');
+      } else {
+        setInstallStatus('Instalação cancelada.');
+      }
       setShowPwaPrompt(false);
     } else {
-      // fallback
-      window.open(window.location.origin, '_blank');
-      setShowPwaPrompt(false);
+      setInstallStatus('Não foi possível iniciar a instalação automática. Siga as instruções abaixo para instalar manualmente.');
     }
   };
 
   const handleClose = () => {
     setShowPwaPrompt(false);
+    setInstallStatus(null);
     console.log('[PWA] Popup fechado pelo usuário');
   };
 
@@ -167,25 +179,45 @@ const HomePage: React.FC = () => {
               <h2 style={{ fontSize: 22, fontWeight: 700, margin: 0 }}>Instale o App!</h2>
               <p style={{ color: '#444', margin: '12px 0 0 0', fontSize: 16 }}>Tenha acesso rápido e fácil ao catálogo direto na sua tela inicial.</p>
             </div>
-            <button
-              onClick={handleInstallClick}
-              style={{
-                background: 'linear-gradient(90deg, #f9ce34 0%, #ee2a7b 50%, #6228d7 100%)',
-                color: 'white',
-                border: 'none',
-                borderRadius: 8,
-                padding: '12px 28px',
-                fontSize: 18,
-                fontWeight: 600,
-                cursor: 'pointer',
-                marginBottom: 12,
-                boxShadow: '0 2px 8px rgba(0,0,0,0.10)',
-                transition: 'transform 0.1s',
-              }}
-            >
-              Instalar Agora
-            </button>
-            <br />
+            {installStatus && (
+              <div style={{ color: installStatus.includes('sucesso') ? 'green' : 'red', marginBottom: 12, fontWeight: 600 }}>{installStatus}</div>
+            )}
+            {deferredPrompt && !isIos && !isInStandaloneMode ? (
+              <button
+                onClick={handleInstallClick}
+                style={{
+                  background: 'linear-gradient(90deg, #f9ce34 0%, #ee2a7b 50%, #6228d7 100%)',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: 8,
+                  padding: '12px 28px',
+                  fontSize: 18,
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  marginBottom: 12,
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.10)',
+                  transition: 'transform 0.1s',
+                }}
+              >
+                Instalar Agora
+              </button>
+            ) : (
+              <div style={{ margin: '16px 0', color: '#ee2a7b', fontWeight: 500 }}>
+                {isIos ? (
+                  <>
+                    <p>Para instalar no iPhone/iPad:</p>
+                    <ol style={{ textAlign: 'left', margin: '8px 0 0 0', paddingLeft: 18 }}>
+                      <li>1. Toque no <b>ícone de compartilhar</b> (<span role="img" aria-label="compartilhar">⬆️</span>) no Safari.</li>
+                      <li>2. Selecione <b>Adicionar à Tela de Início</b>.</li>
+                    </ol>
+                  </>
+                ) : (
+                  <>
+                    <p>Se não aparecer o botão de instalar, utilize o menu do navegador e escolha <b>Adicionar à Tela Inicial</b>.</p>
+                  </>
+                )}
+              </div>
+            )}
             <button
               onClick={handleClose}
               style={{
