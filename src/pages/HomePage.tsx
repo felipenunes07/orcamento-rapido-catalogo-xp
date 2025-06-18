@@ -74,6 +74,15 @@ const HomePage: React.FC = () => {
         return true;
       }
       
+      // Verificação específica para desktop - só mostrar se for Chrome/Edge
+      const isDesktop = !(/android|iphone|ipad|ipod|mobile|tablet/.test(userAgent));
+      const isChromeOrEdge = /chrome|edge/.test(userAgent) && !/firefox|safari/.test(userAgent);
+      
+      if (isDesktop && !isChromeOrEdge) {
+        console.log('[PWA] Desktop detectado mas não é Chrome/Edge, pulando popup');
+        return true;
+      }
+      
       console.log('[PWA] App não detectado como instalado, permitindo popup');
       return false;
     };
@@ -181,14 +190,43 @@ const HomePage: React.FC = () => {
           iconHint: 'Procure os três pontos verticais no canto superior direito'
         };
       default:
-        return {
-          title: 'Como instalar no Desktop',
-          steps: [
+        // Detectar sistema operacional específico para desktop
+        const userAgent = navigator.userAgent.toLowerCase();
+        let osSpecificSteps = [];
+        let osSpecificHint = '';
+        
+        if (userAgent.includes('windows')) {
+          osSpecificSteps = [
             'Clique no ícone de instalação na barra de endereços (ícone +)',
             'Ou clique no menu (três pontos) > "Instalar [Nome do App]"',
-            'Confirme a instalação'
-          ],
-          iconHint: 'Procure o ícone + na barra de endereços ou três pontos no menu'
+            'Confirme a instalação',
+            'O app será adicionado ao menu Iniciar e à área de trabalho'
+          ];
+          osSpecificHint = 'Procure o ícone + na barra de endereços ou três pontos no menu';
+        } else if (userAgent.includes('mac')) {
+          osSpecificSteps = [
+            'Clique no ícone de instalação na barra de endereços (ícone +)',
+            'Ou clique no menu (três pontos) > "Instalar [Nome do App]"',
+            'Confirme a instalação',
+            'O app será adicionado ao Launchpad e à pasta Aplicativos'
+          ];
+          osSpecificHint = 'Procure o ícone + na barra de endereços ou três pontos no menu';
+        } else {
+          // Linux e outros
+          osSpecificSteps = [
+            'Clique no ícone de instalação na barra de endereços (ícone +)',
+            'Ou clique no menu (três pontos) > "Instalar [Nome do App]"',
+            'Confirme a instalação',
+            'O app será adicionado ao menu de aplicativos'
+          ];
+          osSpecificHint = 'Procure o ícone + na barra de endereços ou três pontos no menu';
+        }
+        
+        return {
+          title: 'Como instalar no Desktop',
+          steps: osSpecificSteps,
+          iconHint: osSpecificHint,
+          additionalInfo: '💡 Dica: Se não aparecer o ícone de instalação, você pode criar um atalho manualmente arrastando o ícone da aba para a área de trabalho.'
         };
     }
   };
@@ -449,6 +487,21 @@ const HomePage: React.FC = () => {
                 </div>
               ))}
             </div>
+
+            {instructions.additionalInfo && (
+              <div style={{
+                background: '#f0f8ff',
+                border: '1px solid #e0e0e0',
+                borderRadius: 8,
+                padding: 12,
+                marginBottom: 20,
+                fontSize: 14,
+                color: '#666',
+                fontStyle: 'italic'
+              }}>
+                {instructions.additionalInfo}
+              </div>
+            )}
 
             <button
               onClick={() => {
