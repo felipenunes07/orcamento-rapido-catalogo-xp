@@ -25,6 +25,7 @@ const HomePage: React.FC = () => {
       console.log('[PWA] Verificando se app já está instalado...');
       console.log('[PWA] URL atual:', window.location.href);
       console.log('[PWA] User Agent:', navigator.userAgent);
+      console.log('[PWA] Platform:', platform);
       
       // Verificar se está em modo standalone (app instalado)
       if (window.matchMedia('(display-mode: standalone)').matches) {
@@ -48,6 +49,23 @@ const HomePage: React.FC = () => {
       if ('standalone' in window.navigator && (window.navigator as any).standalone) {
         console.log('[PWA] App já está instalado (iOS standalone)');
         return true;
+      }
+      
+      // Verificação específica para desktop - se está sendo executado como app
+      if (platform === 'desktop') {
+        // Verificar se a janela não tem barra de endereços (modo app)
+        if (window.outerHeight === window.innerHeight) {
+          console.log('[PWA] App já está instalado (desktop - sem barra de endereços)');
+          return true;
+        }
+        
+        // Verificar se está sendo executado como app via protocolo
+        if (window.location.protocol === 'chrome-extension:' || 
+            window.location.protocol === 'moz-extension:' ||
+            window.location.protocol === 'ms-browser-extension:') {
+          console.log('[PWA] App já está instalado (desktop - extensão)');
+          return true;
+        }
       }
       
       // Verificar se há cookie/localStorage indicando instalação
@@ -74,6 +92,18 @@ const HomePage: React.FC = () => {
         return true;
       }
       
+      // Verificação adicional para desktop - se está sendo executado como app instalado
+      if (platform === 'desktop' && window.location.hostname !== 'localhost') {
+        // Verificar se não há elementos de navegador visíveis
+        const hasAddressBar = window.outerHeight > window.innerHeight;
+        const hasScrollbars = document.documentElement.scrollHeight > window.innerHeight;
+        
+        if (!hasAddressBar && !hasScrollbars) {
+          console.log('[PWA] App já está instalado (desktop - modo app detectado)');
+          return true;
+        }
+      }
+      
       console.log('[PWA] App não detectado como instalado, permitindo popup');
       return false;
     };
@@ -93,6 +123,35 @@ const HomePage: React.FC = () => {
     if (isPwaMode) {
       console.log('[PWA] Detectado modo PWA via URL, pulando popup');
       return;
+    }
+
+    // Verificação adicional para desktop - detectar se está sendo executado como app
+    if (platform === 'desktop') {
+      // Verificar se o referrer indica que veio de um app instalado
+      if (document.referrer && (
+          document.referrer.includes('chrome-extension://') ||
+          document.referrer.includes('moz-extension://') ||
+          document.referrer.includes('ms-browser-extension://') ||
+          document.referrer.includes('app://')
+      )) {
+        console.log('[PWA] Desktop: Detectado referrer de app instalado, pulando popup');
+        return;
+      }
+      
+      // Verificar se há indicadores de que está sendo executado como app
+      const isRunningAsApp = (
+        window.location.protocol === 'chrome-extension:' ||
+        window.location.protocol === 'moz-extension:' ||
+        window.location.protocol === 'ms-browser-extension:' ||
+        window.location.protocol === 'app:' ||
+        window.location.href.includes('?source=app') ||
+        window.location.href.includes('&source=app')
+      );
+      
+      if (isRunningAsApp) {
+        console.log('[PWA] Desktop: Detectado execução como app, pulando popup');
+        return;
+      }
     }
 
     let promptEvent: any = null;
