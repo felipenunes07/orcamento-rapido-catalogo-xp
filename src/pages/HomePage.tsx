@@ -20,6 +20,81 @@ const HomePage: React.FC = () => {
       setPlatform('desktop');
     }
 
+    // Verificar se o app já está instalado
+    const isAppInstalled = () => {
+      console.log('[PWA] Verificando se app já está instalado...');
+      console.log('[PWA] URL atual:', window.location.href);
+      console.log('[PWA] User Agent:', navigator.userAgent);
+      
+      // Verificar se está em modo standalone (app instalado)
+      if (window.matchMedia('(display-mode: standalone)').matches) {
+        console.log('[PWA] App já está instalado (display-mode: standalone)');
+        return true;
+      }
+      
+      // Verificar se está em modo fullscreen (app instalado)
+      if (window.matchMedia('(display-mode: fullscreen)').matches) {
+        console.log('[PWA] App já está instalado (display-mode: fullscreen)');
+        return true;
+      }
+      
+      // Verificar se está em modo minimal-ui (app instalado)
+      if (window.matchMedia('(display-mode: minimal-ui)').matches) {
+        console.log('[PWA] App já está instalado (display-mode: minimal-ui)');
+        return true;
+      }
+      
+      // Verificação específica para iOS (navigator.standalone)
+      if ('standalone' in window.navigator && (window.navigator as any).standalone) {
+        console.log('[PWA] App já está instalado (iOS standalone)');
+        return true;
+      }
+      
+      // Verificar se há cookie/localStorage indicando instalação
+      const installationCookie = localStorage.getItem('pwa-installed');
+      if (installationCookie) {
+        console.log('[PWA] App já foi instalado anteriormente (localStorage encontrado)');
+        return true;
+      }
+      
+      // Verificar se está sendo executado como app (URL não contém http/https)
+      if (window.location.protocol === 'file:' || window.location.hostname === 'localhost') {
+        console.log('[PWA] Executando localmente, permitindo popup');
+      } else if (window.location.href.includes('chrome-extension://') || 
+                 window.location.href.includes('moz-extension://')) {
+        console.log('[PWA] Executando como extensão, pulando popup');
+        return true;
+      }
+      
+      // Verificar se a URL indica que está sendo executado como PWA
+      if (window.location.href.includes('?pwa=true') || 
+          window.location.href.includes('&pwa=true') ||
+          window.location.pathname.includes('/app/')) {
+        console.log('[PWA] Detectado modo PWA via URL, pulando popup');
+        return true;
+      }
+      
+      console.log('[PWA] App não detectado como instalado, permitindo popup');
+      return false;
+    };
+
+    // Se já está instalado, não mostrar popup
+    if (isAppInstalled()) {
+      console.log('[PWA] App já instalado, pulando popup de instalação');
+      return;
+    }
+
+    // Verificação adicional: se a URL indica que está sendo executado como app
+    const urlParams = new URLSearchParams(window.location.search);
+    const isPwaMode = urlParams.get('pwa') === 'true' || 
+                     window.location.pathname.includes('/app') ||
+                     document.referrer.includes('chrome-extension://');
+    
+    if (isPwaMode) {
+      console.log('[PWA] Detectado modo PWA via URL, pulando popup');
+      return;
+    }
+
     let promptEvent: any = null;
     function beforeInstallHandler(e: any) {
       e.preventDefault();
@@ -57,6 +132,8 @@ const HomePage: React.FC = () => {
         
         if (outcome === 'accepted') {
           console.log('[PWA] Instalação aceita pelo usuário');
+          // Salvar no localStorage que o app foi instalado
+          localStorage.setItem('pwa-installed', 'true');
           alert('✅ App instalado com sucesso! Procure o ícone na sua tela inicial.');
           setShowPwaPrompt(false);
         } else {
@@ -206,6 +283,33 @@ const HomePage: React.FC = () => {
           <path d="M7.75 2h8.5A5.75 5.75 0 0 1 22 7.75v8.5A5.75 5.75 0 0 1 16.25 22h-8.5A5.75 5.75 0 0 1 2 16.25v-8.5A5.75 5.75 0 0 1 7.75 2zm0 1.5A4.25 4.25 0 0 0 3.5 7.75v8.5A4.25 4.25 0 0 0 7.75 20.5h8.5A4.25 4.25 0 0 0 20.5 16.25v-8.5A4.25 4.25 0 0 0 16.25 3.5h-8.5zm4.25 3.25a5.25 5.25 0 1 1 0 10.5a5.25 5.25 0 0 1 0-10.5zm0 1.5a3.75 3.75 0 1 0 0 7.5a3.75 3.75 0 0 0 0-7.5zm5.13.88a1.13 1.13 0 1 1-2.26 0a1.13 1.13 0 0 1 2.26 0z"/>
         </svg>
       </a>
+
+      {/* Botão de debug temporário - REMOVER EM PRODUÇÃO */}
+      {process.env.NODE_ENV === 'development' && (
+        <button
+          onClick={() => {
+            localStorage.removeItem('pwa-installed');
+            console.log('[PWA] localStorage limpo, recarregando página...');
+            window.location.reload();
+          }}
+          style={{
+            position: 'fixed',
+            left: 24,
+            bottom: 24,
+            zIndex: 1000,
+            background: '#ff4444',
+            color: 'white',
+            border: 'none',
+            borderRadius: 8,
+            padding: '8px 12px',
+            fontSize: 12,
+            cursor: 'pointer',
+          }}
+        >
+          🔄 Reset PWA
+        </button>
+      )}
+
       {/* Popup de instalação do PWA */}
       {showPwaPrompt && !showManualInstructions && (
         <div style={{
@@ -253,9 +357,12 @@ const HomePage: React.FC = () => {
             >
               Instalar Agora
             </button>
-            <br />
             <button
-              onClick={handleClose}
+              onClick={() => {
+                // Salvar no localStorage que o usuário fechou o popup
+                localStorage.setItem('pwa-installed', 'true');
+                handleClose();
+              }}
               style={{
                 background: 'none',
                 color: '#ee2a7b',
@@ -344,7 +451,11 @@ const HomePage: React.FC = () => {
             </div>
 
             <button
-              onClick={handleClose}
+              onClick={() => {
+                // Salvar no localStorage que o usuário viu as instruções
+                localStorage.setItem('pwa-installed', 'true');
+                handleClose();
+              }}
               style={{
                 background: 'linear-gradient(90deg, #f9ce34 0%, #ee2a7b 50%, #6228d7 100%)',
                 color: 'white',
