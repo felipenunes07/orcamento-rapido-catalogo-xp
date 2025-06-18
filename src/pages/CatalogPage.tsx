@@ -198,15 +198,18 @@ const CatalogPage: React.FC = () => {
 
   // Nova função para selecionar 1 de cada modelo
   const handleSelectOneOfEachModel = () => {
+    // Usar os produtos filtrados em vez de todos os produtos
+    const produtosFiltrados = filteredProducts;
+    
     const modelosSelecionados = new Set<string>()
-    products.forEach((product) => {
+    produtosFiltrados.forEach((product) => {
       // Normaliza o modelo para evitar duplicidade por espaços ou maiúsculas/minúsculas
       const modeloNormalizado = product.modelo.trim().toLowerCase()
       if (!modelosSelecionados.has(modeloNormalizado)) {
         modelosSelecionados.add(modeloNormalizado)
       }
     })
-    products.forEach((product) => {
+    produtosFiltrados.forEach((product) => {
       const modeloNormalizado = product.modelo.trim().toLowerCase()
       if (modelosSelecionados.has(modeloNormalizado)) {
         // Busca a quantidade atual no carrinho
@@ -217,6 +220,16 @@ const CatalogPage: React.FC = () => {
         updateQuantity(product, currentQuantity + 1)
       }
     })
+    
+    // Mostrar feedback ao usuário
+    const totalModelos = modelosSelecionados.size;
+    const marcaInfo = selectedBrand ? ` da marca ${selectedBrand}` : '';
+    const buscaInfo = searchTerm ? ` que contêm "${searchTerm}"` : '';
+    
+    toast({
+      title: 'Produtos adicionados!',
+      description: `${totalModelos} modelo${totalModelos > 1 ? 's' : ''} adicionado${totalModelos > 1 ? 's' : ''}${marcaInfo}${buscaInfo}`,
+    });
   }
 
   // Function to sort brands in the required order
@@ -281,16 +294,16 @@ const CatalogPage: React.FC = () => {
                 placeholder="Pesquisar por modelo..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="max-w-sm"
+                className="max-w-sm md:max-w-md md:h-12 md:text-base"
               />
               {searchTerm && (
                 <Button
                   variant="ghost"
                   size="icon"
                   onClick={() => setSearchTerm('')}
-                  className="h-10 w-10"
+                  className="h-10 w-10 md:h-12 md:w-12"
                 >
-                  <X className="h-4 w-4" />
+                  <X className="h-4 w-4 md:h-5 md:w-5" />
                 </Button>
               )}
             </div>
@@ -301,7 +314,7 @@ const CatalogPage: React.FC = () => {
         {!loading && !error && availableBrands.length > 0 && (
           <div className="mb-6 overflow-x-auto pb-2">
             <div className="flex flex-col gap-2">
-              <h2 className="text-sm font-medium px-2 md:px-0">
+              <h2 className="text-sm font-medium px-2 md:px-0 md:text-base">
                 Filtrar por Marca:
               </h2>
               <div className="flex flex-nowrap md:flex-wrap gap-2 px-2 md:px-0">
@@ -309,7 +322,7 @@ const CatalogPage: React.FC = () => {
                   <Badge
                     key={brand}
                     variant={selectedBrand === brand ? 'default' : 'outline'}
-                    className="cursor-pointer whitespace-nowrap"
+                    className="cursor-pointer whitespace-nowrap text-xs md:text-sm md:px-4 md:py-2 md:min-h-[40px] md:flex md:items-center md:justify-center"
                     onClick={() => handleSelectBrand(brand)}
                   >
                     {brand}
@@ -318,10 +331,10 @@ const CatalogPage: React.FC = () => {
                 {selectedBrand && (
                   <Badge
                     variant="secondary"
-                    className="cursor-pointer flex items-center gap-1 whitespace-nowrap"
+                    className="cursor-pointer flex items-center gap-1 whitespace-nowrap text-xs md:text-sm md:px-4 md:py-2 md:min-h-[40px]"
                     onClick={handleClearFilter}
                   >
-                    Limpar filtro <X className="h-3 w-3" />
+                    Limpar filtro <X className="h-3 w-3 md:h-4 md:w-4" />
                   </Badge>
                 )}
               </div>
