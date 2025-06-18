@@ -227,8 +227,7 @@ const HomePage: React.FC = () => {
             'Role para baixo e toque em "Adicionar à Tela Inicial"',
             'Toque em "Adicionar" no canto superior direito'
           ],
-          iconHint: 'Procure o ícone quadrado com seta para cima na barra inferior',
-          shareIcon: true
+          iconHint: 'Procure o ícone quadrado com seta para cima na barra inferior'
         };
       case 'android':
         return {
@@ -238,8 +237,7 @@ const HomePage: React.FC = () => {
             'Selecione "Adicionar à tela inicial" ou "Instalar app"',
             'Confirme a instalação'
           ],
-          iconHint: 'Procure os três pontos verticais no canto superior direito',
-          shareIcon: false
+          iconHint: 'Procure os três pontos verticais no canto superior direito'
         };
       default:
         return {
@@ -249,8 +247,7 @@ const HomePage: React.FC = () => {
             'Ou clique no menu (três pontos) > "Instalar [Nome do App]"',
             'Confirme a instalação'
           ],
-          iconHint: 'Procure o ícone + na barra de endereços ou três pontos no menu',
-          shareIcon: false
+          iconHint: 'Procure o ícone + na barra de endereços ou três pontos no menu'
         };
     }
   };
@@ -479,41 +476,6 @@ const HomePage: React.FC = () => {
               <p style={{ color: '#666', margin: '8px 0 0 0', fontSize: 14, fontStyle: 'italic' }}>
                 {instructions.iconHint}
               </p>
-              
-              {/* Ícone de compartilhamento para iOS */}
-              {instructions.shareIcon && (
-                <div style={{ 
-                  marginTop: 16, 
-                  padding: 16, 
-                  background: '#f8f9fa', 
-                  borderRadius: 12, 
-                  border: '2px dashed #dee2e6',
-                  textAlign: 'center'
-                }}>
-                  <div style={{ 
-                    display: 'inline-flex', 
-                    alignItems: 'center', 
-                    justifyContent: 'center',
-                    width: 48, 
-                    height: 48, 
-                    background: '#007AFF', 
-                    borderRadius: 8,
-                    marginBottom: 8
-                  }}>
-                    <svg width="24" height="24" fill="white" viewBox="0 0 24 24">
-                      <path d="M16 5l-1.42 1.42-1.59-1.59V16h-1.98V4.83L9.42 6.42 8 5l4-4 4 4zm4 5v11c0 1.1-.9 2-2 2H6c-1.11 0-2-.9-2-2V10c0-1.11.89-2 2-2h3v2H6v11h12V10h-3V8h3c1.1 0 2 .89 2 2z"/>
-                    </svg>
-                  </div>
-                  <p style={{ 
-                    fontSize: 12, 
-                    color: '#666', 
-                    margin: 0, 
-                    fontWeight: 500 
-                  }}>
-                    Toque aqui para compartilhar
-                  </p>
-                </div>
-              )}
             </div>
             
             <div style={{ textAlign: 'left', marginBottom: 20 }}>
