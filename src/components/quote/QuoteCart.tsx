@@ -29,30 +29,32 @@ const QuoteCart: React.FC<QuoteCartProps> = ({ cartItems, onClearCart }) => {
   return (
     <div
       className={`bg-white rounded-t-lg md:rounded-lg shadow-lg fixed md:sticky bottom-0 md:bottom-4 left-0 right-0 mt-6 border z-50 max-w-screen-xl mx-auto transition-all duration-300 ${
-        isMinimized && isMobile ? 'pb-1.5' : 'p-4 sm:p-6'
+        isMinimized && isMobile ? 'pb-1.5 pt-2' : 'p-4 sm:p-6'
       }`}
     >
       {/* Cabeçalho com botão para minimizar em dispositivos móveis */}
       <div
-        className={`flex items-center justify-between ${
-          isMinimized && isMobile ? 'px-3 py-1.5' : ''
+        className={`flex items-start justify-between ${
+          isMinimized && isMobile ? 'px-4' : ''
         }`}
       >
         {/* Lado esquerdo: informações sobre o orçamento */}
-        <div className="flex items-center">
-          <div>
+        <div className="flex items-start flex-1">
+          <div className="flex-1">
             <p
               className={`${
                 isMinimized && isMobile ? 'text-sm' : 'text-xl'
-              } font-bold`}
+              } font-bold leading-tight`}
             >
               Total do Orçamento
             </p>
-            {!isMinimized || !isMobile ? (
-              <p className="text-sm text-muted-foreground">
-                {totalItems} item(ns)
-              </p>
-            ) : null}
+            <p
+              className={`text-xs text-muted-foreground ${
+                isMinimized && isMobile ? 'text-[10px]' : 'text-sm'
+              } leading-tight mt-0.5`}
+            >
+              {totalItems} item(ns)
+            </p>
           </div>
         </div>
 
@@ -87,36 +89,36 @@ const QuoteCart: React.FC<QuoteCartProps> = ({ cartItems, onClearCart }) => {
           </div>
         ) : (
           <>
-            <div
-              className={`${
-                isMinimized ? 'text-lg mr-7' : 'text-3xl'
-              } font-bold text-accent md:mb-0 mb-0 md:text-right`}
-            >
-              {formatCurrency(totalValue)}
-            </div>
+            <div className="flex items-center gap-2">
+              <div
+                className={`${
+                  isMinimized ? 'text-lg' : 'text-3xl'
+                } font-bold text-accent md:mb-0 mb-0 md:text-right`}
+              >
+                {formatCurrency(totalValue)}
+              </div>
 
-            <button
-              className={`md:hidden absolute right-2 top-[1/2] transform -translate-y-1/2 ${
-                !isMinimized ? 'mt-3' : ''
-              }`}
-              onClick={toggleMinimized}
-              aria-label={
-                isMinimized ? 'Expandir orçamento' : 'Minimizar orçamento'
-              }
-            >
-              {isMinimized ? (
-                <ChevronUp className="h-5 w-5" />
-              ) : (
-                <ChevronDown className="h-5 w-5" />
-              )}
-            </button>
+              <button
+                className="md:hidden flex items-center justify-center w-8 h-8 -mr-1"
+                onClick={toggleMinimized}
+                aria-label={
+                  isMinimized ? 'Expandir orçamento' : 'Minimizar orçamento'
+                }
+              >
+                {isMinimized ? (
+                  <ChevronUp className="h-5 w-5" />
+                ) : (
+                  <ChevronDown className="h-5 w-5" />
+                )}
+              </button>
+            </div>
           </>
         )}
       </div>
 
       {/* Corpo do carrinho (botões) que pode ser minimizado em dispositivos móveis */}
       {(!isMinimized || !isMobile) && isMobile && (
-        <div className="flex flex-col gap-3 mt-4">
+        <div className="flex flex-col gap-3 mt-4 px-4">
           {hasItems && (
             <Button
               variant="outline"

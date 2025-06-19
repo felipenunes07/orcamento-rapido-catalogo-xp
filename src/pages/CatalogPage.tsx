@@ -19,12 +19,12 @@ const CatalogPage: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true)
   const [error, setError] = useState<string | null>(null)
   const [retryCount, setRetryCount] = useState<number>(0)
-  const [selectedBrand, setSelectedBrand] = useState<string | null>(null)
+  const [selectedBrands, setSelectedBrands] = useState<string[]>([])
   const [availableBrands, setAvailableBrands] = useState<string[]>([])
   const [searchTerm, setSearchTerm] = useState<string>('')
   const { cartItems, updateQuantity, clearCart } = useCart()
   const { toast } = useToast()
-  const [selectedQuality, setSelectedQuality] = useState<string | null>(null)
+  const [selectedQualities, setSelectedQualities] = useState<string[]>([])
   const [availableQualities, setAvailableQualities] = useState<string[]>([])
 
   const loadProducts = async () => {
@@ -131,12 +131,12 @@ const CatalogPage: React.FC = () => {
     loadProducts()
   }, [])
 
-  // Efeito para filtrar produtos quando a marca selecionada ou termo de busca mudar
+  // Efeito para filtrar produtos quando as seleções mudarem
   useEffect(() => {
     let filtered = products
 
-    // Filtrar por marca se selecionada
-    if (selectedBrand) {
+    // Filtrar por marcas selecionadas
+    if (selectedBrands.length > 0) {
       filtered = filtered.filter((product) => {
         // Mapeamento de marcas para prefixos
         const brandPrefixMap: Record<string, string[]> = {
@@ -150,19 +150,32 @@ const CatalogPage: React.FC = () => {
           Realme: ['REALME'],
         }
 
-        // Verificação especial para modelos Xiaomi e Realme
-        if (selectedBrand === 'Xiaomi' && product.modelo.startsWith('MI')) {
-          return true
-        }
-        if (selectedBrand === 'Realme' && product.modelo.startsWith('REALME')) {
-          return true
-        }
+        return selectedBrands.some((selectedBrand) => {
+          // Verificação especial para modelos Xiaomi e Realme
+          if (selectedBrand === 'Xiaomi' && product.modelo.startsWith('MI')) {
+            return true
+          }
+          if (
+            selectedBrand === 'Realme' &&
+            product.modelo.startsWith('REALME')
+          ) {
+            return true
+          }
 
-        // Obter os prefixos para a marca selecionada
-        const prefixes = brandPrefixMap[selectedBrand] || []
+          // Obter os prefixos para a marca selecionada
+          const prefixes = brandPrefixMap[selectedBrand] || []
 
-        // Verificar se o modelo começa com algum dos prefixos da marca selecionada
-        return prefixes.some((prefix) => product.modelo.startsWith(prefix))
+          // Verificar se o modelo começa com algum dos prefixos da marca selecionada
+          return prefixes.some((prefix) => product.modelo.startsWith(prefix))
+        })
+      })
+    }
+
+    // Filtrar por qualidades selecionadas
+    if (selectedQualities.length > 0) {
+      filtered = filtered.filter((product) => {
+        const qual = product.qualidade === '-' ? 'LCD' : product.qualidade
+        return selectedQualities.includes(qual)
       })
     }
 
@@ -174,16 +187,8 @@ const CatalogPage: React.FC = () => {
       )
     }
 
-    // Filtro de qualidade
-    if (selectedQuality) {
-      filtered = filtered.filter((product) => {
-        const qual = product.qualidade === '-' ? 'LCD' : product.qualidade
-        return qual === selectedQuality
-      })
-    }
-
     setFilteredProducts(filtered)
-  }, [selectedBrand, selectedQuality, products, searchTerm])
+  }, [selectedBrands, selectedQualities, products, searchTerm])
 
   // Função para tentar novamente com delay se houver muitas tentativas
   const handleRetry = () => {
@@ -200,33 +205,48 @@ const CatalogPage: React.FC = () => {
     }
   }
 
-  // Função para selecionar uma marca
-  const handleSelectBrand = (brand: string) => {
-    // Se a marca clicada já estiver selecionada, remove o filtro
-    if (selectedBrand === brand) {
-      setSelectedBrand(null)
+  // Função para selecionar marca com suporte a múltipla seleção
+  const handleSelectBrand = (brand: string, event: React.MouseEvent) => {
+    if (event.ctrlKey) {
+      // Se Ctrl está pressionado, adiciona/remove da seleção múltipla
+      setSelectedBrands((prev) =>
+        prev.includes(brand)
+          ? prev.filter((b) => b !== brand)
+          : [...prev, brand]
+      )
     } else {
-      setSelectedBrand(brand)
+      // Se Ctrl não está pressionado, comportamento normal (toggle único)
+      setSelectedBrands((prev) =>
+        prev.length === 1 && prev[0] === brand ? [] : [brand]
+      )
     }
   }
 
-  // Função para limpar o filtro
+  // Função para limpar filtro de marca
   const handleClearFilter = () => {
-    setSelectedBrand(null)
+    setSelectedBrands([])
   }
 
-  // Função para selecionar qualidade
-  const handleSelectQuality = (quality: string) => {
-    if (selectedQuality === quality) {
-      setSelectedQuality(null)
+  // Função para selecionar qualidade com suporte a múltipla seleção
+  const handleSelectQuality = (quality: string, event: React.MouseEvent) => {
+    if (event.ctrlKey) {
+      // Se Ctrl está pressionado, adiciona/remove da seleção múltipla
+      setSelectedQualities((prev) =>
+        prev.includes(quality)
+          ? prev.filter((q) => q !== quality)
+          : [...prev, quality]
+      )
     } else {
-      setSelectedQuality(quality)
+      // Se Ctrl não está pressionado, comportamento normal (toggle único)
+      setSelectedQualities((prev) =>
+        prev.length === 1 && prev[0] === quality ? [] : [quality]
+      )
     }
   }
 
   // Função para limpar filtro de qualidade
   const handleClearQualityFilter = () => {
-    setSelectedQuality(null)
+    setSelectedQualities([])
   }
 
   // Nova função para selecionar 1 de cada modelo
@@ -256,14 +276,13 @@ const CatalogPage: React.FC = () => {
 
     // Mostrar feedback ao usuário
     const totalModelos = modelosSelecionados.size
-    const marcaInfo = selectedBrand ? ` da marca ${selectedBrand}` : ''
     const buscaInfo = searchTerm ? ` que contêm "${searchTerm}"` : ''
 
     toast({
       title: 'Produtos adicionados!',
       description: `${totalModelos} modelo${
         totalModelos > 1 ? 's' : ''
-      } adicionado${totalModelos > 1 ? 's' : ''}${marcaInfo}${buscaInfo}`,
+      } adicionado${totalModelos > 1 ? 's' : ''}${buscaInfo}`,
     })
   }
 
@@ -361,15 +380,15 @@ const CatalogPage: React.FC = () => {
                       <Badge
                         key={brand}
                         variant={
-                          selectedBrand === brand ? 'default' : 'outline'
+                          selectedBrands.includes(brand) ? 'default' : 'outline'
                         }
                         className="cursor-pointer whitespace-nowrap text-xs px-3 py-2 md:text-sm md:px-4 md:py-2 md:min-h-[40px] md:flex md:items-center md:justify-center"
-                        onClick={() => handleSelectBrand(brand)}
+                        onClick={(e) => handleSelectBrand(brand, e)}
                       >
                         {brand}
                       </Badge>
                     ))}
-                    {selectedBrand && (
+                    {selectedBrands.length > 0 && (
                       <Badge
                         variant="secondary"
                         className="cursor-pointer flex items-center gap-1 whitespace-nowrap text-xs px-3 py-2 md:text-sm md:px-4 md:py-2 md:min-h-[40px]"
@@ -396,15 +415,17 @@ const CatalogPage: React.FC = () => {
                       <Badge
                         key={quality}
                         variant={
-                          selectedQuality === quality ? 'default' : 'outline'
+                          selectedQualities.includes(quality)
+                            ? 'default'
+                            : 'outline'
                         }
                         className="cursor-pointer whitespace-nowrap text-xs px-3 py-2 md:text-sm md:px-4 md:py-2 md:min-h-[40px] md:flex md:items-center md:justify-center"
-                        onClick={() => handleSelectQuality(quality)}
+                        onClick={(e) => handleSelectQuality(quality, e)}
                       >
                         {quality}
                       </Badge>
                     ))}
-                    {selectedQuality && (
+                    {selectedQualities.length > 0 && (
                       <Badge
                         variant="secondary"
                         className="cursor-pointer flex items-center gap-1 whitespace-nowrap text-xs px-3 py-2 md:text-sm md:px-4 md:py-2 md:min-h-[40px]"
@@ -458,9 +479,12 @@ const CatalogPage: React.FC = () => {
           <div className="text-center py-12">
             <p>
               Nenhum produto encontrado
-              {selectedBrand ? ` para a marca ${selectedBrand}` : ''}.
+              {selectedBrands.length > 0
+                ? ` para as marcas ${selectedBrands.join(', ')}`
+                : ''}
+              .
             </p>
-            {selectedBrand && (
+            {selectedBrands.length > 0 && (
               <Button
                 variant="outline"
                 size="sm"
