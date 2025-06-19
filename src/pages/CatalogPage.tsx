@@ -255,6 +255,8 @@ const CatalogPage: React.FC = () => {
     const produtosFiltrados = filteredProducts
 
     const modelosSelecionados = new Set<string>()
+    const produtosAdicionados = new Set<string>()
+
     produtosFiltrados.forEach((product) => {
       // Normaliza o modelo para evitar duplicidade por espaços ou maiúsculas/minúsculas
       const modeloNormalizado = product.modelo.trim().toLowerCase()
@@ -262,6 +264,7 @@ const CatalogPage: React.FC = () => {
         modelosSelecionados.add(modeloNormalizado)
       }
     })
+
     produtosFiltrados.forEach((product) => {
       const modeloNormalizado = product.modelo.trim().toLowerCase()
       if (modelosSelecionados.has(modeloNormalizado)) {
@@ -271,18 +274,19 @@ const CatalogPage: React.FC = () => {
         )
         const currentQuantity = cartItem ? cartItem.quantity : 0
         updateQuantity(product, currentQuantity + 1)
+        produtosAdicionados.add(product.id)
       }
     })
 
-    // Mostrar feedback ao usuário
-    const totalModelos = modelosSelecionados.size
+    // Mostrar feedback simplificado ao usuário
+    const totalProdutos = produtosAdicionados.size
     const buscaInfo = searchTerm ? ` que contêm "${searchTerm}"` : ''
 
     toast({
       title: 'Produtos adicionados!',
-      description: `${totalModelos} modelo${
-        totalModelos > 1 ? 's' : ''
-      } adicionado${totalModelos > 1 ? 's' : ''}${buscaInfo}`,
+      description: `${totalProdutos} produto${
+        totalProdutos > 1 ? 's' : ''
+      } adicionado${totalProdutos > 1 ? 's' : ''}${buscaInfo}`,
     })
   }
 
@@ -364,76 +368,113 @@ const CatalogPage: React.FC = () => {
           </div>
         )}
 
-        {/* Filtros agrupados para mobile UX/UI melhorada */}
+        {/* Container principal dos filtros com visual melhorado */}
         {!loading &&
           !error &&
           (availableBrands.length > 0 || availableQualities.length > 0) && (
-            <div className="mb-6 rounded-lg bg-gray-50/80 p-2 md:bg-transparent md:p-0 flex flex-col gap-3 shadow-sm border md:border-0">
+            <div className="flex flex-col gap-6">
               {/* Filtro de marcas */}
               {availableBrands.length > 0 && (
-                <div className="flex flex-col gap-1">
-                  <h2 className="text-xs font-semibold px-1 md:px-0 md:text-base md:font-medium mb-1 md:mb-0">
-                    Marca:
-                  </h2>
-                  <div className="flex flex-nowrap gap-2 overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 px-1 md:px-0 md:flex-wrap md:overflow-visible">
+                <div className="flex flex-col gap-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <h2 className="text-sm font-medium text-gray-800">
+                        Marcas
+                      </h2>
+                      {selectedBrands.length > 0 && (
+                        <span className="text-xs font-medium text-white bg-blue-500 px-2 py-1 rounded-full">
+                          {selectedBrands.length}
+                        </span>
+                      )}
+                    </div>
+                    {selectedBrands.length > 0 && (
+                      <button
+                        onClick={handleClearFilter}
+                        className="text-xs text-gray-500 hover:text-gray-800 transition-colors duration-200 underline decoration-dotted"
+                      >
+                        Limpar seleção
+                      </button>
+                    )}
+                  </div>
+                  <div className="flex flex-wrap gap-2">
                     {sortBrandsByCustomOrder(availableBrands).map((brand) => (
                       <Badge
                         key={brand}
-                        variant={
-                          selectedBrands.includes(brand) ? 'default' : 'outline'
-                        }
-                        className="cursor-pointer whitespace-nowrap text-xs px-3 py-2 md:text-sm md:px-4 md:py-2 md:min-h-[40px] md:flex md:items-center md:justify-center"
+                        variant="outline"
+                        className={`
+                          cursor-pointer 
+                          text-xs
+                          py-2
+                          px-4
+                          rounded-xl
+                          border-2
+                          transition-all
+                          duration-200
+                          font-medium
+                          ${
+                            selectedBrands.includes(brand)
+                              ? 'bg-gradient-to-r from-blue-600 to-blue-500 text-white border-transparent shadow-md hover:shadow-lg'
+                              : 'bg-white text-gray-600 border-gray-200 hover:border-blue-300 hover:text-blue-600 hover:shadow-sm hover:bg-blue-50'
+                          }
+                        `}
                         onClick={(e) => handleSelectBrand(brand, e)}
                       >
                         {brand}
                       </Badge>
                     ))}
-                    {selectedBrands.length > 0 && (
-                      <Badge
-                        variant="secondary"
-                        className="cursor-pointer flex items-center gap-1 whitespace-nowrap text-xs px-3 py-2 md:text-sm md:px-4 md:py-2 md:min-h-[40px]"
-                        onClick={handleClearFilter}
-                      >
-                        Limpar <X className="h-3 w-3 md:h-4 md:w-4" />
-                      </Badge>
-                    )}
                   </div>
                 </div>
               )}
-              {/* Separador visual */}
-              {availableBrands.length > 0 && availableQualities.length > 0 && (
-                <div className="h-2 md:h-0" />
-              )}
+
               {/* Filtro de qualidades */}
               {availableQualities.length > 0 && (
-                <div className="flex flex-col gap-1">
-                  <h2 className="text-xs font-semibold px-1 md:px-0 md:text-base md:font-medium mb-1 md:mb-0">
-                    Qualidade:
-                  </h2>
-                  <div className="flex flex-nowrap gap-2 overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 px-1 md:px-0 md:flex-wrap md:overflow-visible">
+                <div className="flex flex-col gap-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <h2 className="text-sm font-medium text-gray-800">
+                        Qualidade
+                      </h2>
+                      {selectedQualities.length > 0 && (
+                        <span className="text-xs font-medium text-white bg-blue-500 px-2 py-1 rounded-full">
+                          {selectedQualities.length}
+                        </span>
+                      )}
+                    </div>
+                    {selectedQualities.length > 0 && (
+                      <button
+                        onClick={handleClearQualityFilter}
+                        className="text-xs text-gray-500 hover:text-gray-800 transition-colors duration-200 underline decoration-dotted"
+                      >
+                        Limpar seleção
+                      </button>
+                    )}
+                  </div>
+                  <div className="flex flex-wrap gap-2">
                     {availableQualities.map((quality) => (
                       <Badge
                         key={quality}
-                        variant={
-                          selectedQualities.includes(quality)
-                            ? 'default'
-                            : 'outline'
-                        }
-                        className="cursor-pointer whitespace-nowrap text-xs px-3 py-2 md:text-sm md:px-4 md:py-2 md:min-h-[40px] md:flex md:items-center md:justify-center"
+                        variant="outline"
+                        className={`
+                          cursor-pointer 
+                          text-xs
+                          py-2
+                          px-4
+                          rounded-xl
+                          border-2
+                          transition-all
+                          duration-200
+                          font-medium
+                          ${
+                            selectedQualities.includes(quality)
+                              ? 'bg-gradient-to-r from-blue-600 to-blue-500 text-white border-transparent shadow-md hover:shadow-lg'
+                              : 'bg-white text-gray-600 border-gray-200 hover:border-blue-300 hover:text-blue-600 hover:shadow-sm hover:bg-blue-50'
+                          }
+                        `}
                         onClick={(e) => handleSelectQuality(quality, e)}
                       >
                         {quality}
                       </Badge>
                     ))}
-                    {selectedQualities.length > 0 && (
-                      <Badge
-                        variant="secondary"
-                        className="cursor-pointer flex items-center gap-1 whitespace-nowrap text-xs px-3 py-2 md:text-sm md:px-4 md:py-2 md:min-h-[40px]"
-                        onClick={handleClearQualityFilter}
-                      >
-                        Limpar <X className="h-3 w-3 md:h-4 md:w-4" />
-                      </Badge>
-                    )}
                   </div>
                 </div>
               )}
@@ -441,13 +482,17 @@ const CatalogPage: React.FC = () => {
           )}
 
         {/* Botão para selecionar 1 de cada modelo */}
-        <div className="mb-4">
+        <div className="mt-8 mb-6">
           <Button
             variant="outline"
-            size="sm"
+            size="default"
             onClick={handleSelectOneOfEachModel}
-            className="flex items-center gap-1"
+            className="flex items-center gap-3 h-12 px-6 text-sm font-medium text-gray-700 bg-white border-2 border-gray-200 hover:bg-gray-50 hover:text-gray-900 hover:border-blue-300 hover:shadow-md transition-all duration-200"
           >
+            <span className="relative flex h-3 w-3">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-3 w-3 bg-blue-500"></span>
+            </span>
             Selecionar 1 de cada modelo
           </Button>
         </div>
