@@ -15,9 +15,8 @@ const Header: React.FC = () => {
               className="w-10 h-10 rounded-lg shadow-sm"
             />
             <span className="font-medium text-lg">
-              <span className="text-gray-900">Catálogo XP </span>
-              <span className="bg-gradient-to-r from-blue-600 to-blue-500 bg-clip-text text-transparent">
-                Orçamento
+              <span className="bg-gradient-to-r from-gray-900 via-blue-700 to-blue-600 bg-clip-text text-transparent">
+                Catálogo XP Orçamento
               </span>
             </span>
           </Link>
