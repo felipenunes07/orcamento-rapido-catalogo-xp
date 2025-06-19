@@ -6,12 +6,17 @@ import { useCart } from '../context/CartContext'
 import { fetchProducts } from '../services/sheetService'
 import { Product } from '../types'
 import { useToast } from '@/hooks/use-toast'
-import { AlertTriangle, Loader2, RefreshCw, X } from 'lucide-react'
+import { AlertTriangle, Info, Loader2, RefreshCw, X } from 'lucide-react'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover'
 
 const CatalogPage: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([])
@@ -431,9 +436,44 @@ const CatalogPage: React.FC = () => {
                 <div className="flex flex-col gap-3">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <h2 className="text-sm font-medium text-gray-800">
-                        Qualidade
-                      </h2>
+                      <div className="flex items-center gap-2">
+                        <h2 className="text-sm font-medium text-gray-800">
+                          Qualidade
+                        </h2>
+                        <Popover>
+                          <PopoverTrigger>
+                            <Info className="h-4 w-4 text-gray-400 hover:text-blue-500 transition-colors cursor-help" />
+                          </PopoverTrigger>
+                          <PopoverContent className="w-80 p-4 text-sm">
+                            <div className="space-y-2">
+                              <p className="font-medium">SELECT</p>
+                              <p className="text-gray-600">
+                                Com componentes de alta qualidade, brilho 300 a
+                                500 lumens, alta resolução HD+/FHD
+                              </p>
+
+                              <p className="font-medium">PREMIER</p>
+                              <p className="text-gray-600">
+                                Brilho 300 a 500 lumens, alta resolução HD+/FHD,
+                                flex e CI igual ao peça genuína
+                              </p>
+
+                              <p className="font-medium">PREMIER/SELECT MAX</p>
+                              <p className="text-gray-600">
+                                Brilho chegando 500 lumens, alta resolução
+                                HD++/FHD, flex e CI igual ao peça genuína. O MAX
+                                tem maior saturação de cores e brilho mais alto.
+                              </p>
+
+                              <p className="font-medium">ORI</p>
+                              <p className="text-gray-600">Original China</p>
+
+                              <p className="font-medium">LCD</p>
+                              <p className="text-gray-600">Incell</p>
+                            </div>
+                          </PopoverContent>
+                        </Popover>
+                      </div>
                       {selectedQualities.length > 0 && (
                         <span className="text-xs font-medium text-white bg-blue-500 px-2 py-1 rounded-full">
                           {selectedQualities.length}
