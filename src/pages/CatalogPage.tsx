@@ -24,6 +24,8 @@ const CatalogPage: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState<string>('')
   const { cartItems, updateQuantity, clearCart } = useCart()
   const { toast } = useToast()
+  const [selectedQuality, setSelectedQuality] = useState<string | null>(null)
+  const [availableQualities, setAvailableQualities] = useState<string[]>([])
 
   const loadProducts = async () => {
     setLoading(true)
@@ -85,6 +87,15 @@ const CatalogPage: React.FC = () => {
         // Filtrar marcas únicas e ordenar alfabeticamente
         const uniqueBrands = [...new Set(brands)]
         setAvailableBrands(uniqueBrands)
+
+        // Após carregar produtos, extrair qualidades únicas
+        setAvailableQualities([
+          ...new Set(
+            data
+              .map((p) => (p.qualidade === '-' ? 'LCD' : p.qualidade))
+              .filter(Boolean)
+          ),
+        ])
 
         toast({
           title: 'Catálogo carregado',
@@ -163,8 +174,16 @@ const CatalogPage: React.FC = () => {
       )
     }
 
+    // Filtro de qualidade
+    if (selectedQuality) {
+      filtered = filtered.filter((product) => {
+        const qual = product.qualidade === '-' ? 'LCD' : product.qualidade
+        return qual === selectedQuality
+      })
+    }
+
     setFilteredProducts(filtered)
-  }, [selectedBrand, products, searchTerm])
+  }, [selectedBrand, selectedQuality, products, searchTerm])
 
   // Função para tentar novamente com delay se houver muitas tentativas
   const handleRetry = () => {
@@ -196,11 +215,25 @@ const CatalogPage: React.FC = () => {
     setSelectedBrand(null)
   }
 
+  // Função para selecionar qualidade
+  const handleSelectQuality = (quality: string) => {
+    if (selectedQuality === quality) {
+      setSelectedQuality(null)
+    } else {
+      setSelectedQuality(quality)
+    }
+  }
+
+  // Função para limpar filtro de qualidade
+  const handleClearQualityFilter = () => {
+    setSelectedQuality(null)
+  }
+
   // Nova função para selecionar 1 de cada modelo
   const handleSelectOneOfEachModel = () => {
     // Usar os produtos filtrados em vez de todos os produtos
-    const produtosFiltrados = filteredProducts;
-    
+    const produtosFiltrados = filteredProducts
+
     const modelosSelecionados = new Set<string>()
     produtosFiltrados.forEach((product) => {
       // Normaliza o modelo para evitar duplicidade por espaços ou maiúsculas/minúsculas
@@ -220,30 +253,32 @@ const CatalogPage: React.FC = () => {
         updateQuantity(product, currentQuantity + 1)
       }
     })
-    
+
     // Mostrar feedback ao usuário
-    const totalModelos = modelosSelecionados.size;
-    const marcaInfo = selectedBrand ? ` da marca ${selectedBrand}` : '';
-    const buscaInfo = searchTerm ? ` que contêm "${searchTerm}"` : '';
-    
+    const totalModelos = modelosSelecionados.size
+    const marcaInfo = selectedBrand ? ` da marca ${selectedBrand}` : ''
+    const buscaInfo = searchTerm ? ` que contêm "${searchTerm}"` : ''
+
     toast({
       title: 'Produtos adicionados!',
-      description: `${totalModelos} modelo${totalModelos > 1 ? 's' : ''} adicionado${totalModelos > 1 ? 's' : ''}${marcaInfo}${buscaInfo}`,
-    });
+      description: `${totalModelos} modelo${
+        totalModelos > 1 ? 's' : ''
+      } adicionado${totalModelos > 1 ? 's' : ''}${marcaInfo}${buscaInfo}`,
+    })
   }
 
   // Function to sort brands in the required order
   const sortBrandsByCustomOrder = (brands: string[]) => {
     // Define the custom order
     const customOrder: Record<string, number> = {
-      'iPhone': 1,
-      'Samsung': 2,
-      'Motorola': 3,
-      'Xiaomi': 4,
-      'LG': 5,
-      'Realme': 6,
-      'Nokia': 7,
-      'Infinix': 8
+      iPhone: 1,
+      Samsung: 2,
+      Motorola: 3,
+      Xiaomi: 4,
+      LG: 5,
+      Realme: 6,
+      Nokia: 7,
+      Infinix: 8,
     }
 
     // Sort brands by the custom order
@@ -252,13 +287,13 @@ const CatalogPage: React.FC = () => {
       if (customOrder[a] && customOrder[b]) {
         return customOrder[a] - customOrder[b]
       }
-      
+
       // If only a is in the custom order, it comes first
       if (customOrder[a]) return -1
-      
+
       // If only b is in the custom order, it comes first
       if (customOrder[b]) return 1
-      
+
       // If neither brand is in the custom order, sort alphabetically
       return a.localeCompare(b)
     })
@@ -310,37 +345,79 @@ const CatalogPage: React.FC = () => {
           </div>
         )}
 
-        {/* Filtro de marcas */}
-        {!loading && !error && availableBrands.length > 0 && (
-          <div className="mb-6 overflow-x-auto pb-2">
-            <div className="flex flex-col gap-2">
-              <h2 className="text-sm font-medium px-2 md:px-0 md:text-base">
-                Filtrar por Marca:
-              </h2>
-              <div className="flex flex-nowrap md:flex-wrap gap-2 px-2 md:px-0">
-                {sortBrandsByCustomOrder(availableBrands).map((brand) => (
-                  <Badge
-                    key={brand}
-                    variant={selectedBrand === brand ? 'default' : 'outline'}
-                    className="cursor-pointer whitespace-nowrap text-xs md:text-sm md:px-4 md:py-2 md:min-h-[40px] md:flex md:items-center md:justify-center"
-                    onClick={() => handleSelectBrand(brand)}
-                  >
-                    {brand}
-                  </Badge>
-                ))}
-                {selectedBrand && (
-                  <Badge
-                    variant="secondary"
-                    className="cursor-pointer flex items-center gap-1 whitespace-nowrap text-xs md:text-sm md:px-4 md:py-2 md:min-h-[40px]"
-                    onClick={handleClearFilter}
-                  >
-                    Limpar filtro <X className="h-3 w-3 md:h-4 md:w-4" />
-                  </Badge>
-                )}
-              </div>
+        {/* Filtros agrupados para mobile UX/UI melhorada */}
+        {!loading &&
+          !error &&
+          (availableBrands.length > 0 || availableQualities.length > 0) && (
+            <div className="mb-6 rounded-lg bg-gray-50/80 p-2 md:bg-transparent md:p-0 flex flex-col gap-3 shadow-sm border md:border-0">
+              {/* Filtro de marcas */}
+              {availableBrands.length > 0 && (
+                <div className="flex flex-col gap-1">
+                  <h2 className="text-xs font-semibold px-1 md:px-0 md:text-base md:font-medium mb-1 md:mb-0">
+                    Marca:
+                  </h2>
+                  <div className="flex flex-nowrap gap-2 overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 px-1 md:px-0 md:flex-wrap md:overflow-visible">
+                    {sortBrandsByCustomOrder(availableBrands).map((brand) => (
+                      <Badge
+                        key={brand}
+                        variant={
+                          selectedBrand === brand ? 'default' : 'outline'
+                        }
+                        className="cursor-pointer whitespace-nowrap text-xs px-3 py-2 md:text-sm md:px-4 md:py-2 md:min-h-[40px] md:flex md:items-center md:justify-center"
+                        onClick={() => handleSelectBrand(brand)}
+                      >
+                        {brand}
+                      </Badge>
+                    ))}
+                    {selectedBrand && (
+                      <Badge
+                        variant="secondary"
+                        className="cursor-pointer flex items-center gap-1 whitespace-nowrap text-xs px-3 py-2 md:text-sm md:px-4 md:py-2 md:min-h-[40px]"
+                        onClick={handleClearFilter}
+                      >
+                        Limpar <X className="h-3 w-3 md:h-4 md:w-4" />
+                      </Badge>
+                    )}
+                  </div>
+                </div>
+              )}
+              {/* Separador visual */}
+              {availableBrands.length > 0 && availableQualities.length > 0 && (
+                <div className="h-2 md:h-0" />
+              )}
+              {/* Filtro de qualidades */}
+              {availableQualities.length > 0 && (
+                <div className="flex flex-col gap-1">
+                  <h2 className="text-xs font-semibold px-1 md:px-0 md:text-base md:font-medium mb-1 md:mb-0">
+                    Qualidade:
+                  </h2>
+                  <div className="flex flex-nowrap gap-2 overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 px-1 md:px-0 md:flex-wrap md:overflow-visible">
+                    {availableQualities.map((quality) => (
+                      <Badge
+                        key={quality}
+                        variant={
+                          selectedQuality === quality ? 'default' : 'outline'
+                        }
+                        className="cursor-pointer whitespace-nowrap text-xs px-3 py-2 md:text-sm md:px-4 md:py-2 md:min-h-[40px] md:flex md:items-center md:justify-center"
+                        onClick={() => handleSelectQuality(quality)}
+                      >
+                        {quality}
+                      </Badge>
+                    ))}
+                    {selectedQuality && (
+                      <Badge
+                        variant="secondary"
+                        className="cursor-pointer flex items-center gap-1 whitespace-nowrap text-xs px-3 py-2 md:text-sm md:px-4 md:py-2 md:min-h-[40px]"
+                        onClick={handleClearQualityFilter}
+                      >
+                        Limpar <X className="h-3 w-3 md:h-4 md:w-4" />
+                      </Badge>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
-          </div>
-        )}
+          )}
 
         {/* Botão para selecionar 1 de cada modelo */}
         <div className="mb-4">

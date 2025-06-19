@@ -1,4 +1,3 @@
-
 import React from 'react'
 import { Link } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
@@ -34,11 +33,19 @@ const QuoteCart: React.FC<QuoteCartProps> = ({ cartItems, onClearCart }) => {
       }`}
     >
       {/* Cabeçalho com botão para minimizar em dispositivos móveis */}
-      <div className={`flex items-center justify-between ${isMinimized && isMobile ? 'px-3 py-1.5' : ''}`}>
+      <div
+        className={`flex items-center justify-between ${
+          isMinimized && isMobile ? 'px-3 py-1.5' : ''
+        }`}
+      >
         {/* Lado esquerdo: informações sobre o orçamento */}
         <div className="flex items-center">
           <div>
-            <p className={`${isMinimized && isMobile ? 'text-sm' : 'text-xl'} font-bold`}>
+            <p
+              className={`${
+                isMinimized && isMobile ? 'text-sm' : 'text-xl'
+              } font-bold`}
+            >
               Total do Orçamento
             </p>
             {!isMinimized || !isMobile ? (
@@ -55,7 +62,7 @@ const QuoteCart: React.FC<QuoteCartProps> = ({ cartItems, onClearCart }) => {
             <span className="text-3xl font-bold text-accent">
               {formatCurrency(totalValue)}
             </span>
-            
+
             <div className="flex gap-3">
               {hasItems && (
                 <Button
@@ -87,7 +94,7 @@ const QuoteCart: React.FC<QuoteCartProps> = ({ cartItems, onClearCart }) => {
             >
               {formatCurrency(totalValue)}
             </div>
-            
+
             <button
               className={`md:hidden absolute right-2 top-[1/2] transform -translate-y-1/2 ${
                 !isMinimized ? 'mt-3' : ''

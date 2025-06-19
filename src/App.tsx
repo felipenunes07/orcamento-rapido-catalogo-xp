@@ -1,19 +1,18 @@
-
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { CartProvider } from "./context/CartContext";
+import { Toaster } from '@/components/ui/toaster'
+import { Toaster as Sonner } from '@/components/ui/sonner'
+import { TooltipProvider } from '@/components/ui/tooltip'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { CartProvider } from './context/CartContext'
 
 // Pages
-import HomePage from "./pages/HomePage";
-import CatalogPage from "./pages/CatalogPage";
-import QuoteSummaryPage from "./pages/QuoteSummaryPage";
-import ThankYouPage from "./pages/ThankYouPage";
-import NotFound from "./pages/NotFound";
+import HomePage from './pages/HomePage'
+import CatalogPage from './pages/CatalogPage'
+import QuoteSummaryPage from './pages/QuoteSummaryPage'
+import ThankYouPage from './pages/ThankYouPage'
+import NotFound from './pages/NotFound'
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient()
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -33,6 +32,6 @@ const App = () => (
       </TooltipProvider>
     </CartProvider>
   </QueryClientProvider>
-);
+)
 
-export default App;
+export default App
