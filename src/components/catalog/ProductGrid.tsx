@@ -1,4 +1,3 @@
-
 import React from 'react'
 import { Product, CartItem } from '../../types'
 import {
@@ -129,12 +128,18 @@ const ProductGrid: React.FC<ProductGridProps> = ({
             >
               <div className="flex-1 min-w-0">
                 <div className="flex flex-wrap items-center gap-x-2">
-                  <span className="font-semibold text-sm truncate">{product.modelo}</span>
-                  <span className="text-xs text-muted-foreground">({product.cor})</span>
+                  <span className="font-semibold text-sm truncate">
+                    {product.modelo}
+                  </span>
+                  <span className="text-xs text-muted-foreground">
+                    ({product.cor})
+                  </span>
                 </div>
-                
+
                 <div className="flex items-center gap-1 mt-1">
-                  <span className="text-xs text-muted-foreground">Qual: {product.qualidade}</span>
+                  <span className="text-xs text-muted-foreground">
+                    {product.qualidade}
+                  </span>
                   <span className="text-xs font-medium">
                     {formatCurrency(product.valor)}
                   </span>
@@ -147,7 +152,7 @@ const ProductGrid: React.FC<ProductGridProps> = ({
                     {formatCurrency(subtotal)}
                   </div>
                 )}
-                
+
                 <div className="flex items-center">
                   <Button
                     variant="outline"

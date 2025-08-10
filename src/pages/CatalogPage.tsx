@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
+import ScrollToTop from '@/components/ui/ScrollToTop'
 import {
   Popover,
   PopoverContent,
@@ -617,6 +618,7 @@ const CatalogPage: React.FC = () => {
         )}
 
         <QuoteCart cartItems={cartItems} onClearCart={clearCart} />
+        <ScrollToTop />
       </div>
     </Layout>
   )
