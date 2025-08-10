@@ -62,6 +62,15 @@ const CatalogPage: React.FC = () => {
           NOKIA: 'Nokia',
           MI: 'Xiaomi',
           REALME: 'Realme',
+          OPPO: 'OPPO',
+          Oppo: 'OPPO',
+          oppo: 'OPPO',
+          'DOC DE CARGA': 'DOC DE CARGA',
+          'Doc de Carga': 'DOC DE CARGA',
+          'doc de carga': 'DOC DE CARGA',
+          DOC: 'DOC DE CARGA',
+          Doc: 'DOC DE CARGA',
+          doc: 'DOC DE CARGA',
         }
 
         // Extrair a marca do modelo com base nos prefixos conhecidos
@@ -88,6 +97,19 @@ const CatalogPage: React.FC = () => {
           // Verificação específica para modelos Realme
           if (modelo.startsWith('REALME')) {
             return 'Realme'
+          }
+
+          // Verificação específica para modelos OPPO (qualquer variação)
+          if (modelo.toUpperCase().startsWith('OPPO')) {
+            return 'OPPO'
+          }
+
+          // Verificação específica para DOC DE CARGA (qualquer variação)
+          if (
+            modelo.toUpperCase().includes('DOC DE CARGA') ||
+            modelo.toUpperCase().startsWith('DOC')
+          ) {
+            return 'DOC DE CARGA'
           }
 
           // Se não encontrar um prefixo conhecido, usar a primeira palavra como fallback
@@ -168,18 +190,40 @@ const CatalogPage: React.FC = () => {
           Nokia: ['Nokia', 'NOKIA'],
           Xiaomi: ['MI'],
           Realme: ['REALME'],
+          OPPO: ['OPPO', 'Oppo', 'oppo'],
+          'DOC DE CARGA': [
+            'DOC DE CARGA',
+            'Doc de Carga',
+            'doc de carga',
+            'DOC',
+            'Doc',
+            'doc',
+          ],
         }
 
         return selectedBrands
           .filter((brand) => brand && brand.trim() !== '') // Filtrar marcas vazias
           .some((selectedBrand) => {
-            // Verificação especial para modelos Xiaomi e Realme
+            // Verificação especial para modelos Xiaomi, Realme, OPPO e DOC DE CARGA
             if (selectedBrand === 'Xiaomi' && product.modelo.startsWith('MI')) {
               return true
             }
             if (
               selectedBrand === 'Realme' &&
               product.modelo.startsWith('REALME')
+            ) {
+              return true
+            }
+            if (
+              selectedBrand === 'OPPO' &&
+              product.modelo.toUpperCase().startsWith('OPPO')
+            ) {
+              return true
+            }
+            if (
+              selectedBrand === 'DOC DE CARGA' &&
+              (product.modelo.toUpperCase().includes('DOC DE CARGA') ||
+                product.modelo.toUpperCase().startsWith('DOC'))
             ) {
               return true
             }
