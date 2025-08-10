@@ -67,6 +67,11 @@ const CatalogPage: React.FC = () => {
         const brands = data.map((product) => {
           const modelo = product.modelo
 
+          // Verificar se o modelo existe e não está vazio
+          if (!modelo || modelo.trim() === '') {
+            return null
+          }
+
           // Verificar prefixos conhecidos
           for (const [prefix, brandName] of Object.entries(brandMapping)) {
             if (modelo.startsWith(prefix)) {
@@ -86,11 +91,20 @@ const CatalogPage: React.FC = () => {
 
           // Se não encontrar um prefixo conhecido, usar a primeira palavra como fallback
           const modelParts = modelo.split(' ')
-          return modelParts[0]
+          const firstPart = modelParts[0]
+
+          // Verificar se a primeira parte não está vazia
+          if (firstPart && firstPart.trim() !== '') {
+            return firstPart
+          }
+
+          return null
         })
 
-        // Filtrar marcas únicas e ordenar alfabeticamente
-        const uniqueBrands = [...new Set(brands)]
+        // Filtrar marcas únicas, remover marcas vazias e ordenar alfabeticamente
+        const uniqueBrands = [...new Set(brands)].filter(
+          (brand) => brand && brand !== null && brand.trim() !== ''
+        )
         setAvailableBrands(uniqueBrands)
 
         // Após carregar produtos, extrair qualidades únicas
@@ -155,24 +169,26 @@ const CatalogPage: React.FC = () => {
           Realme: ['REALME'],
         }
 
-        return selectedBrands.some((selectedBrand) => {
-          // Verificação especial para modelos Xiaomi e Realme
-          if (selectedBrand === 'Xiaomi' && product.modelo.startsWith('MI')) {
-            return true
-          }
-          if (
-            selectedBrand === 'Realme' &&
-            product.modelo.startsWith('REALME')
-          ) {
-            return true
-          }
+        return selectedBrands
+          .filter((brand) => brand && brand.trim() !== '') // Filtrar marcas vazias
+          .some((selectedBrand) => {
+            // Verificação especial para modelos Xiaomi e Realme
+            if (selectedBrand === 'Xiaomi' && product.modelo.startsWith('MI')) {
+              return true
+            }
+            if (
+              selectedBrand === 'Realme' &&
+              product.modelo.startsWith('REALME')
+            ) {
+              return true
+            }
 
-          // Obter os prefixos para a marca selecionada
-          const prefixes = brandPrefixMap[selectedBrand] || []
+            // Obter os prefixos para a marca selecionada
+            const prefixes = brandPrefixMap[selectedBrand] || []
 
-          // Verificar se o modelo começa com algum dos prefixos da marca selecionada
-          return prefixes.some((prefix) => product.modelo.startsWith(prefix))
-        })
+            // Verificar se o modelo começa com algum dos prefixos da marca selecionada
+            return prefixes.some((prefix) => product.modelo.startsWith(prefix))
+          })
       })
     }
 
@@ -212,6 +228,11 @@ const CatalogPage: React.FC = () => {
 
   // Função para selecionar marca com suporte a múltipla seleção
   const handleSelectBrand = (brand: string, event: React.MouseEvent) => {
+    // Verificar se a marca não está vazia antes de processar
+    if (!brand || brand.trim() === '') {
+      return
+    }
+
     if (event.ctrlKey) {
       // Se Ctrl está pressionado, adiciona/remove da seleção múltipla
       setSelectedBrands((prev) =>
@@ -297,6 +318,9 @@ const CatalogPage: React.FC = () => {
 
   // Function to sort brands in the required order
   const sortBrandsByCustomOrder = (brands: string[]) => {
+    // Filtrar marcas vazias antes de ordenar
+    const validBrands = brands.filter((brand) => brand && brand.trim() !== '')
+
     // Define the custom order
     const customOrder: Record<string, number> = {
       iPhone: 1,
@@ -310,7 +334,7 @@ const CatalogPage: React.FC = () => {
     }
 
     // Sort brands by the custom order
-    return [...brands].sort((a, b) => {
+    return validBrands.sort((a, b) => {
       // If both brands are in the custom order, sort by the custom order
       if (customOrder[a] && customOrder[b]) {
         return customOrder[a] - customOrder[b]
@@ -402,11 +426,13 @@ const CatalogPage: React.FC = () => {
                     )}
                   </div>
                   <div className="flex flex-wrap gap-2">
-                    {sortBrandsByCustomOrder(availableBrands).map((brand) => (
-                      <Badge
-                        key={brand}
-                        variant="outline"
-                        className={`
+                    {sortBrandsByCustomOrder(availableBrands)
+                      .filter((brand) => brand && brand.trim() !== '')
+                      .map((brand) => (
+                        <Badge
+                          key={brand}
+                          variant="outline"
+                          className={`
                           cursor-pointer 
                           text-xs
                           py-2
@@ -422,11 +448,11 @@ const CatalogPage: React.FC = () => {
                               : 'bg-white text-gray-600 border-gray-200 hover:border-blue-300 hover:text-blue-600 hover:shadow-sm hover:bg-blue-50'
                           }
                         `}
-                        onClick={(e) => handleSelectBrand(brand, e)}
-                      >
-                        {brand}
-                      </Badge>
-                    ))}
+                          onClick={(e) => handleSelectBrand(brand, e)}
+                        >
+                          {brand}
+                        </Badge>
+                      ))}
                   </div>
                 </div>
               )}
