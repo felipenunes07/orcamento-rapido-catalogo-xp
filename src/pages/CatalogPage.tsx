@@ -6,13 +6,14 @@ import { useCart } from '../context/CartContext'
 import { fetchProducts } from '../services/sheetService'
 import { Product } from '../types'
 import { useToast } from '@/hooks/use-toast'
-import { AlertTriangle, Info, Loader2, RefreshCw, X } from 'lucide-react'
+import { AlertTriangle, Download, FileSpreadsheet, Info, Loader2, RefreshCw, X } from 'lucide-react'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import ScrollToTop from '@/components/ui/ScrollToTop'
+import { downloadCatalogExcel } from '@/utils/pdf/exportFunctions'
 import {
   Popover,
   PopoverContent,
@@ -399,22 +400,33 @@ const CatalogPage: React.FC = () => {
   return (
     <Layout>
       <div className="container-custom py-8">
-        <div className="flex justify-between items-center mb-6">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
           <h1 className="text-2xl font-bold">Tabela de Produtos</h1>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleRetry}
-            disabled={loading}
-            className="flex items-center gap-1"
-          >
-            {loading ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <RefreshCw className="h-4 w-4" />
-            )}
-            Atualizar Tabela
-          </Button>
+          <div className="flex flex-wrap gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => downloadCatalogExcel()}
+              className="flex items-center gap-1 bg-green-50 hover:bg-green-100 text-green-700 border-green-200 hover:border-green-300"
+            >
+              <FileSpreadsheet className="h-4 w-4" />
+              Baixar Catálogo em Excel
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleRetry}
+              disabled={loading}
+              className="flex items-center gap-1"
+            >
+              {loading ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <RefreshCw className="h-4 w-4" />
+              )}
+              Atualizar Tabela
+            </Button>
+          </div>
         </div>
 
         {/* Campo de busca por modelo */}

@@ -25,13 +25,15 @@
     <link rel="icon" type="image/png" href="/images/xp-logo.png" />
     <link rel="apple-touch-icon" href="/images/xp-logo.png" />
     <meta name="theme-color" content="#000000" />
-    <script src="https://cdn.jsdelivr.net/npm/@chatvolt/embeds@latest/dist/chatbox/index.umd.js"></script>
+    <!-- Removido script do Chatvolt que estava causando problemas com o ícone -->
+    <!-- <script src="https://cdn.jsdelivr.net/npm/@chatvolt/embeds@latest/dist/chatbox/index.umd.js"></script> -->
   </head>
 
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
-    <script>
+    <!-- Removido script de inicialização do Chatvolt -->
+    <!-- <script>
       window.addEventListener('DOMContentLoaded', () => {
         ChatvoltChatbox.initBubble({
           agentId: 'cmb81qy5f0bswhy5npr0p9sxh',
@@ -47,11 +49,11 @@
               'How can I help you ?',
             ],
           },
-          context:
+          context: 
             'The user lives in the city of São Paulo and is interested in learning more details about the online consulting service.',
         })
       })
-    </script>
+    </script> -->
     <script>
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {

@@ -1,12 +1,13 @@
 
 import React from 'react'
 import { pdf } from '@react-pdf/renderer'
-import { CartItem } from '../../types'
+import { CartItem, Product } from '../../types'
 import PdfOrcamento from './PdfOrcamento'
 import { formatCurrency } from '../formatters'
 import * as XLSX from 'xlsx'
 import { saveQuote, getShareableQuoteLink } from '../../services/quoteService'
 import { toast } from '@/components/ui/sonner'
+import { fetchProducts } from '../../services/sheetService'
 
 // Função para baixar o PDF
 export const downloadPdf = async (items: CartItem[]): Promise<void> => {
@@ -177,6 +178,59 @@ export const downloadExcel = async (items: CartItem[]): Promise<void> => {
   XLSX.writeFile(wb, filename);
   
   toast.success(`Orçamento #${quote.number} salvo e baixado em Excel`);
+}
+
+// Função para baixar o catálogo completo em Excel
+export const downloadCatalogExcel = async (): Promise<void> => {
+  try {
+    // Buscar todos os produtos do catálogo
+    const products = await fetchProducts();
+    
+    // Nome do arquivo
+    const filename = `catalogo-orcamento-facil-${new Date().toLocaleDateString('pt-BR').replace(/\//g, '-')}.xlsx`;
+    
+    // Preparar dados para o Excel
+    const wsData = [
+      ['CATÁLOGO - APP ORÇAMENTO FÁCIL'],
+      ['Data de exportação', new Date().toLocaleDateString('pt-BR')],
+      [''],
+      ['SKU', 'Modelo', 'Cor', 'Qualidade', 'Valor'],
+      ...products.map((product) => [
+        product.sku,
+        product.modelo,
+        product.cor,
+        product.qualidade,
+        product.valor,
+      ]),
+    ];
+    
+    // Criar planilha
+    const ws = XLSX.utils.aoa_to_sheet(wsData);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'CATÁLOGO');
+    
+    // Aplicar estilos (cabeçalhos em negrito)
+    const range = XLSX.utils.decode_range(ws['!ref'] || 'A1');
+    for (let C = range.s.c; C <= range.e.c; ++C) {
+      const cell = ws[XLSX.utils.encode_cell({ r: 3, c: C })];
+      if (!cell) continue;
+      cell.s = { font: { bold: true } };
+    }
+    
+    // Título em negrito e maior
+    const titleCell = ws[XLSX.utils.encode_cell({ r: 0, c: 0 })];
+    if (titleCell) {
+      titleCell.s = { font: { bold: true, sz: 14 } };
+    }
+    
+    // Baixar arquivo
+    XLSX.writeFile(wb, filename);
+    
+    toast.success('Catálogo exportado com sucesso para Excel');
+  } catch (error) {
+    console.error('Erro ao exportar catálogo:', error);
+    toast.error('Erro ao exportar catálogo. Tente novamente.');
+  }
 }
 
 // Função para compartilhar Excel via WhatsApp
