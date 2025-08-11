@@ -5,7 +5,7 @@ const Header: React.FC = () => {
   const location = useLocation()
 
   return (
-    <header className="bg-white shadow-sm py-4 sticky top-0 z-10">
+    <header className="bg-white shadow-sm py-4 md:sticky md:top-0 md:z-10">
       <div className="container-custom">
         <div className="flex justify-between items-center">
           <Link to="/" className="flex items-center gap-3">
