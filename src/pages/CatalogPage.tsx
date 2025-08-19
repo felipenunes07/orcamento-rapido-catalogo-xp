@@ -6,7 +6,15 @@ import { useCart } from '../context/CartContext'
 import { fetchProducts } from '../services/sheetService'
 import { Product } from '../types'
 import { useToast } from '@/hooks/use-toast'
-import { AlertTriangle, Download, FileSpreadsheet, Info, Loader2, RefreshCw, X } from 'lucide-react'
+import {
+  AlertTriangle,
+  Download,
+  FileSpreadsheet,
+  Info,
+  Loader2,
+  RefreshCw,
+  X,
+} from 'lucide-react'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -66,6 +74,7 @@ const CatalogPage: React.FC = () => {
           OPPO: 'OPPO',
           Oppo: 'OPPO',
           oppo: 'OPPO',
+          ZF: 'Asus',
           'DOC DE CARGA': 'DOC DE CARGA',
           'Doc de Carga': 'DOC DE CARGA',
           'doc de carga': 'DOC DE CARGA',
@@ -103,6 +112,11 @@ const CatalogPage: React.FC = () => {
           // Verificação específica para modelos OPPO (qualquer variação)
           if (modelo.toUpperCase().startsWith('OPPO')) {
             return 'OPPO'
+          }
+
+          // Verificação específica para modelos Asus (começam com ZF)
+          if (modelo.startsWith('ZF')) {
+            return 'Asus'
           }
 
           // Verificação específica para DOC DE CARGA (qualquer variação)
@@ -192,6 +206,7 @@ const CatalogPage: React.FC = () => {
           Xiaomi: ['MI'],
           Realme: ['REALME'],
           OPPO: ['OPPO', 'Oppo', 'oppo'],
+          Asus: ['ZF'],
           'DOC DE CARGA': [
             'DOC DE CARGA',
             'Doc de Carga',
@@ -226,6 +241,11 @@ const CatalogPage: React.FC = () => {
               (product.modelo.toUpperCase().includes('DOC DE CARGA') ||
                 product.modelo.toUpperCase().startsWith('DOC'))
             ) {
+              return true
+            }
+
+            // Verificação específica para modelos Asus
+            if (selectedBrand === 'Asus' && product.modelo.startsWith('ZF')) {
               return true
             }
 
@@ -377,6 +397,7 @@ const CatalogPage: React.FC = () => {
       Realme: 6,
       Nokia: 7,
       Infinix: 8,
+      Asus: 9,
     }
 
     // Sort brands by the custom order
