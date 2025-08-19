@@ -120,6 +120,27 @@ const ProductGrid: React.FC<ProductGridProps> = ({
           const cartItem = getCartItem(product.id)
           const quantity = cartItem?.quantity || 0
           const subtotal = product.valor * quantity
+          const isDocDeCarga = product.modelo
+            .toUpperCase()
+            .includes('DOC DE CARGA')
+
+          // Extrair o modelo sem o prefixo DOC DE CARGA e sem a cor para produtos DOC DE CARGA
+          let displayModel = product.modelo
+          if (isDocDeCarga) {
+            // Remove o prefixo DOC DE CARGA
+            displayModel = product.modelo.replace(
+              /DOC DE CARGA\s*[\|\-]?\s*/i,
+              ''
+            )
+
+            // Remove cores específicas do nome (PRETO, BRANCO, etc.)
+            displayModel = displayModel
+              .replace(
+                /\s*(PRETO|BRANCO|AZUL|VERMELHO|VERDE|AMARELO|ROXO|ROSA|CINZA|DOURADO|PRATA)\b/i,
+                ''
+              )
+              .replace(/\s*\([^)]*\)\s*$/i, '') // Remove qualquer texto entre parênteses no final
+          }
 
           return (
             <div
@@ -128,20 +149,17 @@ const ProductGrid: React.FC<ProductGridProps> = ({
             >
               <div className="flex-1 min-w-0">
                 <div className="flex flex-wrap items-center gap-x-2">
-                  <span className="font-semibold text-sm truncate">
-                    {product.modelo}
-                  </span>
-                  <span className="text-xs text-muted-foreground">
-                    ({product.cor})
+                  <span className="font-semibold text-sm break-words">
+                    {displayModel}
                   </span>
                 </div>
 
                 <div className="flex items-center gap-1 mt-1">
                   <span className="text-xs text-muted-foreground">
-                    {product.qualidade}
+                    {product.cor} • {product.qualidade}
                   </span>
                   <span className="text-xs font-medium">
-                    {formatCurrency(product.valor)}
+                    • {formatCurrency(product.valor)}
                   </span>
                 </div>
               </div>
@@ -153,36 +171,45 @@ const ProductGrid: React.FC<ProductGridProps> = ({
                   </div>
                 )}
 
-                <div className="flex items-center">
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={() => handleDecrement(product)}
-                    disabled={quantity <= 0}
-                    className="h-7 w-7"
-                  >
-                    <Minus size={14} />
-                  </Button>
+                <div className="flex flex-col items-end">
+                  {isDocDeCarga && (
+                    <div className="mb-1">
+                      <span className="inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10">
+                        DOC
+                      </span>
+                    </div>
+                  )}
+                  <div className="flex items-center">
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={() => handleDecrement(product)}
+                      disabled={quantity <= 0}
+                      className="h-7 w-7"
+                    >
+                      <Minus size={14} />
+                    </Button>
 
-                  <Input
-                    type="number"
-                    min="0"
-                    value={quantity.toString()}
-                    onChange={(e) => {
-                      const newQuantity = parseInt(e.target.value) || 0
-                      onUpdateQuantity(product, newQuantity)
-                    }}
-                    className="h-7 mx-1 text-center w-10 px-1"
-                  />
+                    <Input
+                      type="number"
+                      min="0"
+                      value={quantity.toString()}
+                      onChange={(e) => {
+                        const newQuantity = parseInt(e.target.value) || 0
+                        onUpdateQuantity(product, newQuantity)
+                      }}
+                      className="h-7 mx-1 text-center w-10 px-1"
+                    />
 
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={() => handleIncrement(product)}
-                    className="h-7 w-7"
-                  >
-                    <Plus size={14} />
-                  </Button>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={() => handleIncrement(product)}
+                      className="h-7 w-7"
+                    >
+                      <Plus size={14} />
+                    </Button>
+                  </div>
                 </div>
               </div>
             </div>
