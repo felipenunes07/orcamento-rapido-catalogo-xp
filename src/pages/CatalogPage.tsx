@@ -279,13 +279,23 @@ const CatalogPage: React.FC = () => {
 
   // Função para tentar novamente com delay se houver muitas tentativas
   const handleRetry = () => {
+    // Limpar todos os cookies para garantir que as atualizações sejam aplicadas
+    document.cookie.split(';').forEach(cookie => {
+      const [name] = cookie.trim().split('=');
+      document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+    });
+    
+    // Limpar cache do localStorage
+    localStorage.clear();
+    
+    // Mostrar mensagem de sucesso
+    toast({
+      title: 'Atualização em andamento',
+      description: 'Carregando atualizações.',
+    });
+
     if (retryCount > 3) {
       // Se já tentou várias vezes, adicionar um delay para evitar bloqueio
-      toast({
-        title: 'Tentando novamente...',
-        description: 'Aguarde um momento enquanto tentamos novamente.',
-      })
-
       setTimeout(loadProducts, 2000)
     } else {
       loadProducts()
