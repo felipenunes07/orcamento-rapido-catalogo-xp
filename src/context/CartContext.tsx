@@ -32,8 +32,29 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     localStorage.setItem('cart', JSON.stringify(cartItems));
   }, [cartItems]);
 
+  // Função para verificar se o produto é DOC DE CARGA
+  const isDocDeCarga = (product: Product): boolean => {
+    return product.modelo.toUpperCase().includes('DOC DE CARGA');
+  };
+
+  // Função para ajustar a quantidade para múltiplos de 5 para produtos DOC DE CARGA
+  const adjustQuantityForDocDeCarga = (product: Product, quantity: number): number => {
+    if (isDocDeCarga(product)) {
+      // Se for menor que 5, ajusta para 5
+      if (quantity < 5) return 5;
+      
+      // Arredonda para o múltiplo de 5 mais próximo
+      const remainder = quantity % 5;
+      return remainder === 0 ? quantity : quantity + (5 - remainder);
+    }
+    return quantity;
+  };
+
   const addToCart = (product: Product, quantity: number) => {
     if (quantity <= 0) return;
+
+    // Ajusta a quantidade para DOC DE CARGA
+    const adjustedQuantity = isDocDeCarga(product) ? adjustQuantityForDocDeCarga(product, quantity) : quantity;
 
     setCartItems(prevItems => {
       const existingItemIndex = prevItems.findIndex(item => item.product.id === product.id);
@@ -41,38 +62,49 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (existingItemIndex >= 0) {
         // Update existing item
         const updatedItems = [...prevItems];
+        const newQuantity = updatedItems[existingItemIndex].quantity + adjustedQuantity;
+        
+        // Ajusta a quantidade total para DOC DE CARGA
+        const finalQuantity = isDocDeCarga(product) 
+          ? adjustQuantityForDocDeCarga(product, newQuantity) 
+          : newQuantity;
+        
         updatedItems[existingItemIndex] = {
           ...updatedItems[existingItemIndex],
-          quantity: updatedItems[existingItemIndex].quantity + quantity,
+          quantity: finalQuantity,
         };
         return updatedItems;
       } else {
         // Add new item
-        return [...prevItems, { product, quantity }];
+        return [...prevItems, { product, quantity: adjustedQuantity }];
       }
     });
   };
 
   const updateQuantity = (product: Product, quantity: number) => {
+    // Se a quantidade for 0 ou menos, remove o item
+    if (quantity <= 0) {
+      setCartItems(prevItems => prevItems.filter(item => item.product.id !== product.id));
+      return;
+    }
+
+    // Ajusta a quantidade para DOC DE CARGA
+    const adjustedQuantity = isDocDeCarga(product) ? adjustQuantityForDocDeCarga(product, quantity) : quantity;
+
     setCartItems(prevItems => {
       const existingItemIndex = prevItems.findIndex(item => item.product.id === product.id);
-
-      if (quantity <= 0) {
-        // Remove item if quantity is 0 or less
-        return prevItems.filter(item => item.product.id !== product.id);
-      }
 
       if (existingItemIndex >= 0) {
         // Update existing item
         const updatedItems = [...prevItems];
         updatedItems[existingItemIndex] = {
           ...updatedItems[existingItemIndex],
-          quantity,
+          quantity: adjustedQuantity,
         };
         return updatedItems;
       } else {
         // Add new item
-        return [...prevItems, { product, quantity }];
+        return [...prevItems, { product, quantity: adjustedQuantity }];
       }
     });
   };

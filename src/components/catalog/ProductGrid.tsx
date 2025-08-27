@@ -28,15 +28,38 @@ const ProductGrid: React.FC<ProductGridProps> = ({
     return cartItems.find((item) => item.product.id === productId)
   }
 
+  const isDocDeCarga = (product: Product): boolean => {
+    return product.modelo.toUpperCase().includes('DOC DE CARGA')
+  }
+
   const handleIncrement = (product: Product) => {
     const currentQuantity = getCartItem(product.id)?.quantity || 0
-    onUpdateQuantity(product, currentQuantity + 1)
+    
+    if (isDocDeCarga(product)) {
+      // Para DOC DE CARGA, incrementa em 5 unidades
+      onUpdateQuantity(product, currentQuantity + 5)
+    } else {
+      // Para outros produtos, incrementa normalmente
+      onUpdateQuantity(product, currentQuantity + 1)
+    }
   }
 
   const handleDecrement = (product: Product) => {
     const currentQuantity = getCartItem(product.id)?.quantity || 0
-    if (currentQuantity > 0) {
-      onUpdateQuantity(product, currentQuantity - 1)
+    
+    if (isDocDeCarga(product)) {
+      // Para DOC DE CARGA, decrementa em 5 unidades, mas não permite ficar abaixo de 0
+      if (currentQuantity >= 5) {
+        onUpdateQuantity(product, currentQuantity - 5)
+      } else if (currentQuantity > 0) {
+        // Se for menor que 5 mas maior que 0, zera
+        onUpdateQuantity(product, 0)
+      }
+    } else {
+      // Para outros produtos, decrementa normalmente
+      if (currentQuantity > 0) {
+        onUpdateQuantity(product, currentQuantity - 1)
+      }
     }
   }
 
