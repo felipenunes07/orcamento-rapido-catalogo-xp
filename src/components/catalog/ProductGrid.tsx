@@ -177,23 +177,21 @@ const ProductGrid: React.FC<ProductGridProps> = ({
                   </span>
                 </div>
 
-                <div className="flex items-center gap-1 mt-1">
-                  <span className="text-xs text-muted-foreground">
-                    {product.cor} • {product.qualidade}
-                  </span>
-                  <span className="text-xs font-medium">
-                    • {formatCurrency(product.valor)}
-                  </span>
+                <div className="flex flex-col mt-1">
+                  <div className="flex items-center gap-1">
+                    <span className="text-xs text-muted-foreground">
+                      {product.cor} • {product.qualidade}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <span className="text-xs font-medium">
+                      {formatCurrency(product.valor)}
+                    </span>
+                  </div>
                 </div>
               </div>
 
               <div className="flex items-center shrink-0 pl-2">
-                {quantity > 0 && (
-                  <div className="text-xs font-medium text-accent mr-2">
-                    {formatCurrency(subtotal)}
-                  </div>
-                )}
-
                 <div className="flex flex-col items-end">
                   {isDocDeCarga && (
                     <div className="mb-1">
@@ -202,36 +200,43 @@ const ProductGrid: React.FC<ProductGridProps> = ({
                       </span>
                     </div>
                   )}
-                  <div className="flex items-center">
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      onClick={() => handleDecrement(product)}
-                      disabled={quantity <= 0}
-                      className="h-7 w-7"
-                    >
-                      <Minus size={14} />
-                    </Button>
+                  <div className="flex flex-col items-end">
+                    <div className="flex items-center">
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={() => handleDecrement(product)}
+                        disabled={quantity <= 0}
+                        className="h-7 w-7"
+                      >
+                        <Minus size={14} />
+                      </Button>
 
-                    <Input
-                      type="number"
-                      min="0"
-                      value={quantity.toString()}
-                      onChange={(e) => {
-                        const newQuantity = parseInt(e.target.value) || 0
-                        onUpdateQuantity(product, newQuantity)
-                      }}
-                      className="h-7 mx-1 text-center w-10 px-1"
-                    />
+                      <Input
+                        type="number"
+                        min="0"
+                        value={quantity.toString()}
+                        onChange={(e) => {
+                          const newQuantity = parseInt(e.target.value) || 0
+                          onUpdateQuantity(product, newQuantity)
+                        }}
+                        className="h-7 mx-1 text-center w-10 px-1"
+                      />
 
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      onClick={() => handleIncrement(product)}
-                      className="h-7 w-7"
-                    >
-                      <Plus size={14} />
-                    </Button>
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={() => handleIncrement(product)}
+                        className="h-7 w-7"
+                      >
+                        <Plus size={14} />
+                      </Button>
+                    </div>
+                    {quantity > 0 && (
+                      <div className="text-xs font-medium text-accent mt-1 text-right">
+                        {formatCurrency(subtotal)}
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
