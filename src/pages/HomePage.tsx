@@ -356,38 +356,6 @@ const HomePage: React.FC = () => {
           </div>
         </div>
       </Layout>
-      {/* Bolha flutuante do Instagram */}
-      <a
-        href="https://www.instagram.com/expor_telas/"
-        target="_blank"
-        rel="noopener noreferrer"
-        style={{
-          position: 'fixed',
-          right: 24,
-          bottom: 24,
-          zIndex: 1000,
-          boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
-          borderRadius: '50%',
-          background:
-            'linear-gradient(135deg, #f9ce34 0%, #ee2a7b 50%, #6228d7 100%)',
-          width: 60,
-          height: 60,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
-        aria-label="Instagram"
-      >
-        <svg
-          width="32"
-          height="32"
-          fill="white"
-          viewBox="0 0 24 24"
-          aria-hidden="true"
-        >
-          <path d="M7.75 2h8.5A5.75 5.75 0 0 1 22 7.75v8.5A5.75 5.75 0 0 1 16.25 22h-8.5A5.75 5.75 0 0 1 2 16.25v-8.5A5.75 5.75 0 0 1 7.75 2zm0 1.5A4.25 4.25 0 0 0 3.5 7.75v8.5A4.25 4.25 0 0 0 7.75 20.5h8.5A4.25 4.25 0 0 0 20.5 16.25v-8.5A4.25 4.25 0 0 0 16.25 3.5h-8.5zm4.25 3.25a5.25 5.25 0 1 1 0 10.5a5.25 5.25 0 0 1 0-10.5zm0 1.5a3.75 3.75 0 1 0 0 7.5a3.75 3.75 0 0 0 0-7.5zm5.13.88a1.13 1.13 0 1 1-2.26 0a1.13 1.13 0 0 1 2.26 0z" />
-        </svg>
-      </a>
 
       {/* Botão de debug temporário - REMOVER EM PRODUÇÃO */}
       {process.env.NODE_ENV === 'development' && (
