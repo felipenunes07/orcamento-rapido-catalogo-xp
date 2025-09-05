@@ -2,7 +2,7 @@
 <html lang="pt-BR">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no" />
     <title>Catálogo XP Orçamento</title>
     <meta
       name="description"
@@ -146,6 +146,8 @@
           z-index: 99999;
           animation: slideUp 0.3s ease-out;
           font-family: 'Poppins', sans-serif;
+          transform: translateZ(0);
+          -webkit-transform: translateZ(0);
       }
 
       @media (max-width: 768px) {
@@ -162,8 +164,8 @@
       @media (max-width: 480px) {
           #gg-help-chat {
               width: 100vw;
-              height: calc(100vh - env(safe-area-inset-bottom));
-              max-height: calc(100vh - 60px);
+              height: 100%;
+              max-height: 100%;
               right: 0;
               left: 0;
               bottom: 0;
@@ -173,10 +175,13 @@
               z-index: 99999;
           }
           
-          /* Ajuste para barra do navegador */
+          /* Ajuste para barra do navegador e teclado virtual */
           @supports (padding: max(0px)) {
               #gg-help-chat {
-                  height: calc(100vh - max(env(safe-area-inset-bottom), 60px));
+                  height: 100%;
+                  position: fixed;
+                  bottom: 0;
+                  top: 0;
               }
           }
       }
@@ -337,6 +342,8 @@
               padding-bottom: 80px;
               overflow-y: auto;
               -webkit-overflow-scrolling: touch;
+              flex: 1;
+              height: auto;
           }
       }
 
@@ -477,6 +484,8 @@
           align-items: center;
           box-sizing: border-box;
           box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.05);
+          position: relative;
+          z-index: 2;
       }
 
       @media (max-width: 768px) {
@@ -485,6 +494,8 @@
               gap: 4px;
               flex-direction: row;
               align-items: center;
+              position: relative;
+              bottom: 0;
           }
           
           #gg-help-input {
@@ -546,7 +557,7 @@
           color: #333333;
           outline: none;
           transition: all 0.3s ease;
-          font-size: 15px;
+          font-size: 16px; /* Previne zoom em iOS */
           min-width: 0;
           box-sizing: border-box;
           box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
@@ -747,6 +758,32 @@
         const scrollToBottom = () => {
             chatBody.scrollTop = chatBody.scrollHeight;
         };
+
+        // Função para ajustar a visualização quando o teclado aparece
+        const adjustViewForKeyboard = () => {
+            if (window.innerWidth <= 480) {
+                // Rolagem para o final do chat quando o teclado aparece
+                setTimeout(() => {
+                    scrollToBottom();
+                    // Foca no input novamente caso tenha perdido o foco
+                    inputField.focus();
+                }, 300);
+            }
+        };
+
+        // Adiciona eventos para detectar quando o teclado aparece
+        inputField.addEventListener('focus', adjustViewForKeyboard);
+        window.addEventListener('resize', adjustViewForKeyboard);
+        
+        // Previne o comportamento padrão de zoom em dispositivos móveis
+        document.addEventListener('touchmove', function(event) {
+            if (event.scale !== 1) { event.preventDefault(); }
+        }, { passive: false });
+        
+        // Ajusta a visualização quando o usuário clica no input
+        inputField.addEventListener('touchstart', function() {
+            setTimeout(scrollToBottom, 300);
+        });
 
         const sendMessage = () => {
             const message = inputField.value.trim();
