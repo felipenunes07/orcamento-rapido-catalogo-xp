@@ -293,7 +293,7 @@ const HomePage: React.FC = () => {
         <div className="container-custom py-8">
           <div className="max-w-3xl mx-auto">
             <section className="mb-12 text-center">
-              <h1 className="text-3xl sm:text-4xl font-bold mb-4">
+              <h1 className="text-3xl sm:text-4xl font-bold mb-4 whitespace-nowrap text-[1.5rem] sm:text-3xl md:text-4xl">
                 Catálogo Orçamento Fácil
               </h1>
               <p className="text-lg mb-8 text-muted-foreground">

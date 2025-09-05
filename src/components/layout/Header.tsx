@@ -14,8 +14,8 @@ const Header: React.FC = () => {
               alt="XP Logo"
               className="w-10 h-10 rounded-lg shadow-sm"
             />
-            <span className="font-medium text-lg">
-              <span className="bg-gradient-to-r from-gray-900 via-blue-700 to-blue-600 bg-clip-text text-transparent">
+            <span className="font-medium text-sm sm:text-lg">
+              <span className="bg-gradient-to-r from-gray-900 via-blue-700 to-blue-600 bg-clip-text text-transparent whitespace-nowrap">
                 Catálogo XP Orçamento
               </span>
             </span>
