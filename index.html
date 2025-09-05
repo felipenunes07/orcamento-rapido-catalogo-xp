@@ -2,7 +2,7 @@
 <html lang="pt-BR">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <title>Catálogo XP Orçamento</title>
     <meta
       name="description"
@@ -162,12 +162,22 @@
       @media (max-width: 480px) {
           #gg-help-chat {
               width: 100vw;
-              height: 100vh;
+              height: calc(100vh - env(safe-area-inset-bottom));
+              max-height: calc(100vh - 60px);
               right: 0;
               left: 0;
               bottom: 0;
               top: 0;
               border-radius: 0;
+              position: fixed;
+              z-index: 99999;
+          }
+          
+          /* Ajuste para barra do navegador */
+          @supports (padding: max(0px)) {
+              #gg-help-chat {
+                  height: calc(100vh - max(env(safe-area-inset-bottom), 60px));
+              }
           }
       }
 
@@ -324,6 +334,9 @@
           #gg-help-body {
               padding: 20px 15px;
               gap: 8px;
+              padding-bottom: 80px;
+              overflow-y: auto;
+              -webkit-overflow-scrolling: touch;
           }
       }
 
@@ -499,9 +512,10 @@
 
       @media (max-width: 480px) {
           #gg-help-footer {
-              padding: 12px 15px;
+              padding: 12px 15px 20px 15px;
               gap: 8px;
               border-radius: 0;
+              padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px) + 20px);
           }
           
           #gg-help-input {
