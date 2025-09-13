@@ -1,5 +1,5 @@
 // Nome do cache
-const CACHE_NAME = 'orcamento-facil-xp-v1'
+const CACHE_NAME = 'orcamento-facil-xp-v2'
 
 // Arquivos para cache inicial
 const urlsToCache = [
@@ -9,7 +9,7 @@ const urlsToCache = [
   '/icon-192x192.png',
   '/icon-512x512.png',
   '/favicon.ico',
-  '/new-icon.png', // Adicionando novo ícone ao cache
+  '/whatsapp-icon.jpeg', // Ícone do WhatsApp em preto e branco
 ]
 
 // Instalação do service worker
