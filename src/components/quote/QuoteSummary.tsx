@@ -21,7 +21,7 @@ const QuoteSummary: React.FC<QuoteSummaryProps> = ({ items }) => {
   )
 
   return (
-    <div className="bg-white rounded-lg p-4 shadow-sm">
+    <div className="bg-background rounded-lg p-4 shadow-sm">
       <h2 className="text-xl font-bold mb-4">Resumo do Orçamento</h2>
 
       <div className="overflow-x-auto">

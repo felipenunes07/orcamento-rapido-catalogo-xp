@@ -85,13 +85,13 @@ const ProductGrid: React.FC<ProductGridProps> = ({
               const subtotal = product.valor * quantity
 
               return (
-                <TableRow key={product.id}>
-                  <TableCell className="font-medium">
+                <TableRow key={product.id} className="dark:border-gray-700">
+                  <TableCell className="font-medium dark:text-gray-100">
                     {product.modelo}
                   </TableCell>
-                  <TableCell>{product.cor}</TableCell>
-                  <TableCell>{product.qualidade}</TableCell>
-                  <TableCell className="text-right">
+                  <TableCell className="dark:text-gray-300">{product.cor}</TableCell>
+                  <TableCell className="dark:text-gray-300">{product.qualidade}</TableCell>
+                  <TableCell className="text-right dark:text-gray-300">
                     {formatCurrency(product.valor)}
                   </TableCell>
                   <TableCell>
@@ -101,7 +101,7 @@ const ProductGrid: React.FC<ProductGridProps> = ({
                         size="icon"
                         onClick={() => handleDecrement(product)}
                         disabled={quantity <= 0}
-                        className="h-8 w-8"
+                        className="h-8 w-8 dark:border-gray-600 dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-100"
                       >
                         <Minus size={16} />
                       </Button>
@@ -114,20 +114,20 @@ const ProductGrid: React.FC<ProductGridProps> = ({
                           const newQuantity = parseInt(e.target.value) || 0
                           onUpdateQuantity(product, newQuantity)
                         }}
-                        className="h-8 mx-2 text-center w-16"
+                        className="h-8 mx-2 text-center w-16 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100"
                       />
 
                       <Button
                         variant="outline"
                         size="icon"
                         onClick={() => handleIncrement(product)}
-                        className="h-8 w-8"
+                        className="h-8 w-8 dark:border-gray-600 dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-100"
                       >
                         <Plus size={16} />
                       </Button>
                     </div>
                   </TableCell>
-                  <TableCell className="text-right font-semibold">
+                  <TableCell className="text-right font-semibold dark:text-gray-100">
                     {quantity > 0 ? formatCurrency(subtotal) : '-'}
                   </TableCell>
                 </TableRow>
@@ -168,23 +168,23 @@ const ProductGrid: React.FC<ProductGridProps> = ({
           return (
             <div
               key={product.id}
-              className="bg-white p-2.5 rounded-lg shadow-sm border mb-2.5 flex flex-row items-center"
+              className="bg-background p-2.5 rounded-lg shadow-sm border mb-2.5 flex flex-row items-center dark:border-gray-700"
             >
               <div className="flex-1 min-w-0">
                 <div className="flex flex-wrap items-center gap-x-2">
-                  <span className="font-semibold text-sm break-words">
+                  <span className="font-semibold text-sm break-words dark:text-gray-100">
                     {displayModel}
                   </span>
                 </div>
 
                 <div className="flex flex-col mt-1">
                   <div className="flex items-center gap-1">
-                    <span className="text-xs text-muted-foreground">
+                    <span className="text-xs text-muted-foreground dark:text-gray-400">
                       {product.cor} • {product.qualidade}
                     </span>
                   </div>
                   <div className="flex items-center gap-1">
-                    <span className="text-xs font-medium">
+                    <span className="text-xs font-medium dark:text-gray-300">
                       {formatCurrency(product.valor)}
                     </span>
                   </div>
@@ -195,7 +195,7 @@ const ProductGrid: React.FC<ProductGridProps> = ({
                 <div className="flex flex-col items-end">
                   {isDocDeCarga && (
                     <div className="mb-1">
-                      <span className="inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10">
+                      <span className="inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10 dark:bg-blue-900 dark:text-blue-200 dark:ring-blue-200/20">
                         DOC
                       </span>
                     </div>
@@ -207,7 +207,7 @@ const ProductGrid: React.FC<ProductGridProps> = ({
                         size="icon"
                         onClick={() => handleDecrement(product)}
                         disabled={quantity <= 0}
-                        className="h-7 w-7"
+                        className="h-7 w-7 dark:border-gray-600 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-100"
                       >
                         <Minus size={14} />
                       </Button>
@@ -220,20 +220,20 @@ const ProductGrid: React.FC<ProductGridProps> = ({
                           const newQuantity = parseInt(e.target.value) || 0
                           onUpdateQuantity(product, newQuantity)
                         }}
-                        className="h-7 mx-1 text-center w-10 px-1"
+                        className="h-7 mx-1 text-center w-10 px-1 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100"
                       />
 
                       <Button
                         variant="outline"
                         size="icon"
                         onClick={() => handleIncrement(product)}
-                        className="h-7 w-7"
+                        className="h-7 w-7 dark:border-gray-600 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-100"
                       >
                         <Plus size={14} />
                       </Button>
                     </div>
                     {quantity > 0 && (
-                      <div className="text-xs font-medium text-accent mt-1 text-right">
+                      <div className="text-xs font-medium text-accent mt-1 text-right dark:text-blue-400">
                         {formatCurrency(subtotal)}
                       </div>
                     )}

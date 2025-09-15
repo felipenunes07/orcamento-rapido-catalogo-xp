@@ -7,7 +7,7 @@ import { CheckCircle } from 'lucide-react'
 const ThankYouPage: React.FC = () => {
   return (
     <Layout>
-      <div className="container-custom py-16">
+      <div className="container-custom py-16 bg-background">
         <div className="max-w-md mx-auto text-center">
           <div className="flex justify-center mb-6">
             <CheckCircle className="h-16 w-16 text-green-500" />

@@ -64,7 +64,7 @@ const QuoteSummaryPage: React.FC = () => {
 
   return (
     <Layout>
-      <div className="container-custom py-8">
+      <div className="container-custom py-8 bg-background">
         <div className="mb-6">
           <Link to="/catalogo" className="text-accent hover:underline">
             ← Voltar ao catálogo

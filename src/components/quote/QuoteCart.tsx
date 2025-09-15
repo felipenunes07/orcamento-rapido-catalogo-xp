@@ -28,7 +28,7 @@ const QuoteCart: React.FC<QuoteCartProps> = ({ cartItems, onClearCart }) => {
 
   return (
     <div
-      className={`bg-white rounded-t-lg md:rounded-lg shadow-lg fixed md:sticky bottom-0 md:bottom-4 left-0 right-0 mt-6 border z-50 max-w-screen-xl mx-auto transition-all duration-300 ${
+      className={`bg-background rounded-t-lg md:rounded-lg shadow-lg fixed md:sticky bottom-0 md:bottom-4 left-0 right-0 mt-6 border z-50 max-w-screen-xl mx-auto transition-all duration-300 dark:border-gray-700 ${
         isMinimized && isMobile ? 'pb-1.5 pt-2' : 'p-4 sm:p-6'
       }`}
     >
@@ -44,14 +44,14 @@ const QuoteCart: React.FC<QuoteCartProps> = ({ cartItems, onClearCart }) => {
             <p
               className={`${
                 isMinimized && isMobile ? 'text-sm' : 'text-xl'
-              } font-bold leading-tight`}
+              } font-bold leading-tight dark:text-gray-100`}
             >
               Total do Orçamento
             </p>
             <p
               className={`text-xs text-muted-foreground ${
                 isMinimized && isMobile ? 'text-[10px]' : 'text-sm'
-              } leading-tight mt-0.5`}
+              } leading-tight mt-0.5 dark:text-gray-400`}
             >
               {totalItems} item(ns)
             </p>
@@ -61,7 +61,7 @@ const QuoteCart: React.FC<QuoteCartProps> = ({ cartItems, onClearCart }) => {
         {/* Lado direito em dispositivos não móveis: valor e botões */}
         {!isMobile ? (
           <div className="flex items-center gap-4">
-            <span className="text-3xl font-bold text-accent">
+            <span className="text-3xl font-bold text-accent dark:text-blue-400">
               {formatCurrency(totalValue)}
             </span>
 
@@ -71,7 +71,7 @@ const QuoteCart: React.FC<QuoteCartProps> = ({ cartItems, onClearCart }) => {
                   variant="outline"
                   size="lg"
                   onClick={onClearCart}
-                  className="whitespace-nowrap"
+                  className="whitespace-nowrap dark:border-gray-600 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-100"
                 >
                   Limpar Orçamento
                 </Button>
@@ -93,13 +93,13 @@ const QuoteCart: React.FC<QuoteCartProps> = ({ cartItems, onClearCart }) => {
               <div
                 className={`${
                   isMinimized ? 'text-lg' : 'text-3xl'
-                } font-bold text-accent md:mb-0 mb-0 md:text-right`}
+                } font-bold text-accent md:mb-0 mb-0 md:text-right dark:text-blue-400`}
               >
                 {formatCurrency(totalValue)}
               </div>
 
               <button
-                className="md:hidden flex items-center justify-center w-8 h-8 -mr-1"
+                className="md:hidden flex items-center justify-center w-8 h-8 -mr-1 dark:text-gray-300"
                 onClick={toggleMinimized}
                 aria-label={
                   isMinimized ? 'Expandir orçamento' : 'Minimizar orçamento'
@@ -124,7 +124,7 @@ const QuoteCart: React.FC<QuoteCartProps> = ({ cartItems, onClearCart }) => {
               variant="outline"
               size="lg"
               onClick={onClearCart}
-              className="w-full py-5"
+              className="w-full py-5 dark:border-gray-600 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-100"
             >
               Limpar Orçamento
             </Button>

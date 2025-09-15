@@ -430,7 +430,7 @@ const CatalogPage: React.FC = () => {
 
   return (
     <Layout>
-      <div className="container-custom py-8">
+      <div className="container-custom py-8 bg-background">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
           <h1 className="text-2xl font-bold">Tabela de Produtos</h1>
           <div className="flex flex-wrap gap-2">
@@ -495,7 +495,7 @@ const CatalogPage: React.FC = () => {
                 <div className="flex flex-col gap-3">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <h2 className="text-sm font-medium text-gray-800">
+                      <h2 className="text-sm font-medium text-gray-800 dark:text-gray-200">
                         Marcas
                       </h2>
                       {selectedBrands.length > 0 && (
@@ -506,11 +506,11 @@ const CatalogPage: React.FC = () => {
                     </div>
                     {selectedBrands.length > 0 && (
                       <button
-                        onClick={handleClearFilter}
-                        className="text-xs text-gray-500 hover:text-gray-800 transition-colors duration-200 underline decoration-dotted"
-                      >
-                        Limpar seleção
-                      </button>
+                          onClick={handleClearFilter}
+                          className="text-xs text-gray-500 hover:text-gray-800 transition-colors duration-200 underline decoration-dotted dark:text-gray-400 dark:hover:text-gray-200"
+                        >
+                          Limpar seleção
+                        </button>
                     )}
                   </div>
                   <div className="flex flex-wrap gap-2">
@@ -533,7 +533,7 @@ const CatalogPage: React.FC = () => {
                           ${
                             selectedBrands.includes(brand)
                               ? 'bg-gradient-to-r from-blue-600 to-blue-500 text-white border-transparent shadow-md hover:shadow-lg'
-                              : 'bg-white text-gray-600 border-gray-200 hover:border-blue-300 hover:text-blue-600 hover:shadow-sm hover:bg-blue-50'
+                              : 'bg-background text-gray-600 border-gray-200 hover:border-blue-300 hover:text-blue-600 hover:shadow-sm hover:bg-blue-50 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:hover:border-blue-400 dark:hover:text-blue-400 dark:hover:bg-gray-700'
                           }
                         `}
                           onClick={(e) => handleSelectBrand(brand, e)}
@@ -551,39 +551,39 @@ const CatalogPage: React.FC = () => {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <div className="flex items-center gap-2">
-                        <h2 className="text-sm font-medium text-gray-800">
+                        <h2 className="text-sm font-medium text-gray-800 dark:text-gray-200">
                           Qualidade
                         </h2>
                         <Popover>
                           <PopoverTrigger>
-                            <Info className="h-4 w-4 text-gray-400 hover:text-blue-500 transition-colors cursor-help" />
+                            <Info className="h-4 w-4 text-gray-400 hover:text-blue-500 transition-colors cursor-help dark:text-gray-500 dark:hover:text-blue-400" />
                           </PopoverTrigger>
-                          <PopoverContent className="w-80 p-4 text-sm">
+                          <PopoverContent className="w-80 p-4 text-sm dark:bg-gray-800 dark:border-gray-700">
                             <div className="space-y-2">
-                              <p className="font-medium">SELECT</p>
-                              <p className="text-gray-600">
+                              <p className="font-medium dark:text-gray-200">SELECT</p>
+                              <p className="text-gray-600 dark:text-gray-400">
                                 Com componentes de alta qualidade, brilho 300 a
                                 500 lumens, alta resolução HD+/FHD
                               </p>
 
-                              <p className="font-medium">PREMIER</p>
-                              <p className="text-gray-600">
+                              <p className="font-medium dark:text-gray-200">PREMIER</p>
+                              <p className="text-gray-600 dark:text-gray-400">
                                 Brilho 300 a 500 lumens, alta resolução HD+/FHD,
                                 flex e CI igual ao peça genuína
                               </p>
 
-                              <p className="font-medium">PREMIER/SELECT MAX</p>
-                              <p className="text-gray-600">
+                              <p className="font-medium dark:text-gray-200">PREMIER/SELECT MAX</p>
+                              <p className="text-gray-600 dark:text-gray-400">
                                 Brilho chegando 500 lumens, alta resolução
                                 HD++/FHD, flex e CI igual ao peça genuína. O MAX
                                 tem maior saturação de cores e brilho mais alto.
                               </p>
 
-                              <p className="font-medium">ORI</p>
-                              <p className="text-gray-600">Original China</p>
+                              <p className="font-medium dark:text-gray-200">ORI</p>
+                              <p className="text-gray-600 dark:text-gray-400">Original China</p>
 
-                              <p className="font-medium">LCD</p>
-                              <p className="text-gray-600">Incell</p>
+                              <p className="font-medium dark:text-gray-200">LCD</p>
+                              <p className="text-gray-600 dark:text-gray-400">Incell</p>
                             </div>
                           </PopoverContent>
                         </Popover>
@@ -595,12 +595,12 @@ const CatalogPage: React.FC = () => {
                       )}
                     </div>
                     {selectedQualities.length > 0 && (
-                      <button
-                        onClick={handleClearQualityFilter}
-                        className="text-xs text-gray-500 hover:text-gray-800 transition-colors duration-200 underline decoration-dotted"
-                      >
-                        Limpar seleção
-                      </button>
+                                              <button
+                          onClick={handleClearQualityFilter}
+                          className="text-xs text-gray-500 hover:text-gray-800 transition-colors duration-200 underline decoration-dotted dark:text-gray-400 dark:hover:text-gray-200"
+                        >
+                          Limpar seleção
+                        </button>
                     )}
                   </div>
                   <div className="flex flex-wrap gap-2">
@@ -621,7 +621,7 @@ const CatalogPage: React.FC = () => {
                           ${
                             selectedQualities.includes(quality)
                               ? 'bg-gradient-to-r from-blue-600 to-blue-500 text-white border-transparent shadow-md hover:shadow-lg'
-                              : 'bg-white text-gray-600 border-gray-200 hover:border-blue-300 hover:text-blue-600 hover:shadow-sm hover:bg-blue-50'
+                              : 'bg-background text-gray-600 border-gray-200 hover:border-blue-300 hover:text-blue-600 hover:shadow-sm hover:bg-blue-50 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:hover:border-blue-400 dark:hover:text-blue-400 dark:hover:bg-gray-700'
                           }
                         `}
                         onClick={(e) => handleSelectQuality(quality, e)}
@@ -641,7 +641,7 @@ const CatalogPage: React.FC = () => {
             variant="outline"
             size="default"
             onClick={handleSelectOneOfEachModel}
-            className="flex items-center gap-3 h-12 px-6 text-sm font-medium text-gray-700 bg-white border-2 border-gray-200 hover:bg-gray-50 hover:text-gray-900 hover:border-blue-300 hover:shadow-md transition-all duration-200"
+            className="flex items-center gap-3 h-12 px-6 text-sm font-medium text-gray-700 bg-background border-2 border-gray-200 hover:bg-gray-50 hover:text-gray-900 hover:border-blue-300 hover:shadow-md transition-all duration-200 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:text-gray-100 dark:hover:border-blue-400"
           >
             <span className="relative flex h-3 w-3">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
@@ -653,11 +653,11 @@ const CatalogPage: React.FC = () => {
 
         {loading ? (
           <div className="space-y-4">
-            <div className="w-full h-10 bg-gray-100 rounded animate-pulse" />
+            <div className="w-full h-10 bg-muted rounded animate-pulse" />
             {[...Array(6)].map((_, index) => (
               <div
                 key={index}
-                className="w-full h-12 bg-gray-50 rounded-md animate-pulse"
+                className="w-full h-12 bg-muted rounded-md animate-pulse"
               />
             ))}
           </div>
@@ -695,7 +695,7 @@ const CatalogPage: React.FC = () => {
             )}
           </div>
         ) : (
-          <div className="bg-white p-4 rounded-lg shadow-sm">
+          <div className="bg-background p-4 rounded-lg shadow-sm dark:border-gray-700">
             <ProductGrid
               products={filteredProducts}
               cartItems={cartItems}

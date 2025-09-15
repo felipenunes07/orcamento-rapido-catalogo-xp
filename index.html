@@ -635,6 +635,35 @@
     <div id="root"></div>
     <div id="gg-help-widget-root"></div>
     <script type="module" src="/src/main.tsx"></script>
+    <script>
+      // Verificar se o tema dark está sendo aplicado
+      const observer = new MutationObserver(function(mutations) {
+        mutations.forEach(function(mutation) {
+          if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+            console.log('Classe do body mudou:', document.body.className);
+          }
+        });
+      });
+      
+      observer.observe(document.body, {
+        attributes: true,
+        attributeFilter: ['class']
+      });
+      
+      // Verificar se o tema dark está sendo aplicado ao html
+      const htmlObserver = new MutationObserver(function(mutations) {
+        mutations.forEach(function(mutation) {
+          if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+            console.log('Classe do html mudou:', document.documentElement.className);
+          }
+        });
+      });
+      
+      htmlObserver.observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ['class']
+      });
+    </script>
     <!-- Removido script de inicialização do Chatvolt -->
     <!-- <script>
       window.addEventListener('DOMContentLoaded', () => {
