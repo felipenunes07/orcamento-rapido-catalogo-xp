@@ -1,23 +1,16 @@
 import { Moon, Sun } from "lucide-react"
 import { useTheme } from "next-themes"
 import { Button } from "@/components/ui/button"
-import { useEffect } from "react"
 
 export function ThemeToggle() {
   const { theme, setTheme } = useTheme()
-
-  // Adicionar log para verificar se o tema está sendo aplicado
-  useEffect(() => {
-    console.log("Tema atual:", theme)
-  }, [theme])
 
   return (
     <Button
       variant="ghost"
       size="icon"
       onClick={() => {
-        const newTheme = theme === "dark" ? "light" : "dark"
-        console.log("Mudando tema para:", newTheme)
+        const newTheme = theme === "light" ? "dark" : "light"
         setTheme(newTheme)
       }}
       aria-label="Toggle theme"
