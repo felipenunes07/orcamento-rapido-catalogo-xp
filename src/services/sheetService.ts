@@ -57,6 +57,11 @@ function parseCSV(csvText: string): Product[] {
   const imagemIndex = headers.findIndex((h) =>
     h.toLowerCase().includes('imagem')
   )
+  const promocaoIndex = headers.findIndex(
+    (h) =>
+      h.toLowerCase().includes('promoção') ||
+      h.toLowerCase().includes('promocao')
+  )
 
   console.log('Índices das colunas:', {
     sku: skuIndex,
@@ -215,6 +220,19 @@ function parseCSV(csvText: string): Product[] {
       }
     }
 
+    // Processar valor de promoção
+    let promocao: number | undefined = undefined
+    if (
+      promocaoIndex >= 0 &&
+      row[promocaoIndex] &&
+      row[promocaoIndex].trim() !== ''
+    ) {
+      const promocaoValue = normalizeCurrencyToNumber(row[promocaoIndex])
+      if (promocaoValue !== null && promocaoValue > 0) {
+        promocao = promocaoValue
+      }
+    }
+
     // Create product object
     const product: Product = {
       id: `product-${i}`,
@@ -224,6 +242,7 @@ function parseCSV(csvText: string): Product[] {
       qualidade: qualidade.trim() || '-',
       valor: valor,
       imagem: imagemIndex >= 0 ? row[imagemIndex] || undefined : undefined,
+      promocao: promocao, // Adicionar campo de promoção
     }
 
     // Log específico do produto final para conectores

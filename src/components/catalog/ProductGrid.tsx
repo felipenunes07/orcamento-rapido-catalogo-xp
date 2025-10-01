@@ -34,7 +34,7 @@ const ProductGrid: React.FC<ProductGridProps> = ({
 
   const handleIncrement = (product: Product) => {
     const currentQuantity = getCartItem(product.id)?.quantity || 0
-    
+
     if (isDocDeCarga(product)) {
       // Para DOC DE CARGA, incrementa em 5 unidades
       onUpdateQuantity(product, currentQuantity + 5)
@@ -46,7 +46,7 @@ const ProductGrid: React.FC<ProductGridProps> = ({
 
   const handleDecrement = (product: Product) => {
     const currentQuantity = getCartItem(product.id)?.quantity || 0
-    
+
     if (isDocDeCarga(product)) {
       // Para DOC DE CARGA, decrementa em 5 unidades, mas não permite ficar abaixo de 0
       if (currentQuantity >= 5) {
@@ -82,17 +82,36 @@ const ProductGrid: React.FC<ProductGridProps> = ({
             {products.map((product) => {
               const cartItem = getCartItem(product.id)
               const quantity = cartItem?.quantity || 0
-              const subtotal = product.valor * quantity
+              const priceToUse =
+                product.promocao && product.promocao > 0
+                  ? product.promocao
+                  : product.valor
+              const subtotal = priceToUse * quantity
 
               return (
                 <TableRow key={product.id} className="dark:border-gray-700">
                   <TableCell className="font-medium dark:text-gray-100">
                     {product.modelo}
                   </TableCell>
-                  <TableCell className="dark:text-gray-300">{product.cor}</TableCell>
-                  <TableCell className="dark:text-gray-300">{product.qualidade}</TableCell>
+                  <TableCell className="dark:text-gray-300">
+                    {product.cor}
+                  </TableCell>
+                  <TableCell className="dark:text-gray-300">
+                    {product.qualidade}
+                  </TableCell>
                   <TableCell className="text-right dark:text-gray-300">
-                    {formatCurrency(product.valor)}
+                    {product.promocao && product.promocao > 0 ? (
+                      <div className="flex flex-col items-end">
+                        <span className="text-sm text-gray-400 line-through">
+                          {formatCurrency(product.valor)}
+                        </span>
+                        <span className="text-base font-bold text-blue-700 dark:text-blue-400">
+                          {formatCurrency(product.promocao)}
+                        </span>
+                      </div>
+                    ) : (
+                      <span>{formatCurrency(product.valor)}</span>
+                    )}
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center justify-center">
@@ -142,7 +161,11 @@ const ProductGrid: React.FC<ProductGridProps> = ({
         {products.map((product) => {
           const cartItem = getCartItem(product.id)
           const quantity = cartItem?.quantity || 0
-          const subtotal = product.valor * quantity
+          const priceToUse =
+            product.promocao && product.promocao > 0
+              ? product.promocao
+              : product.valor
+          const subtotal = priceToUse * quantity
           const isDocDeCarga = product.modelo
             .toUpperCase()
             .includes('DOC DE CARGA')
@@ -185,7 +208,20 @@ const ProductGrid: React.FC<ProductGridProps> = ({
                   </div>
                   <div className="flex items-center gap-1">
                     <span className="text-xs font-medium dark:text-gray-300">
-                      {formatCurrency(product.valor)}
+                      {product.promocao && product.promocao > 0 ? (
+                        <div className="flex flex-col">
+                          <span className="text-xs text-gray-400 line-through">
+                            {formatCurrency(product.valor)}
+                          </span>
+                          <span className="text-xs font-semibold text-blue-700 dark:text-blue-400">
+                            {formatCurrency(product.promocao)}
+                          </span>
+                        </div>
+                      ) : (
+                        <span className="text-xs font-medium dark:text-gray-300">
+                          {formatCurrency(product.valor)}
+                        </span>
+                      )}
                     </span>
                   </div>
                 </div>

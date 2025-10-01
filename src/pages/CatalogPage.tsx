@@ -41,6 +41,7 @@ const CatalogPage: React.FC = () => {
   const { toast } = useToast()
   const [selectedQualities, setSelectedQualities] = useState<string[]>([])
   const [availableQualities, setAvailableQualities] = useState<string[]>([])
+  const [showPromocaoOnly, setShowPromocaoOnly] = useState<boolean>(false)
 
   const loadProducts = async () => {
     setLoading(true)
@@ -266,6 +267,12 @@ const CatalogPage: React.FC = () => {
       })
     }
 
+    if (showPromocaoOnly) {
+      filtered = filtered.filter(
+        (product) => product.promocao && product.promocao > 0
+      )
+    }
+
     // Filtrar por termo de busca
     if (searchTerm.trim()) {
       const searchLower = searchTerm.toLowerCase().trim()
@@ -275,24 +282,30 @@ const CatalogPage: React.FC = () => {
     }
 
     setFilteredProducts(filtered)
-  }, [selectedBrands, selectedQualities, products, searchTerm])
+  }, [
+    selectedBrands,
+    selectedQualities,
+    products,
+    searchTerm,
+    showPromocaoOnly,
+  ])
 
   // Função para tentar novamente com delay se houver muitas tentativas
   const handleRetry = () => {
     // Limpar todos os cookies para garantir que as atualizações sejam aplicadas
-    document.cookie.split(';').forEach(cookie => {
-      const [name] = cookie.trim().split('=');
-      document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
-    });
-    
+    document.cookie.split(';').forEach((cookie) => {
+      const [name] = cookie.trim().split('=')
+      document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`
+    })
+
     // Limpar cache do localStorage
-    localStorage.clear();
-    
+    localStorage.clear()
+
     // Mostrar mensagem de sucesso
     toast({
       title: 'Atualização em andamento',
       description: 'Carregando atualizações.',
-    });
+    })
 
     if (retryCount > 3) {
       // Se já tentou várias vezes, adicionar um delay para evitar bloqueio
@@ -428,6 +441,10 @@ const CatalogPage: React.FC = () => {
     })
   }
 
+  const handleTogglePromocao = () => {
+    setShowPromocaoOnly(!showPromocaoOnly)
+  }
+
   return (
     <Layout>
       <div className="container-custom py-8 bg-background">
@@ -506,11 +523,11 @@ const CatalogPage: React.FC = () => {
                     </div>
                     {selectedBrands.length > 0 && (
                       <button
-                          onClick={handleClearFilter}
-                          className="text-xs text-gray-500 hover:text-gray-800 transition-colors duration-200 underline decoration-dotted dark:text-gray-400 dark:hover:text-gray-200"
-                        >
-                          Limpar seleção
-                        </button>
+                        onClick={handleClearFilter}
+                        className="text-xs text-gray-500 hover:text-gray-800 transition-colors duration-200 underline decoration-dotted dark:text-gray-400 dark:hover:text-gray-200"
+                      >
+                        Limpar seleção
+                      </button>
                     )}
                   </div>
                   <div className="flex flex-wrap gap-2">
@@ -560,30 +577,44 @@ const CatalogPage: React.FC = () => {
                           </PopoverTrigger>
                           <PopoverContent className="w-80 p-4 text-sm dark:bg-gray-800 dark:border-gray-700">
                             <div className="space-y-2">
-                              <p className="font-medium dark:text-gray-200">SELECT</p>
+                              <p className="font-medium dark:text-gray-200">
+                                SELECT
+                              </p>
                               <p className="text-gray-600 dark:text-gray-400">
                                 Com componentes de alta qualidade, brilho 300 a
                                 500 lumens, alta resolução HD+/FHD
                               </p>
 
-                              <p className="font-medium dark:text-gray-200">PREMIER</p>
+                              <p className="font-medium dark:text-gray-200">
+                                PREMIER
+                              </p>
                               <p className="text-gray-600 dark:text-gray-400">
                                 Brilho 300 a 500 lumens, alta resolução HD+/FHD,
                                 flex e CI igual ao peça genuína
                               </p>
 
-                              <p className="font-medium dark:text-gray-200">PREMIER/SELECT MAX</p>
+                              <p className="font-medium dark:text-gray-200">
+                                PREMIER/SELECT MAX
+                              </p>
                               <p className="text-gray-600 dark:text-gray-400">
                                 Brilho chegando 500 lumens, alta resolução
                                 HD++/FHD, flex e CI igual ao peça genuína. O MAX
                                 tem maior saturação de cores e brilho mais alto.
                               </p>
 
-                              <p className="font-medium dark:text-gray-200">ORI</p>
-                              <p className="text-gray-600 dark:text-gray-400">Original China</p>
+                              <p className="font-medium dark:text-gray-200">
+                                ORI
+                              </p>
+                              <p className="text-gray-600 dark:text-gray-400">
+                                Original China
+                              </p>
 
-                              <p className="font-medium dark:text-gray-200">LCD</p>
-                              <p className="text-gray-600 dark:text-gray-400">Incell</p>
+                              <p className="font-medium dark:text-gray-200">
+                                LCD
+                              </p>
+                              <p className="text-gray-600 dark:text-gray-400">
+                                Incell
+                              </p>
                             </div>
                           </PopoverContent>
                         </Popover>
@@ -595,12 +626,12 @@ const CatalogPage: React.FC = () => {
                       )}
                     </div>
                     {selectedQualities.length > 0 && (
-                                              <button
-                          onClick={handleClearQualityFilter}
-                          className="text-xs text-gray-500 hover:text-gray-800 transition-colors duration-200 underline decoration-dotted dark:text-gray-400 dark:hover:text-gray-200"
-                        >
-                          Limpar seleção
-                        </button>
+                      <button
+                        onClick={handleClearQualityFilter}
+                        className="text-xs text-gray-500 hover:text-gray-800 transition-colors duration-200 underline decoration-dotted dark:text-gray-400 dark:hover:text-gray-200"
+                      >
+                        Limpar seleção
+                      </button>
                     )}
                   </div>
                   <div className="flex flex-wrap gap-2">
@@ -632,6 +663,63 @@ const CatalogPage: React.FC = () => {
                   </div>
                 </div>
               )}
+
+              {/* Novo filtro de promoção */}
+              <div className="flex flex-col gap-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <h2 className="text-sm font-medium text-gray-800 dark:text-gray-200">
+                      Promoção
+                    </h2>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-6 w-6 p-0 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300"
+                        >
+                          <Info className="h-3 w-3" />
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-80 p-4">
+                        <div className="space-y-2">
+                          <h4 className="font-medium text-sm">
+                            Produtos em Promoção
+                          </h4>
+                          <p className="text-xs text-gray-600 dark:text-gray-400">
+                            Mostra apenas produtos em promoção.
+                          </p>
+                        </div>
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <Badge
+                    variant="outline"
+                    className={`
+                      cursor-pointer 
+                      text-xs
+                      py-2
+                      px-4
+                      rounded-xl
+                      border-2
+                      transition-all
+                      duration-200
+                      font-semibold
+                      shadow-sm
+                      ${
+                        showPromocaoOnly
+                          ? 'bg-blue-600 text-white border-blue-700 shadow-md'
+                          : 'bg-white text-blue-700 border-blue-300 hover:bg-blue-50 hover:text-blue-800 hover:border-blue-400 dark:bg-gray-900 dark:text-blue-300 dark:border-blue-700 dark:hover:bg-gray-800 dark:hover:text-blue-200'
+                      }
+                    `}
+                    onClick={handleTogglePromocao}
+                  >
+                    🔥 Promoção
+                  </Badge>
+                </div>
+              </div>
             </div>
           )}
 

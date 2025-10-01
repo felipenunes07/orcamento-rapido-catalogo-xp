@@ -1,4 +1,3 @@
-
 export interface Product {
   id: string
   sku: string
@@ -7,6 +6,7 @@ export interface Product {
   qualidade: string
   valor: number
   imagem?: string
+  promocao?: number // Novo campo para valor promocional
 }
 
 export interface CartItem {
