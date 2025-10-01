@@ -62,6 +62,7 @@ function parseCSV(csvText: string): Product[] {
       h.toLowerCase().includes('promoção') ||
       h.toLowerCase().includes('promocao')
   )
+  const ativoIndex = headers.findIndex((h) => h.toLowerCase().includes('ativo'))
 
   console.log('Índices das colunas:', {
     sku: skuIndex,
@@ -233,6 +234,9 @@ function parseCSV(csvText: string): Product[] {
       }
     }
 
+    // Preencher status de exibição
+    const ativo = ativoIndex >= 0 ? row[ativoIndex]?.trim() : undefined
+
     // Create product object
     const product: Product = {
       id: `product-${i}`,
@@ -243,6 +247,7 @@ function parseCSV(csvText: string): Product[] {
       valor: valor,
       imagem: imagemIndex >= 0 ? row[imagemIndex] || undefined : undefined,
       promocao: promocao, // Adicionar campo de promoção
+      ativo: ativo, // Preencher status de exibição
     }
 
     // Log específico do produto final para conectores

@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { formatCurrency } from '../../utils/formatters'
 import { Plus, Minus } from 'lucide-react'
+import deburr from 'lodash/deburr'
 
 interface ProductGridProps {
   products: Product[]
@@ -63,6 +64,22 @@ const ProductGrid: React.FC<ProductGridProps> = ({
     }
   }
 
+  // Badge visual para últimas unidades
+  const isUltimasUnidades = (ativo?: string) => {
+    if (!ativo) return false
+    const norm = deburr(ativo).trim().toUpperCase()
+    return norm === 'ULTIMAS UNIDADES'
+  }
+  const UltimasUnidadesBadge = () => (
+    <span
+      className="absolute -top-1 -right-1 z-20 px-2 py-0.5 rounded-full bg-blue-600 text-white text-[10px] font-bold shadow-lg uppercase tracking-wide border border-blue-700"
+      style={{ letterSpacing: '0.02em', lineHeight: '1' }}
+    >
+      <span className="hidden md:inline">ÚLTIMAS UNIDADES</span>
+      <span className="md:hidden">ÚLTIMAS UND.</span>
+    </span>
+  )
+
   return (
     <div>
       {/* Versão para Desktop */}
@@ -89,9 +106,15 @@ const ProductGrid: React.FC<ProductGridProps> = ({
               const subtotal = priceToUse * quantity
 
               return (
-                <TableRow key={product.id} className="dark:border-gray-700">
+                <TableRow
+                  key={product.id}
+                  className="dark:border-gray-700 relative"
+                >
                   <TableCell className="font-medium dark:text-gray-100">
                     {product.modelo}
+                    {isUltimasUnidades(product.ativo) && (
+                      <UltimasUnidadesBadge />
+                    )}
                   </TableCell>
                   <TableCell className="dark:text-gray-300">
                     {product.cor}
@@ -191,7 +214,7 @@ const ProductGrid: React.FC<ProductGridProps> = ({
           return (
             <div
               key={product.id}
-              className="bg-background p-2.5 rounded-lg shadow-sm border mb-2.5 flex flex-row items-center dark:border-gray-700"
+              className="bg-background p-2.5 rounded-lg shadow-sm border mb-2.5 flex flex-row items-center dark:border-gray-700 relative"
             >
               <div className="flex-1 min-w-0">
                 <div className="flex flex-wrap items-center gap-x-2">
@@ -276,6 +299,7 @@ const ProductGrid: React.FC<ProductGridProps> = ({
                   </div>
                 </div>
               </div>
+              {isUltimasUnidades(product.ativo) && <UltimasUnidadesBadge />}
             </div>
           )
         })}

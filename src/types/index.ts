@@ -7,6 +7,7 @@ export interface Product {
   valor: number
   imagem?: string
   promocao?: number // Novo campo para valor promocional
+  ativo?: string // Campo para status de exibição do produto
 }
 
 export interface CartItem {

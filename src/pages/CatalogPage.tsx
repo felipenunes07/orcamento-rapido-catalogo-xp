@@ -27,6 +27,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover'
+import deburr from 'lodash/deburr'
 
 const CatalogPage: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([])
@@ -192,6 +193,16 @@ const CatalogPage: React.FC = () => {
   // Efeito para filtrar produtos quando as seleções mudarem
   useEffect(() => {
     let filtered = products
+    // Regra de visibilidade: só exibe produtos ativos ou últimas unidades
+    filtered = filtered.filter((product) => {
+      // Normaliza o valor do campo ativo para evitar problemas de espaços, acentos e maiúsculas/minúsculas
+      const ativo = product.ativo
+        ? deburr(product.ativo).trim().toUpperCase()
+        : ''
+      return (
+        ativo === 'S' || ativo === 'ULTIMAS UNIDADES' || !product.ativo // fallback para produtos antigos sem campo
+      )
+    })
 
     // Filtrar por marcas selecionadas
     if (selectedBrands.length > 0) {
