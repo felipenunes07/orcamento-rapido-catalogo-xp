@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Teste Service Worker - Diagnóstico</title>
+    <style>
+      body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        max-width: 900px;
+        margin: 40px auto;
+        padding: 20px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+      }
+      .container {
+        background: white;
+        border-radius: 12px;
+        padding: 30px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+      }
+      h1 {
+        color: #333;
+        margin-bottom: 10px;
+      }
+      .subtitle {
+        color: #666;
+        margin-bottom: 30px;
+      }
+      .status {
+        padding: 15px;
+        margin: 15px 0;
+        border-radius: 8px;
+        border-left: 4px solid;
+      }
+      .status.success {
+        background: #d4edda;
+        border-color: #28a745;
+        color: #155724;
+      }
+      .status.error {
+        background: #f8d7da;
+        border-color: #dc3545;
+        color: #721c24;
+      }
+      .status.warning {
+        background: #fff3cd;
+        border-color: #ffc107;
+        color: #856404;
+      }
+      .status.info {
+        background: #d1ecf1;
+        border-color: #17a2b8;
+        color: #0c5460;
+      }
+      button {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        margin: 8px 4px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 600;
+        transition: transform 0.2s, box-shadow 0.2s;
+      }
+      button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+      }
+      button:active {
+        transform: translateY(0);
+      }
+      .danger {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      }
+      .log-container {
+        background: #1e1e1e;
+        color: #d4d4d4;
+        padding: 20px;
+        border-radius: 8px;
+        margin: 20px 0;
+        max-height: 400px;
+        overflow-y: auto;
+        font-family: 'Consolas', 'Monaco', monospace;
+        font-size: 13px;
+        line-height: 1.6;
+      }
+      .log-entry {
+        margin: 4px 0;
+        padding: 4px 8px;
+        border-radius: 3px;
+      }
+      .log-entry.error {
+        background: rgba(220, 53, 69, 0.2);
+        color: #ff6b6b;
+      }
+      .log-entry.success {
+        background: rgba(40, 167, 69, 0.2);
+        color: #51cf66;
+      }
+      .log-entry.info {
+        color: #74c0fc;
+      }
+      .log-entry.warning {
+        background: rgba(255, 193, 7, 0.2);
+        color: #ffd43b;
+      }
+      .section {
+        margin: 30px 0;
+        padding: 20px;
+        background: #f8f9fa;
+        border-radius: 8px;
+      }
+      .section h2 {
+        margin-top: 0;
+        color: #495057;
+        font-size: 18px;
+      }
+      code {
+        background: #e9ecef;
+        padding: 2px 6px;
+        border-radius: 3px;
+        font-family: 'Consolas', 'Monaco', monospace;
+        font-size: 13px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>🔧 Diagnóstico do Service Worker</h1>
+      <p class="subtitle">
+        Ferramenta para testar e diagnosticar problemas com o Service Worker
+      </p>
+
+      <div id="sw-status"></div>
+
+      <div class="section">
+        <h2>📋 Informações do Sistema</h2>
+        <div id="system-info"></div>
+      </div>
+
+      <div class="section">
+        <h2>🛠️ Ações Rápidas</h2>
+        <button onclick="testServiceWorker()">
+          🔍 Verificar Service Worker
+        </button>
+        <button onclick="checkCache()">📦 Verificar Cache</button>
+        <button onclick="testFetch()">🌐 Testar Fetch</button>
+        <button onclick="forceUpdate()">🔄 Forçar Atualização</button>
+        <button class="danger" onclick="unregisterSW()">
+          ❌ Desregistrar SW
+        </button>
+        <button class="danger" onclick="clearAllCache()">
+          🗑️ Limpar Todo Cache
+        </button>
+        <button onclick="clearLogs()">🧹 Limpar Logs</button>
+      </div>
+
+      <div class="section">
+        <h2>📊 Console de Logs</h2>
+        <div id="log-container" class="log-container">
+          <div class="log-entry info">Aguardando comandos...</div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const logContainer = document.getElementById('log-container')
+
+      function log(message, type = 'info') {
+        const entry = document.createElement('div')
+        entry.className = `log-entry ${type}`
+        const timestamp = new Date().toLocaleTimeString('pt-BR')
+        entry.textContent = `[${timestamp}] ${message}`
+        logContainer.appendChild(entry)
+        logContainer.scrollTop = logContainer.scrollHeight
+        console.log(`[${type.toUpperCase()}]`, message)
+      }
+
+      function clearLogs() {
+        logContainer.innerHTML =
+          '<div class="log-entry info">Logs limpos.</div>'
+      }
+
+      async function testServiceWorker() {
+        log('Iniciando verificação do Service Worker...', 'info')
+
+        if (!('serviceWorker' in navigator)) {
+          log('❌ Service Worker não é suportado neste navegador', 'error')
+          updateStatus('Service Worker não suportado', 'error')
+          return
+        }
+
+        log('✅ Service Worker é suportado', 'success')
+
+        try {
+          const registration = await navigator.serviceWorker.getRegistration()
+
+          if (!registration) {
+            log('⚠️ Nenhum Service Worker registrado', 'warning')
+            updateStatus('Nenhum SW registrado - Primeiro acesso?', 'warning')
+            return
+          }
+
+          log(`✅ Service Worker encontrado: ${registration.scope}`, 'success')
+
+          if (registration.active) {
+            log(`✅ SW Ativo: ${registration.active.scriptURL}`, 'success')
+            log(`   Estado: ${registration.active.state}`, 'info')
+          }
+
+          if (registration.waiting) {
+            log(
+              `⚠️ SW aguardando: ${registration.waiting.scriptURL}`,
+              'warning'
+            )
+            log('   Há uma nova versão aguardando ativação!', 'warning')
+          }
+
+          if (registration.installing) {
+            log(
+              `🔄 SW instalando: ${registration.installing.scriptURL}`,
+              'info'
+            )
+          }
+
+          updateStatus('Service Worker funcionando corretamente', 'success')
+        } catch (error) {
+          log(`❌ Erro ao verificar SW: ${error.message}`, 'error')
+          updateStatus(`Erro: ${error.message}`, 'error')
+        }
+      }
+
+      async function checkCache() {
+        log('Verificando caches...', 'info')
+
+        try {
+          const cacheNames = await caches.keys()
+
+          if (cacheNames.length === 0) {
+            log('⚠️ Nenhum cache encontrado', 'warning')
+            return
+          }
+
+          log(`✅ ${cacheNames.length} cache(s) encontrado(s):`, 'success')
+
+          for (const cacheName of cacheNames) {
+            const cache = await caches.open(cacheName)
+            const keys = await cache.keys()
+            log(`📦 ${cacheName}: ${keys.length} arquivo(s)`, 'info')
+
+            keys.forEach((key) => {
+              log(`   - ${key.url}`, 'info')
+            })
+          }
+        } catch (error) {
+          log(`❌ Erro ao verificar cache: ${error.message}`, 'error')
+        }
+      }
+
+      async function testFetch() {
+        log('Testando requisições...', 'info')
+
+        const testUrls = [
+          '/',
+          '/index.html',
+          '/manifest.json',
+          '/icon-192x192.png',
+          '/icon-512x512.png',
+          '/favicon.ico',
+        ]
+
+        for (const url of testUrls) {
+          try {
+            const response = await fetch(url, { cache: 'no-cache' })
+            if (response.ok) {
+              log(`✅ ${url} - Status: ${response.status}`, 'success')
+            } else {
+              log(`⚠️ ${url} - Status: ${response.status}`, 'warning')
+            }
+          } catch (error) {
+            log(`❌ ${url} - Erro: ${error.message}`, 'error')
+          }
+        }
+      }
+
+      async function forceUpdate() {
+        log('Forçando atualização do Service Worker...', 'info')
+
+        try {
+          const registration = await navigator.serviceWorker.getRegistration()
+
+          if (!registration) {
+            log('⚠️ Nenhum Service Worker para atualizar', 'warning')
+            return
+          }
+
+          await registration.update()
+          log('✅ Verificação de atualização iniciada', 'success')
+          log('ℹ️ Se houver uma nova versão, ela será baixada', 'info')
+
+          setTimeout(() => testServiceWorker(), 2000)
+        } catch (error) {
+          log(`❌ Erro ao atualizar: ${error.message}`, 'error')
+        }
+      }
+
+      async function unregisterSW() {
+        if (
+          !confirm(
+            'Tem certeza que deseja desregistrar o Service Worker?\n\nIsso pode fazer com que o app não funcione offline.'
+          )
+        ) {
+          return
+        }
+
+        log('Desregistrando Service Worker...', 'warning')
+
+        try {
+          const registration = await navigator.serviceWorker.getRegistration()
+
+          if (!registration) {
+            log('⚠️ Nenhum Service Worker para desregistrar', 'warning')
+            return
+          }
+
+          const unregistered = await registration.unregister()
+
+          if (unregistered) {
+            log('✅ Service Worker desregistrado com sucesso', 'success')
+            log('ℹ️ Recarregue a página para registrar novamente', 'info')
+            updateStatus('SW desregistrado - Recarregue a página', 'warning')
+          } else {
+            log('❌ Falha ao desregistrar Service Worker', 'error')
+          }
+        } catch (error) {
+          log(`❌ Erro ao desregistrar: ${error.message}`, 'error')
+        }
+      }
+
+      async function clearAllCache() {
+        if (
+          !confirm(
+            'Tem certeza que deseja limpar TODO o cache?\n\nIsso forçará o download de todos os arquivos novamente.'
+          )
+        ) {
+          return
+        }
+
+        log('Limpando todos os caches...', 'warning')
+
+        try {
+          const cacheNames = await caches.keys()
+
+          if (cacheNames.length === 0) {
+            log('⚠️ Nenhum cache para limpar', 'warning')
+            return
+          }
+
+          for (const cacheName of cacheNames) {
+            const deleted = await caches.delete(cacheName)
+            if (deleted) {
+              log(`✅ Cache deletado: ${cacheName}`, 'success')
+            } else {
+              log(`❌ Falha ao deletar: ${cacheName}`, 'error')
+            }
+          }
+
+          log('✅ Todos os caches foram limpos', 'success')
+          log('ℹ️ Recarregue a página para cachear novamente', 'info')
+        } catch (error) {
+          log(`❌ Erro ao limpar cache: ${error.message}`, 'error')
+        }
+      }
+
+      function updateStatus(message, type) {
+        const statusDiv = document.getElementById('sw-status')
+        statusDiv.className = `status ${type}`
+        statusDiv.textContent = message
+      }
+
+      function displaySystemInfo() {
+        const infoDiv = document.getElementById('system-info')
+        const info = `
+                <p><strong>Navegador:</strong> ${navigator.userAgent}</p>
+                <p><strong>Online:</strong> ${
+                  navigator.onLine ? '✅ Sim' : '❌ Não'
+                }</p>
+                <p><strong>Service Worker suportado:</strong> ${
+                  'serviceWorker' in navigator ? '✅ Sim' : '❌ Não'
+                }</p>
+                <p><strong>Cache API suportado:</strong> ${
+                  'caches' in window ? '✅ Sim' : '❌ Não'
+                }</p>
+                <p><strong>URL atual:</strong> <code>${
+                  window.location.href
+                }</code></p>
+            `
+        infoDiv.innerHTML = info
+      }
+
+      // Inicialização
+      displaySystemInfo()
+      testServiceWorker()
+
+      log('Ferramenta de diagnóstico carregada', 'success')
+      log('Use os botões acima para testar o Service Worker', 'info')
+    </script>
+  </body>
+</html>

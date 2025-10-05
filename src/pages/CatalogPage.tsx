@@ -680,7 +680,7 @@ const CatalogPage: React.FC = () => {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <h2 className="text-sm font-medium text-gray-800 dark:text-gray-200">
-                      Promoção
+                      Preço de Parceiro
                     </h2>
                     <Popover>
                       <PopoverTrigger asChild>
@@ -695,10 +695,10 @@ const CatalogPage: React.FC = () => {
                       <PopoverContent className="w-80 p-4">
                         <div className="space-y-2">
                           <h4 className="font-medium text-sm">
-                            Produtos em Promoção
+                            Produtos com Preço de Parceiro
                           </h4>
                           <p className="text-xs text-gray-600 dark:text-gray-400">
-                            Mostra apenas produtos em promoção.
+                            Mostra apenas produtos com preço de parceiro.
                           </p>
                         </div>
                       </PopoverContent>
@@ -727,7 +727,7 @@ const CatalogPage: React.FC = () => {
                     `}
                     onClick={handleTogglePromocao}
                   >
-                    🔥 Promoção
+                    🔥 Preço de Parceiro
                   </Badge>
                 </div>
               </div>

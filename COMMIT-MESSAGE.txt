@@ -1,0 +1,54 @@
+fix: corrige tela branca no primeiro acesso removendo arquivo inexistente do SW
+
+## Problema
+Muitos usuários relataram tela branca ao acessar pela primeira vez,
+com apenas o chat funcionando.
+
+## Causa
+Service Worker tentava cachear arquivo inexistente `/new-icon.png`,
+causando falha na instalação do SW e deixando a aplicação quebrada.
+
+## Correções
+
+### Service Worker (public/sw.js)
+- Remove `/new-icon.png` da lista de cache
+- Atualiza CACHE_VERSION de v2 para v3
+- Adiciona tratamento individual de erros no cache
+- Adiciona skipWaiting() para ativação imediata
+
+### HTML (index.html)
+- Corrige meta tags OG e Twitter para usar `/icon-512x512.png`
+- Remove registro duplicado do Service Worker
+
+### React (src/main.tsx)
+- Adiciona Error Boundary para capturar erros de renderização
+- Adiciona verificação se elemento 'root' existe
+- Adiciona logs de debug
+- Adiciona mensagem de erro amigável
+
+### SW Updates (src/utils/swUpdates.ts)
+- Adiciona logs detalhados para debug
+- Adiciona verificação automática de atualizações (60s)
+- Adiciona listener para controllerchange
+- Melhora tratamento de erros
+
+## Documentação
+- RESUMO-CORRECOES.md: Resumo executivo das correções
+- CORRECOES-TELA-BRANCA.md: Detalhes técnicos completos
+- INSTRUCOES-USUARIOS.md: Guia para usuários finais
+- test-sw.html: Ferramenta de diagnóstico visual
+
+## Breaking Changes
+Nenhum. Usuários existentes com cache antigo precisarão limpar
+o cache ou aguardar atualização automática do SW.
+
+## Testing
+- ✅ Testado em modo incógnito
+- ✅ Sem erros de lint
+- ✅ Service Worker registra corretamente
+- ✅ Cache v3 funcional
+- ✅ Error Boundary captura erros
+- ✅ Logs aparecem no console
+
+Closes #[número-da-issue-se-houver]
+
