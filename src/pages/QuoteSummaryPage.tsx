@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import Layout from '../components/layout/Layout'
@@ -26,7 +25,7 @@ const QuoteSummaryPage: React.FC = () => {
         setIsLoading(false)
       }
     }
-    
+
     loadNextQuoteNumber()
   }, [])
 
@@ -46,8 +45,6 @@ const QuoteSummaryPage: React.FC = () => {
     }
   }
 
-
-
   if (cartItems.length === 0) {
     return null // Will redirect via useEffect
   }
@@ -65,10 +62,19 @@ const QuoteSummaryPage: React.FC = () => {
   return (
     <Layout>
       <div className="container-custom py-8 bg-background">
-        <div className="mb-6">
+        <div className="mb-6 flex items-center justify-between gap-3">
           <Link to="/catalogo" className="text-accent hover:underline">
             ← Voltar ao catálogo
           </Link>
+
+          {/* Botão WhatsApp no topo para facilitar em orçamentos longos */}
+          <Button
+            onClick={handleShareWhatsApp}
+            size="sm"
+            className="btn-accent h-8 px-3 text-xs md:h-9 md:px-4 md:text-sm rounded-md"
+          >
+            Enviar via WhatsApp
+          </Button>
         </div>
 
         <div className="mb-6">

@@ -44,6 +44,16 @@ const CatalogPage: React.FC = () => {
   const [availableQualities, setAvailableQualities] = useState<string[]>([])
   const [showPromocaoOnly, setShowPromocaoOnly] = useState<boolean>(false)
 
+  // Detecta se é um dispositivo touch (mobile/tablet)
+  const isTouchDevice = () => {
+    if (typeof window === 'undefined') return false
+    return (
+      'ontouchstart' in window ||
+      (navigator as any).maxTouchPoints > 0 ||
+      (window.matchMedia && window.matchMedia('(pointer: coarse)').matches)
+    )
+  }
+
   const loadProducts = async () => {
     setLoading(true)
     setError(null)
@@ -333,15 +343,24 @@ const CatalogPage: React.FC = () => {
       return
     }
 
-    if (event.ctrlKey) {
-      // Se Ctrl está pressionado, adiciona/remove da seleção múltipla
+    // Em dispositivos touch (mobile/tablet), sempre alterna (multi-seleção por toque)
+    if (isTouchDevice()) {
+      setSelectedBrands((prev) =>
+        prev.includes(brand)
+          ? prev.filter((b) => b !== brand)
+          : [...prev, brand]
+      )
+      return
+    }
+
+    // Desktop: Ctrl/Cmd para multiseleção; clique simples mantém seleção única
+    if (event.ctrlKey || (event as any).metaKey) {
       setSelectedBrands((prev) =>
         prev.includes(brand)
           ? prev.filter((b) => b !== brand)
           : [...prev, brand]
       )
     } else {
-      // Se Ctrl não está pressionado, comportamento normal (toggle único)
       setSelectedBrands((prev) =>
         prev.length === 1 && prev[0] === brand ? [] : [brand]
       )
@@ -355,15 +374,24 @@ const CatalogPage: React.FC = () => {
 
   // Função para selecionar qualidade com suporte a múltipla seleção
   const handleSelectQuality = (quality: string, event: React.MouseEvent) => {
-    if (event.ctrlKey) {
-      // Se Ctrl está pressionado, adiciona/remove da seleção múltipla
+    // Mobile/tablet: alterna sempre (multi-seleção por toque)
+    if (isTouchDevice()) {
+      setSelectedQualities((prev) =>
+        prev.includes(quality)
+          ? prev.filter((q) => q !== quality)
+          : [...prev, quality]
+      )
+      return
+    }
+
+    // Desktop: Ctrl/Cmd para multiseleção; clique simples mantém seleção única
+    if (event.ctrlKey || (event as any).metaKey) {
       setSelectedQualities((prev) =>
         prev.includes(quality)
           ? prev.filter((q) => q !== quality)
           : [...prev, quality]
       )
     } else {
-      // Se Ctrl não está pressionado, comportamento normal (toggle único)
       setSelectedQualities((prev) =>
         prev.length === 1 && prev[0] === quality ? [] : [quality]
       )
@@ -680,7 +708,7 @@ const CatalogPage: React.FC = () => {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <h2 className="text-sm font-medium text-gray-800 dark:text-gray-200">
-                      Preço de Parceiro
+                      Preço
                     </h2>
                     <Popover>
                       <PopoverTrigger asChild>
