@@ -545,218 +545,222 @@ const CatalogPage: React.FC = () => {
         {!loading &&
           !error &&
           (availableBrands.length > 0 || availableQualities.length > 0) && (
-            <div className="flex flex-col gap-6">
-              {/* Filtro de marcas */}
-              {availableBrands.length > 0 && (
-                <div className="flex flex-col gap-3">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <h2 className="text-sm font-medium text-gray-800 dark:text-gray-200">
-                        Marcas
-                      </h2>
+            <div className="bg-gradient-to-br from-slate-50 to-blue-50 dark:from-gray-900 dark:to-gray-800 rounded-2xl p-4 md:p-6 shadow-sm border border-gray-100 dark:border-gray-700 mb-6">
+              <div className="flex flex-col gap-5">
+                {/* Filtro de marcas */}
+                {availableBrands.length > 0 && (
+                  <div className="flex flex-col gap-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <h2 className="text-sm md:text-base font-semibold text-gray-900 dark:text-gray-100">
+                          Marcas
+                        </h2>
+                        {selectedBrands.length > 0 && (
+                          <span className="text-[10px] md:text-xs font-bold text-white bg-gradient-to-r from-blue-600 to-blue-500 px-2 py-0.5 rounded-full shadow-sm">
+                            {selectedBrands.length}
+                          </span>
+                        )}
+                      </div>
                       {selectedBrands.length > 0 && (
-                        <span className="text-xs font-medium text-white bg-blue-500 px-2 py-1 rounded-full">
-                          {selectedBrands.length}
-                        </span>
+                        <button
+                          onClick={handleClearFilter}
+                          className="text-[10px] md:text-xs text-blue-600 hover:text-blue-800 transition-colors duration-200 font-medium dark:text-blue-400 dark:hover:text-blue-300"
+                        >
+                          Limpar
+                        </button>
                       )}
                     </div>
-                    {selectedBrands.length > 0 && (
-                      <button
-                        onClick={handleClearFilter}
-                        className="text-xs text-gray-500 hover:text-gray-800 transition-colors duration-200 underline decoration-dotted dark:text-gray-400 dark:hover:text-gray-200"
-                      >
-                        Limpar seleção
-                      </button>
-                    )}
+                    <div className="flex flex-wrap gap-1.5 md:gap-2">
+                      {sortBrandsByCustomOrder(availableBrands)
+                        .filter((brand) => brand && brand.trim() !== '')
+                        .map((brand) => (
+                          <Badge
+                            key={brand}
+                            variant="outline"
+                            className={`
+                            cursor-pointer 
+                            text-[11px] md:text-xs
+                            py-1.5 md:py-2
+                            px-3 md:px-4
+                            rounded-lg md:rounded-xl
+                            border-2
+                            transition-all
+                            duration-200
+                            font-medium
+                            ${
+                              selectedBrands.includes(brand)
+                                ? 'bg-gradient-to-r from-blue-600 to-blue-500 text-white border-transparent shadow-md hover:shadow-lg scale-105'
+                                : 'bg-white text-gray-700 border-gray-200 hover:border-blue-400 hover:text-blue-700 hover:shadow-sm hover:bg-blue-50 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:hover:border-blue-400 dark:hover:text-blue-400 dark:hover:bg-gray-700'
+                            }
+                          `}
+                            onClick={(e) => handleSelectBrand(brand, e)}
+                          >
+                            {brand}
+                          </Badge>
+                        ))}
+                    </div>
+                    <div className="h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent dark:via-gray-700 mt-1"></div>
                   </div>
-                  <div className="flex flex-wrap gap-2">
-                    {sortBrandsByCustomOrder(availableBrands)
-                      .filter((brand) => brand && brand.trim() !== '')
-                      .map((brand) => (
+                )}
+
+                {/* Filtro de qualidades */}
+                {availableQualities.length > 0 && (
+                  <div className="flex flex-col gap-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-1.5">
+                          <h2 className="text-sm md:text-base font-semibold text-gray-900 dark:text-gray-100">
+                            Qualidade
+                          </h2>
+                          <Popover>
+                            <PopoverTrigger>
+                              <Info className="h-3.5 w-3.5 md:h-4 md:w-4 text-gray-400 hover:text-blue-500 transition-colors cursor-help dark:text-gray-500 dark:hover:text-blue-400" />
+                            </PopoverTrigger>
+                            <PopoverContent className="w-80 p-4 text-sm dark:bg-gray-800 dark:border-gray-700">
+                              <div className="space-y-2">
+                                <p className="font-medium dark:text-gray-200">
+                                  SELECT
+                                </p>
+                                <p className="text-gray-600 dark:text-gray-400">
+                                  Com componentes de alta qualidade, brilho 300
+                                  a 500 lumens, alta resolução HD+/FHD
+                                </p>
+
+                                <p className="font-medium dark:text-gray-200">
+                                  PREMIER
+                                </p>
+                                <p className="text-gray-600 dark:text-gray-400">
+                                  Brilho 300 a 500 lumens, alta resolução
+                                  HD+/FHD, flex e CI igual ao peça genuína
+                                </p>
+
+                                <p className="font-medium dark:text-gray-200">
+                                  PREMIER/SELECT MAX
+                                </p>
+                                <p className="text-gray-600 dark:text-gray-400">
+                                  Brilho chegando 500 lumens, alta resolução
+                                  HD++/FHD, flex e CI igual ao peça genuína. O
+                                  MAX tem maior saturação de cores e brilho mais
+                                  alto.
+                                </p>
+
+                                <p className="font-medium dark:text-gray-200">
+                                  ORI
+                                </p>
+                                <p className="text-gray-600 dark:text-gray-400">
+                                  Original China
+                                </p>
+
+                                <p className="font-medium dark:text-gray-200">
+                                  LCD
+                                </p>
+                                <p className="text-gray-600 dark:text-gray-400">
+                                  Incell
+                                </p>
+                              </div>
+                            </PopoverContent>
+                          </Popover>
+                        </div>
+                        {selectedQualities.length > 0 && (
+                          <span className="text-[10px] md:text-xs font-bold text-white bg-gradient-to-r from-blue-600 to-blue-500 px-2 py-0.5 rounded-full shadow-sm">
+                            {selectedQualities.length}
+                          </span>
+                        )}
+                      </div>
+                      {selectedQualities.length > 0 && (
+                        <button
+                          onClick={handleClearQualityFilter}
+                          className="text-[10px] md:text-xs text-blue-600 hover:text-blue-800 transition-colors duration-200 font-medium dark:text-blue-400 dark:hover:text-blue-300"
+                        >
+                          Limpar
+                        </button>
+                      )}
+                    </div>
+                    <div className="flex flex-wrap gap-1.5 md:gap-2">
+                      {availableQualities.map((quality) => (
                         <Badge
-                          key={brand}
+                          key={quality}
                           variant="outline"
                           className={`
                           cursor-pointer 
-                          text-xs
-                          py-2
-                          px-4
-                          rounded-xl
-                          border-2
-                          transition-all
-                          duration-200
-                          font-medium
-                          ${
-                            selectedBrands.includes(brand)
-                              ? 'bg-gradient-to-r from-blue-600 to-blue-500 text-white border-transparent shadow-md hover:shadow-lg'
-                              : 'bg-background text-gray-600 border-gray-200 hover:border-blue-300 hover:text-blue-600 hover:shadow-sm hover:bg-blue-50 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:hover:border-blue-400 dark:hover:text-blue-400 dark:hover:bg-gray-700'
-                          }
-                        `}
-                          onClick={(e) => handleSelectBrand(brand, e)}
-                        >
-                          {brand}
-                        </Badge>
-                      ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Filtro de qualidades */}
-              {availableQualities.length > 0 && (
-                <div className="flex flex-col gap-3">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <div className="flex items-center gap-2">
-                        <h2 className="text-sm font-medium text-gray-800 dark:text-gray-200">
-                          Qualidade
-                        </h2>
-                        <Popover>
-                          <PopoverTrigger>
-                            <Info className="h-4 w-4 text-gray-400 hover:text-blue-500 transition-colors cursor-help dark:text-gray-500 dark:hover:text-blue-400" />
-                          </PopoverTrigger>
-                          <PopoverContent className="w-80 p-4 text-sm dark:bg-gray-800 dark:border-gray-700">
-                            <div className="space-y-2">
-                              <p className="font-medium dark:text-gray-200">
-                                SELECT
-                              </p>
-                              <p className="text-gray-600 dark:text-gray-400">
-                                Com componentes de alta qualidade, brilho 300 a
-                                500 lumens, alta resolução HD+/FHD
-                              </p>
-
-                              <p className="font-medium dark:text-gray-200">
-                                PREMIER
-                              </p>
-                              <p className="text-gray-600 dark:text-gray-400">
-                                Brilho 300 a 500 lumens, alta resolução HD+/FHD,
-                                flex e CI igual ao peça genuína
-                              </p>
-
-                              <p className="font-medium dark:text-gray-200">
-                                PREMIER/SELECT MAX
-                              </p>
-                              <p className="text-gray-600 dark:text-gray-400">
-                                Brilho chegando 500 lumens, alta resolução
-                                HD++/FHD, flex e CI igual ao peça genuína. O MAX
-                                tem maior saturação de cores e brilho mais alto.
-                              </p>
-
-                              <p className="font-medium dark:text-gray-200">
-                                ORI
-                              </p>
-                              <p className="text-gray-600 dark:text-gray-400">
-                                Original China
-                              </p>
-
-                              <p className="font-medium dark:text-gray-200">
-                                LCD
-                              </p>
-                              <p className="text-gray-600 dark:text-gray-400">
-                                Incell
-                              </p>
-                            </div>
-                          </PopoverContent>
-                        </Popover>
-                      </div>
-                      {selectedQualities.length > 0 && (
-                        <span className="text-xs font-medium text-white bg-blue-500 px-2 py-1 rounded-full">
-                          {selectedQualities.length}
-                        </span>
-                      )}
-                    </div>
-                    {selectedQualities.length > 0 && (
-                      <button
-                        onClick={handleClearQualityFilter}
-                        className="text-xs text-gray-500 hover:text-gray-800 transition-colors duration-200 underline decoration-dotted dark:text-gray-400 dark:hover:text-gray-200"
-                      >
-                        Limpar seleção
-                      </button>
-                    )}
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    {availableQualities.map((quality) => (
-                      <Badge
-                        key={quality}
-                        variant="outline"
-                        className={`
-                          cursor-pointer 
-                          text-xs
-                          py-2
-                          px-4
-                          rounded-xl
+                          text-[11px] md:text-xs
+                          py-1.5 md:py-2
+                          px-3 md:px-4
+                          rounded-lg md:rounded-xl
                           border-2
                           transition-all
                           duration-200
                           font-medium
                           ${
                             selectedQualities.includes(quality)
-                              ? 'bg-gradient-to-r from-blue-600 to-blue-500 text-white border-transparent shadow-md hover:shadow-lg'
-                              : 'bg-background text-gray-600 border-gray-200 hover:border-blue-300 hover:text-blue-600 hover:shadow-sm hover:bg-blue-50 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:hover:border-blue-400 dark:hover:text-blue-400 dark:hover:bg-gray-700'
+                              ? 'bg-gradient-to-r from-blue-600 to-blue-500 text-white border-transparent shadow-md hover:shadow-lg scale-105'
+                              : 'bg-white text-gray-700 border-gray-200 hover:border-blue-400 hover:text-blue-700 hover:shadow-sm hover:bg-blue-50 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:hover:border-blue-400 dark:hover:text-blue-400 dark:hover:bg-gray-700'
                           }
                         `}
-                        onClick={(e) => handleSelectQuality(quality, e)}
-                      >
-                        {quality}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Novo filtro de promoção */}
-              <div className="flex flex-col gap-3">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <h2 className="text-sm font-medium text-gray-800 dark:text-gray-200">
-                      Preço
-                    </h2>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="h-6 w-6 p-0 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300"
+                          onClick={(e) => handleSelectQuality(quality, e)}
                         >
-                          <Info className="h-3 w-3" />
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-80 p-4">
-                        <div className="space-y-2">
-                          <h4 className="font-medium text-sm">
-                            Produtos com Preço de Parceiro
-                          </h4>
-                          <p className="text-xs text-gray-600 dark:text-gray-400">
-                            Mostra apenas produtos com preço de parceiro.
-                          </p>
-                        </div>
-                      </PopoverContent>
-                    </Popover>
+                          {quality}
+                        </Badge>
+                      ))}
+                    </div>
+                    <div className="h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent dark:via-gray-700 mt-1"></div>
                   </div>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  <Badge
-                    variant="outline"
-                    className={`
+                )}
+
+                {/* Novo filtro de promoção */}
+                <div className="flex flex-col gap-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-1.5">
+                      <h2 className="text-sm md:text-base font-semibold text-gray-900 dark:text-gray-100">
+                        Preço
+                      </h2>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-5 w-5 p-0 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300"
+                          >
+                            <Info className="h-3 w-3" />
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-80 p-4">
+                          <div className="space-y-2">
+                            <h4 className="font-medium text-sm">
+                              Produtos com Preço de Parceiro
+                            </h4>
+                            <p className="text-xs text-gray-600 dark:text-gray-400">
+                              Mostra apenas produtos com preço de parceiro.
+                            </p>
+                          </div>
+                        </PopoverContent>
+                      </Popover>
+                    </div>
+                  </div>
+                  <div className="flex flex-wrap gap-1.5 md:gap-2">
+                    <Badge
+                      variant="outline"
+                      className={`
                       cursor-pointer 
-                      text-xs
-                      py-2
-                      px-4
-                      rounded-xl
+                      text-[11px] md:text-xs
+                      py-1.5 md:py-2
+                      px-3 md:px-4
+                      rounded-lg md:rounded-xl
                       border-2
                       transition-all
                       duration-200
                       font-semibold
-                      shadow-sm
                       ${
                         showPromocaoOnly
-                          ? 'bg-blue-600 text-white border-blue-700 shadow-md'
-                          : 'bg-white text-blue-700 border-blue-300 hover:bg-blue-50 hover:text-blue-800 hover:border-blue-400 dark:bg-gray-900 dark:text-blue-300 dark:border-blue-700 dark:hover:bg-gray-800 dark:hover:text-blue-200'
+                          ? 'bg-gradient-to-r from-blue-600 to-blue-500 text-white border-transparent shadow-md hover:shadow-lg scale-105'
+                          : 'bg-white text-blue-700 border-blue-300 hover:bg-blue-50 hover:text-blue-800 hover:border-blue-400 hover:shadow-sm dark:bg-gray-800 dark:text-blue-300 dark:border-blue-700 dark:hover:bg-gray-700 dark:hover:text-blue-200'
                       }
                     `}
-                    onClick={handleTogglePromocao}
-                  >
-                    🔥 Preço de Parceiro
-                  </Badge>
+                      onClick={handleTogglePromocao}
+                    >
+                      🔥 Preço de Parceiro
+                    </Badge>
+                  </div>
                 </div>
               </div>
             </div>

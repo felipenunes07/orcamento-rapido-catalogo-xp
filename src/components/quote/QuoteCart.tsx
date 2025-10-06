@@ -36,7 +36,8 @@ const QuoteCart: React.FC<QuoteCartProps> = ({ cartItems, onClearCart }) => {
       <div
         className={`flex items-start justify-between ${
           isMinimized && isMobile ? 'px-4' : ''
-        }`}
+        } ${isMobile ? 'cursor-pointer' : ''}`}
+        onClick={isMobile ? toggleMinimized : undefined}
       >
         {/* Lado esquerdo: informações sobre o orçamento */}
         <div className="flex items-start flex-1">
@@ -98,19 +99,13 @@ const QuoteCart: React.FC<QuoteCartProps> = ({ cartItems, onClearCart }) => {
                 {formatCurrency(totalValue)}
               </div>
 
-              <button
-                className="md:hidden flex items-center justify-center w-8 h-8 -mr-1 dark:text-gray-300"
-                onClick={toggleMinimized}
-                aria-label={
-                  isMinimized ? 'Expandir orçamento' : 'Minimizar orçamento'
-                }
-              >
+              <div className="md:hidden flex items-center justify-center w-8 h-8 -mr-1 dark:text-gray-300">
                 {isMinimized ? (
                   <ChevronUp className="h-5 w-5" />
                 ) : (
                   <ChevronDown className="h-5 w-5" />
                 )}
-              </button>
+              </div>
             </div>
           </>
         )}
