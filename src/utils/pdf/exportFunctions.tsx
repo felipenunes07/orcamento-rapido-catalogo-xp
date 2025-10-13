@@ -7,7 +7,7 @@ import { formatCurrency } from '../formatters'
 import * as XLSX from 'xlsx'
 import { saveQuote, getShareableQuoteLink } from '../../services/quoteService'
 import { toast } from '@/components/ui/sonner'
-import { fetchProducts } from '../../services/sheetService'
+import { fetchProducts, fetchCodePriceMapping } from '../../services/sheetService'
 
 // Função para baixar o PDF
 export const downloadPdf = async (items: CartItem[]): Promise<void> => {
@@ -35,17 +35,22 @@ export const shareCompleteQuote = async (items: CartItem[]): Promise<void> => {
 
   // Add items to the message
   items.forEach((item) => {
+    const unitPrice = item.product.promocao && item.product.promocao > 0
+      ? Math.min(item.product.valor, item.product.promocao)
+      : item.product.valor
     message += `*${item.product.modelo} ${item.product.cor}* (${item.product.qualidade})\n`;
     message += `${item.quantity}x ${formatCurrency(
-      item.product.valor
-    )} = ${formatCurrency(item.product.valor * item.quantity)}\n\n`;
+      unitPrice
+    )} = ${formatCurrency(unitPrice * item.quantity)}\n\n`;
   });
 
   // Add total
-  const total = items.reduce(
-    (sum, item) => sum + item.product.valor * item.quantity,
-    0
-  );
+  const total = items.reduce((sum, item) => {
+    const unitPrice = item.product.promocao && item.product.promocao > 0
+      ? Math.min(item.product.valor, item.product.promocao)
+      : item.product.valor
+    return sum + unitPrice * item.quantity
+  }, 0);
   message += `*Total: ${formatCurrency(total)}*\n\n`;
 
   // Adicionar link do Excel se disponível
@@ -163,14 +168,19 @@ export const downloadExcel = async (items: CartItem[]): Promise<void> => {
     ['Data', new Date().toLocaleDateString('pt-BR')],
     [''],
     ['Produto', 'Cor', 'Qualidade', 'Valor Unitário', 'Quantidade', 'Subtotal'],
-    ...items.map((item) => [
-      item.product.modelo,
-      item.product.cor,
-      item.product.qualidade,
-      item.product.valor,
-      item.quantity,
-      item.product.valor * item.quantity,
-    ]),
+    ...items.map((item) => {
+      const unitPrice = item.product.promocao && item.product.promocao > 0
+        ? Math.min(item.product.valor, item.product.promocao)
+        : item.product.valor
+      return [
+        item.product.modelo,
+        item.product.cor,
+        item.product.qualidade,
+        unitPrice,
+        item.quantity,
+        unitPrice * item.quantity,
+      ]
+    }),
   ];
   const ws = XLSX.utils.aoa_to_sheet(wsData);
   const wb = XLSX.utils.book_new();
@@ -181,10 +191,77 @@ export const downloadExcel = async (items: CartItem[]): Promise<void> => {
 }
 
 // Função para baixar o catálogo completo em Excel
-export const downloadCatalogExcel = async (): Promise<void> => {
+export const downloadCatalogExcel = async (code?: string): Promise<void> => {
   try {
     // Buscar todos os produtos do catálogo
-    const products = await fetchProducts();
+    let products = await fetchProducts();
+    
+    // Filtrar apenas produtos ativos/estoque
+    const isActive = (ativo?: string) => {
+      const val = (ativo || '').normalize('NFD').replace(/\p{Diacritic}/gu, '').trim().toUpperCase()
+      return val === 'S' || val === 'ULTIMAS UNIDADES' || !ativo
+    }
+    products = products.filter((p) => isActive(p.ativo))
+
+    // Se houver código, aplicar a coluna de preço correspondente
+    const normalizedCode = normalizeKey(code || '')
+    if (normalizedCode) {
+      try {
+        const mapping = await fetchCodePriceMapping()
+        const ref = mapping[normalizedCode]
+        if (ref) {
+          const headers = Object.keys(products[0]?.allColumns || {})
+          const percentMatch = ref.match(/^\s*(-?\d+(?:[\.,]\d+)?)\s*%\s*$/)
+          if (percentMatch) {
+            const percent = parseFloat(percentMatch[1].replace(',', '.'))
+            const byHeader = findHeaderForRef(headers, ref)
+            if (byHeader) {
+              products = products.map((p) => {
+                const cell = (p.allColumns || {})[byHeader] || ''
+                const parsed = normalizeCurrencyToNumber(cell)
+                return { ...p, valor: parsed !== null ? parsed : p.valor }
+              })
+            } else {
+              const priceHeaders = getPriceHeaders(headers)
+              const baseHeader = priceHeaders[0] || findHeaderForRef(headers, 'valor')
+              if (baseHeader) {
+                const factor = 1 - percent / 100
+                products = products.map((p) => {
+                  const baseCell = (p.allColumns || {})[baseHeader] || ''
+                  const baseParsed = normalizeCurrencyToNumber(baseCell)
+                  if (baseParsed === null) return p
+                  const adjusted = Math.max(0, baseParsed * factor)
+                  return { ...p, valor: adjusted }
+                })
+              }
+            }
+          } else {
+            const idx = parseInt(ref, 10)
+            const headersForIdx = getPriceHeaders(headers)
+            if (!Number.isNaN(idx) && headersForIdx.length > 0) {
+              const resolvedIndex = idx >= 0 ? idx : headersForIdx.length + idx
+              const headerToUse = headersForIdx[resolvedIndex] || headersForIdx[0]
+              products = products.map((p) => {
+                const cell = (p.allColumns || {})[headerToUse] || ''
+                const parsed = normalizeCurrencyToNumber(cell)
+                return { ...p, valor: parsed !== null ? parsed : p.valor }
+              })
+            } else {
+              const headerToUse = findHeaderForRef(headers, ref)
+              if (headerToUse) {
+                products = products.map((p) => {
+                  const cell = (p.allColumns || {})[headerToUse] || ''
+                  const parsed = normalizeCurrencyToNumber(cell)
+                  return { ...p, valor: parsed !== null ? parsed : p.valor }
+                })
+              }
+            }
+          }
+        }
+      } catch (e) {
+        console.warn('Falha ao aplicar código no Excel, usando preço base:', e)
+      }
+    }
     
     // Nome do arquivo
     const filename = `catalogo-orcamento-facil-${new Date().toLocaleDateString('pt-BR').replace(/\//g, '-')}.xlsx`;
@@ -195,13 +272,18 @@ export const downloadCatalogExcel = async (): Promise<void> => {
       ['Data de exportação', new Date().toLocaleDateString('pt-BR')],
       [''],
       ['SKU', 'Modelo', 'Cor', 'Qualidade', 'Valor'],
-      ...products.map((product) => [
-        product.sku,
-        product.modelo,
-        product.cor,
-        product.qualidade,
-        product.valor,
-      ]),
+      ...products.map((product) => {
+        const unitPrice = product.promocao && product.promocao > 0
+          ? Math.min(product.valor, product.promocao)
+          : product.valor
+        return [
+          product.sku,
+          product.modelo,
+          product.cor,
+          product.qualidade,
+          unitPrice,
+        ]
+      }),
     ];
     
     // Criar planilha
@@ -231,6 +313,49 @@ export const downloadCatalogExcel = async (): Promise<void> => {
     console.error('Erro ao exportar catálogo:', error);
     toast.error('Erro ao exportar catálogo. Tente novamente.');
   }
+}
+
+// Helpers replicados para processar colunas de preço
+function normalizeKey(value: string): string {
+  return value.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase().trim()
+}
+
+function normalizeHeader(value: string): string {
+  return normalizeKey(value)
+}
+
+function findHeaderForRef(headers: string[], ref: string): string | null {
+  if (!headers || headers.length === 0) return null
+  const nRef = normalizeKey(ref)
+  const exact = headers.find((h) => normalizeHeader(h) === nRef)
+  if (exact) return exact
+  const containsOnValor = headers.find((h) => {
+    const nh = normalizeHeader(h)
+    return nh.includes('valor') && nh.includes(nRef)
+  })
+  if (containsOnValor) return containsOnValor
+  const anyContains = headers.find((h) => normalizeHeader(h).includes(nRef))
+  if (anyContains) return anyContains
+  return null
+}
+
+function getPriceHeaders(headers: string[]): string[] {
+  const normalized = headers.map((h) => ({ h, n: normalizeHeader(h) }))
+  return normalized
+    .filter((x) => x.n.includes('valor') || x.n.includes('preco') || x.n.includes('preço'))
+    .map((x) => x.h)
+}
+
+function normalizeCurrencyToNumber(input: string | undefined | null): number | null {
+  if (!input || typeof input !== 'string') return null
+  const cleaned = input
+    .replace(/R\$/gi, '')
+    .replace(/[\s\u00A0]/g, '')
+    .replace(/[A-Za-z]/g, '')
+    .replace(/\./g, '')
+    .replace(',', '.')
+  const value = parseFloat(cleaned)
+  return Number.isFinite(value) ? value : null
 }
 
 // Função para compartilhar Excel via WhatsApp

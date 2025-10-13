@@ -3,6 +3,7 @@ import { Product } from '../types'
 // Spreadsheet ID from the provided URL
 const SPREADSHEET_ID = '1qAuw2ebWPJmcy_gl4Qf48GfmnSGLZumDfs62fpG2BGA'
 const SHEET_NAME = 'CATÁLOGO'
+const CODE_PRICE_SHEET_NAME = 'CODIGOPREÇO'
 
 // Using a public access approach instead of API key
 export async function fetchProducts(): Promise<Product[]> {
@@ -57,11 +58,17 @@ function parseCSV(csvText: string): Product[] {
   const imagemIndex = headers.findIndex((h) =>
     h.toLowerCase().includes('imagem')
   )
-  const promocaoIndex = headers.findIndex(
-    (h) =>
-      h.toLowerCase().includes('promoção') ||
-      h.toLowerCase().includes('promocao')
-  )
+  // Detecta coluna de promoção/preço de parceiro por vários sinônimos
+  const promocaoIndex = findHeaderIndex(headers, [
+    'promoção',
+    'promocao',
+    'promo',
+    'parceiro',
+    'preço parceiro',
+    'preco parceiro',
+    'preço de parceiro',
+    'preco de parceiro',
+  ])
   const ativoIndex = headers.findIndex((h) => h.toLowerCase().includes('ativo'))
 
   console.log('Índices das colunas:', {
@@ -221,14 +228,20 @@ function parseCSV(csvText: string): Product[] {
       }
     }
 
-    // Processar valor de promoção
+    // Processar valor de promoção (inclui fallback para coluna H quando cabeçalho não bate)
     let promocao: number | undefined = undefined
+    let promoIndexToUse = promocaoIndex
+    // Fallback: se não encontrou por cabeçalho, tenta a coluna H (índice 7)
+    if (promoIndexToUse === -1 && headers.length > 7) {
+      promoIndexToUse = 7
+    }
     if (
-      promocaoIndex >= 0 &&
-      row[promocaoIndex] &&
-      row[promocaoIndex].trim() !== ''
+      promoIndexToUse >= 0 &&
+      row.length > promoIndexToUse &&
+      row[promoIndexToUse] &&
+      row[promoIndexToUse].trim() !== ''
     ) {
-      const promocaoValue = normalizeCurrencyToNumber(row[promocaoIndex])
+      const promocaoValue = normalizeCurrencyToNumber(row[promoIndexToUse])
       if (promocaoValue !== null && promocaoValue > 0) {
         promocao = promocaoValue
       }
@@ -236,6 +249,13 @@ function parseCSV(csvText: string): Product[] {
 
     // Preencher status de exibição
     const ativo = ativoIndex >= 0 ? row[ativoIndex]?.trim() : undefined
+
+    // Montar mapa com todos os valores da linha indexados pelo cabeçalho
+    const allColumns: Record<string, string> = {}
+    for (let c = 0; c < headers.length; c++) {
+      const header = headers[c]
+      allColumns[header] = row[c] ?? ''
+    }
 
     // Create product object
     const product: Product = {
@@ -248,6 +268,7 @@ function parseCSV(csvText: string): Product[] {
       imagem: imagemIndex >= 0 ? row[imagemIndex] || undefined : undefined,
       promocao: promocao, // Adicionar campo de promoção
       ativo: ativo, // Preencher status de exibição
+      allColumns,
     }
 
     // Log específico do produto final para conectores
@@ -277,6 +298,63 @@ function parseCSV(csvText: string): Product[] {
 
   console.log(`Total de produtos válidos: ${products.length}`)
   return products
+}
+
+// Lê a aba CODIGOPREÇO e retorna um mapa: código -> referência de coluna de preço
+export async function fetchCodePriceMapping(): Promise<Record<string, string>> {
+  const requestUrl = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:csv&sheet=${CODE_PRICE_SHEET_NAME}`
+  console.log('Buscando mapeamento de código/preço em:', requestUrl)
+
+  const response = await fetch(requestUrl)
+  if (!response.ok) {
+    throw new Error(
+      `Falha ao buscar CODIGOPREÇO: ${response.status} ${response.statusText}`
+    )
+  }
+
+  const csvText = await response.text()
+  const rows = csvText.split('\n').filter((row) => row.trim() !== '')
+  if (rows.length <= 1) return {}
+
+  const headers = parseCSVRow(rows[0])
+  const indexCodigo = findHeaderIndex(headers, ['codigo', 'código'])
+  const indexColunaPreco = findHeaderIndex(headers, ['coluna preço', 'coluna preco', 'preco', 'preço'])
+
+  if (indexCodigo === -1 || indexColunaPreco === -1) {
+    console.warn('Cabeçalhos de CODIGOPREÇO não encontrados:', headers)
+    return {}
+  }
+
+  const mapping: Record<string, string> = {}
+  for (let i = 1; i < rows.length; i++) {
+    const row = parseCSVRow(rows[i])
+    if (!row || row.length === 0) continue
+    const code = (row[indexCodigo] || '').trim()
+    const priceRef = (row[indexColunaPreco] || '').trim()
+    if (!code || !priceRef) continue
+    mapping[normalizeKey(code)] = priceRef
+  }
+
+  console.log('Total de códigos carregados:', Object.keys(mapping).length)
+  return mapping
+}
+
+// Helpers adicionais usados no mapeamento de códigos
+function normalizeKey(value: string): string {
+  return removeDiacritics(value).toLowerCase().trim()
+}
+
+function findHeaderIndex(headers: string[], candidates: string[]): number {
+  const normalizedCandidates = candidates.map((c) => normalizeKey(c))
+  for (let i = 0; i < headers.length; i++) {
+    const h = normalizeKey(headers[i])
+    if (normalizedCandidates.some((c) => h.includes(c))) return i
+  }
+  return -1
+}
+
+function removeDiacritics(input: string): string {
+  return input.normalize('NFD').replace(/\p{Diacritic}/gu, '')
 }
 
 // Helper function to parse CSV row with proper handling of quoted values

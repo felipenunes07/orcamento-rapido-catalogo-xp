@@ -8,6 +8,8 @@ export interface Product {
   imagem?: string
   promocao?: number // Novo campo para valor promocional
   ativo?: string // Campo para status de exibição do produto
+  // Mapa com todos os valores da linha, indexados pelo cabeçalho da coluna
+  allColumns?: Record<string, string>
 }
 
 export interface CartItem {

@@ -43,10 +43,12 @@ const QuoteSummary: React.FC<QuoteSummaryProps> = ({ items }) => {
 
     return name
   }
-  const subtotal = items.reduce(
-    (sum, item) => sum + item.product.valor * item.quantity,
-    0
-  )
+  const subtotal = items.reduce((sum, item) => {
+    const unitPrice = item.product.promocao && item.product.promocao > 0
+      ? Math.min(item.product.valor, item.product.promocao)
+      : item.product.valor
+    return sum + unitPrice * item.quantity
+  }, 0)
 
   return (
     <div className="bg-background rounded-lg p-4 shadow-sm">
@@ -91,10 +93,18 @@ const QuoteSummary: React.FC<QuoteSummaryProps> = ({ items }) => {
                   {item.quantity}
                 </TableCell>
                 <TableCell className="text-right px-2 py-2 text-sm">
-                  {formatCurrency(item.product.valor)}
+                  {formatCurrency(
+                    item.product.promocao && item.product.promocao > 0
+                      ? Math.min(item.product.valor, item.product.promocao)
+                      : item.product.valor
+                  )}
                 </TableCell>
                 <TableCell className="text-right px-2 py-2 text-sm font-semibold">
-                  {formatCurrency(item.product.valor * item.quantity)}
+                  {formatCurrency(
+                    ((item.product.promocao && item.product.promocao > 0
+                      ? Math.min(item.product.valor, item.product.promocao)
+                      : item.product.valor) * item.quantity)
+                  )}
                 </TableCell>
               </TableRow>
             ))}
@@ -128,10 +138,18 @@ const QuoteSummary: React.FC<QuoteSummaryProps> = ({ items }) => {
                 <TableCell>{item.product.qualidade}</TableCell>
                 <TableCell className="text-right">{item.quantity}</TableCell>
                 <TableCell className="text-right">
-                  {formatCurrency(item.product.valor)}
+                  {formatCurrency(
+                    item.product.promocao && item.product.promocao > 0
+                      ? Math.min(item.product.valor, item.product.promocao)
+                      : item.product.valor
+                  )}
                 </TableCell>
                 <TableCell className="text-right font-semibold">
-                  {formatCurrency(item.product.valor * item.quantity)}
+                  {formatCurrency(
+                    ((item.product.promocao && item.product.promocao > 0
+                      ? Math.min(item.product.valor, item.product.promocao)
+                      : item.product.valor) * item.quantity)
+                  )}
                 </TableCell>
               </TableRow>
             ))}

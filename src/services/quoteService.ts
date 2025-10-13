@@ -67,15 +67,20 @@ async function createAndUploadExcel(quote: QuoteData): Promise<string | null> {
       ['Data', new Date().toLocaleDateString('pt-BR')],
       [''],
       ['SKU', 'Produto', 'Cor', 'Qualidade', 'Valor Unitário', 'Quantidade', 'Subtotal'],
-      ...quote.items.map((item) => [
-        item.product.sku,
-        item.product.modelo,
-        item.product.cor,
-        item.product.qualidade,
-        item.product.valor,
-        item.quantity,
-        item.product.valor * item.quantity,
-      ]),
+      ...quote.items.map((item) => {
+        const unitPrice = item.product.promocao && item.product.promocao > 0
+          ? Math.min(item.product.valor, item.product.promocao)
+          : item.product.valor
+        return [
+          item.product.sku,
+          item.product.modelo,
+          item.product.cor,
+          item.product.qualidade,
+          unitPrice,
+          item.quantity,
+          unitPrice * item.quantity,
+        ]
+      }),
       [''],
       ['Total:', '', '', '', '', '', quote.total],
     ];
@@ -122,10 +127,12 @@ export const saveQuote = async (items: CartItem[]): Promise<QuoteData> => {
     const quoteNumber = await getNextQuoteNumber();
     
     // Calculate total
-    const total = items.reduce(
-      (sum, item) => sum + item.product.valor * item.quantity, 
-      0
-    );
+    const total = items.reduce((sum, item) => {
+      const unitPrice = item.product.promocao && item.product.promocao > 0
+        ? Math.min(item.product.valor, item.product.promocao)
+        : item.product.valor
+      return sum + unitPrice * item.quantity
+    }, 0);
 
     // Create the quote object
     const excelFilename = `orcamento-${quoteNumber}-${new Date().toISOString().split('T')[0]}.xlsx`;
@@ -179,7 +186,12 @@ export const saveQuote = async (items: CartItem[]): Promise<QuoteData> => {
       id: crypto.randomUUID(),
       number: quoteNumber,
       items,
-      total: items.reduce((sum, item) => sum + item.product.valor * item.quantity, 0),
+      total: items.reduce((sum, item) => {
+        const unitPrice = item.product.promocao && item.product.promocao > 0
+          ? Math.min(item.product.valor, item.product.promocao)
+          : item.product.valor
+        return sum + unitPrice * item.quantity
+      }, 0),
       date: new Date().toISOString(),
       excelFilename: `orcamento-${quoteNumber}-${new Date().toISOString().split('T')[0]}.xlsx`
     };

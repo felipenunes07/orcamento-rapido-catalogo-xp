@@ -99,10 +99,15 @@ const ProductGrid: React.FC<ProductGridProps> = ({
             {products.map((product) => {
               const cartItem = getCartItem(product.id)
               const quantity = cartItem?.quantity || 0
-              const priceToUse =
-                product.promocao && product.promocao > 0
-                  ? product.promocao
-                  : product.valor
+              const hasPromo = product.promocao && product.promocao > 0
+              const priceToUse = hasPromo
+                ? Math.min(product.valor, product.promocao as number)
+                : product.valor
+              const otherPrice = hasPromo
+                ? (priceToUse === (product.promocao as number)
+                    ? product.valor
+                    : (product.promocao as number))
+                : null
               const subtotal = priceToUse * quantity
 
               return (
@@ -123,17 +128,19 @@ const ProductGrid: React.FC<ProductGridProps> = ({
                     {product.qualidade}
                   </TableCell>
                   <TableCell className="text-right dark:text-gray-300">
-                    {product.promocao && product.promocao > 0 ? (
+                    {hasPromo ? (
                       <div className="flex flex-col items-end">
-                        <span className="text-sm text-gray-400 line-through">
-                          {formatCurrency(product.valor)}
-                        </span>
+                        {otherPrice !== null && otherPrice > priceToUse ? (
+                          <span className="text-sm text-gray-400 line-through">
+                            {formatCurrency(otherPrice)}
+                          </span>
+                        ) : null}
                         <span className="text-base font-bold text-blue-700 dark:text-blue-400">
-                          {formatCurrency(product.promocao)}
+                          {formatCurrency(priceToUse)}
                         </span>
                       </div>
                     ) : (
-                      <span>{formatCurrency(product.valor)}</span>
+                      <span>{formatCurrency(priceToUse)}</span>
                     )}
                   </TableCell>
                   <TableCell>
@@ -184,10 +191,15 @@ const ProductGrid: React.FC<ProductGridProps> = ({
         {products.map((product) => {
           const cartItem = getCartItem(product.id)
           const quantity = cartItem?.quantity || 0
-          const priceToUse =
-            product.promocao && product.promocao > 0
-              ? product.promocao
-              : product.valor
+          const hasPromo = product.promocao && product.promocao > 0
+          const priceToUse = hasPromo
+            ? Math.min(product.valor, product.promocao as number)
+            : product.valor
+          const otherPrice = hasPromo
+            ? (priceToUse === (product.promocao as number)
+                ? product.valor
+                : (product.promocao as number))
+            : null
           const subtotal = priceToUse * quantity
           const isDocDeCarga = product.modelo
             .toUpperCase()
@@ -231,18 +243,20 @@ const ProductGrid: React.FC<ProductGridProps> = ({
                   </div>
                   <div className="flex items-center gap-1">
                     <span className="text-xs font-medium dark:text-gray-300">
-                      {product.promocao && product.promocao > 0 ? (
+                      {hasPromo ? (
                         <div className="flex flex-col">
-                          <span className="text-xs text-gray-400 line-through">
-                            {formatCurrency(product.valor)}
-                          </span>
+                          {otherPrice !== null && otherPrice > priceToUse ? (
+                            <span className="text-xs text-gray-400 line-through">
+                              {formatCurrency(otherPrice)}
+                            </span>
+                          ) : null}
                           <span className="text-xs font-semibold text-blue-700 dark:text-blue-400">
-                            {formatCurrency(product.promocao)}
+                            {formatCurrency(priceToUse)}
                           </span>
                         </div>
                       ) : (
                         <span className="text-xs font-medium dark:text-gray-300">
-                          {formatCurrency(product.valor)}
+                          {formatCurrency(priceToUse)}
                         </span>
                       )}
                     </span>

@@ -7,10 +7,12 @@ import { styles } from './styles'
 
 // Componente para renderizar o documento PDF do orçamento
 const PdfOrcamento = ({ items, quoteNumber }: { items: CartItem[], quoteNumber: number }) => {
-  const subtotal = items.reduce(
-    (sum, item) => sum + item.product.valor * item.quantity,
-    0
-  )
+  const subtotal = items.reduce((sum, item) => {
+    const unitPrice = item.product.promocao && item.product.promocao > 0
+      ? Math.min(item.product.valor, item.product.promocao)
+      : item.product.valor
+    return sum + unitPrice * item.quantity
+  }, 0)
   const currentDate = new Date().toLocaleDateString('pt-BR')
   
   return (
@@ -33,11 +35,19 @@ const PdfOrcamento = ({ items, quoteNumber }: { items: CartItem[], quoteNumber: 
               <Text style={styles.tableCell}>{item.product.cor}</Text>
               <Text style={styles.tableCell}>{item.product.qualidade}</Text>
               <Text style={styles.tableCell}>
-                {formatCurrency(item.product.valor)}
+                {formatCurrency(
+                  item.product.promocao && item.product.promocao > 0
+                    ? Math.min(item.product.valor, item.product.promocao)
+                    : item.product.valor
+                )}
               </Text>
               <Text style={styles.tableCell}>{item.quantity}</Text>
               <Text style={styles.tableCell}>
-                {formatCurrency(item.product.valor * item.quantity)}
+                {formatCurrency(
+                  ((item.product.promocao && item.product.promocao > 0
+                    ? Math.min(item.product.valor, item.product.promocao)
+                    : item.product.valor) * item.quantity)
+                )}
               </Text>
             </View>
           ))}

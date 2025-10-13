@@ -3,7 +3,7 @@ import Layout from '../components/layout/Layout'
 import ProductGrid from '../components/catalog/ProductGrid'
 import QuoteCart from '../components/quote/QuoteCart'
 import { useCart } from '../context/CartContext'
-import { fetchProducts } from '../services/sheetService'
+import { fetchProducts, fetchCodePriceMapping } from '../services/sheetService'
 import { Product } from '../types'
 import { useToast } from '@/hooks/use-toast'
 import {
@@ -13,6 +13,7 @@ import {
   Info,
   Loader2,
   RefreshCw,
+  KeyRound,
   X,
 } from 'lucide-react'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
@@ -43,6 +44,8 @@ const CatalogPage: React.FC = () => {
   const [selectedQualities, setSelectedQualities] = useState<string[]>([])
   const [availableQualities, setAvailableQualities] = useState<string[]>([])
   const [showPromocaoOnly, setShowPromocaoOnly] = useState<boolean>(false)
+  const [codigo, setCodigo] = useState<string>('')
+  const [codePriceMapping, setCodePriceMapping] = useState<Record<string, string>>({})
 
   // Detecta se é um dispositivo touch (mobile/tablet)
   const isTouchDevice = () => {
@@ -198,6 +201,12 @@ const CatalogPage: React.FC = () => {
 
   useEffect(() => {
     loadProducts()
+    // Carregar mapeamento de códigos ao iniciar
+    fetchCodePriceMapping()
+      .then((mapping) => setCodePriceMapping(mapping))
+      .catch((e) => {
+        console.warn('Falha ao carregar CODIGOPREÇO (continuando com preço base):', e)
+      })
   }, [])
 
   // Efeito para filtrar produtos quando as seleções mudarem
@@ -302,6 +311,87 @@ const CatalogPage: React.FC = () => {
       )
     }
 
+    // Aplicar código de preço, se existir
+    const normalizedCode = normalizeKey(codigo)
+    const ref = normalizedCode ? codePriceMapping[normalizedCode] : undefined
+    if (ref && filtered.length > 0) {
+      const headers = Object.keys(filtered[0].allColumns || {})
+
+      // 1) Referência percentual (ex.: "5%")
+      const percentMatch = ref.match(/^\s*(-?\d+(?:[\.,]\d+)?)\s*%\s*$/)
+      if (percentMatch) {
+        const percent = parseFloat(percentMatch[1].replace(',', '.'))
+
+        // Tentar uma coluna que contenha o percentual no nome (ex.: "Valor 5%")
+        const byHeader = findHeaderForRef(headers, ref)
+        if (byHeader) {
+          filtered = filtered.map((p) => {
+            const cell = (p.allColumns || {})[byHeader] || ''
+            const parsed = normalizeCurrencyToNumber(cell)
+            // Ajusta o valor via código, mas preserva o menor entre código e promoção
+            const codeValue = parsed !== null ? parsed : p.valor
+            const finalValue = p.promocao && p.promocao > 0
+              ? Math.min(codeValue, p.promocao)
+              : codeValue
+            return { ...p, valor: finalValue }
+          })
+        } else {
+          // Fallback: aplica percentual sobre a coluna base de Valor
+          const priceHeaders = getPriceHeaders(headers)
+          const baseHeader = priceHeaders[0] || findHeaderForRef(headers, 'valor')
+          if (baseHeader) {
+            const factor = 1 - percent / 100 // positivo = desconto
+            filtered = filtered.map((p) => {
+              const baseCell = (p.allColumns || {})[baseHeader] || ''
+              const baseParsed = normalizeCurrencyToNumber(baseCell)
+              if (baseParsed === null) return p
+              const codeValue = Math.max(0, baseParsed * factor)
+              const finalValue = p.promocao && p.promocao > 0
+                ? Math.min(codeValue, p.promocao)
+                : codeValue
+              return { ...p, valor: finalValue }
+            })
+          }
+        }
+      } else {
+        // 2) Índice numérico relativo às colunas de preço (0, 1, 2, -1, -2)
+        const idx = parseInt(ref, 10)
+        const priceHeaders = getPriceHeaders(headers)
+        if (!Number.isNaN(idx) && priceHeaders.length > 0) {
+          const resolvedIndex = idx >= 0 ? idx : priceHeaders.length + idx
+          const headerToUse = priceHeaders[resolvedIndex] || priceHeaders[0]
+          filtered = filtered.map((p) => {
+            const cell = (p.allColumns || {})[headerToUse] || ''
+            const parsed = normalizeCurrencyToNumber(cell)
+            return { ...p, valor: parsed !== null ? parsed : p.valor }
+          })
+        } else {
+          // 3) Resolver por nome do cabeçalho (compatibilidade)
+          const headerToUse = findHeaderForRef(headers, ref)
+          if (headerToUse) {
+            filtered = filtered.map((p) => {
+              const cell = (p.allColumns || {})[headerToUse] || ''
+              const parsed = normalizeCurrencyToNumber(cell)
+              const codeValue = parsed !== null ? parsed : p.valor
+              const finalValue = p.promocao && p.promocao > 0
+                ? Math.min(codeValue, p.promocao)
+                : codeValue
+              return { ...p, valor: finalValue }
+            })
+          filtered = filtered.map((p) => {
+            const cell = (p.allColumns || {})[headerToUse] || ''
+            const parsed = normalizeCurrencyToNumber(cell)
+            const codeValue = parsed !== null ? parsed : p.valor
+            const finalValue = p.promocao && p.promocao > 0
+              ? Math.min(codeValue, p.promocao)
+              : codeValue
+            return { ...p, valor: finalValue }
+          })
+          }
+        }
+      }
+    }
+
     setFilteredProducts(filtered)
   }, [
     selectedBrands,
@@ -309,6 +399,8 @@ const CatalogPage: React.FC = () => {
     products,
     searchTerm,
     showPromocaoOnly,
+    codigo,
+    codePriceMapping,
   ])
 
   // Função para tentar novamente com delay se houver muitas tentativas
@@ -334,6 +426,11 @@ const CatalogPage: React.FC = () => {
     } else {
       loadProducts()
     }
+
+    // Recarregar mapeamento de códigos junto com a atualização da tabela
+    fetchCodePriceMapping()
+      .then((mapping) => setCodePriceMapping(mapping))
+      .catch(() => {})
   }
 
   // Função para selecionar marca com suporte a múltipla seleção
@@ -484,6 +581,55 @@ const CatalogPage: React.FC = () => {
     setShowPromocaoOnly(!showPromocaoOnly)
   }
 
+  // Helpers (mantidos aqui para evitar dependência externa)
+  const normalizeKey = (value: string) => deburr(value).toLowerCase().trim()
+  const normalizeHeader = (value: string) => deburr(value).toLowerCase().trim()
+  const normalizeCurrencyToNumber = (
+    input: string | undefined | null
+  ): number | null => {
+    if (!input || typeof input !== 'string') return null
+    const cleaned = input
+      .replace(/R\$/gi, '')
+      .replace(/[\s\u00A0]/g, '')
+      .replace(/[A-Za-z]/g, '')
+      .replace(/\./g, '')
+      .replace(',', '.')
+    const value = parseFloat(cleaned)
+    return Number.isFinite(value) ? value : null
+  }
+
+  const findHeaderForRef = (headers: string[], ref: string): string | null => {
+    if (!headers || headers.length === 0) return null
+    const nRef = normalizeKey(ref)
+
+    // 1) Correspondência exata pelo cabeçalho
+    const exact = headers.find((h) => normalizeHeader(h) === nRef)
+    if (exact) return exact
+
+    // 2) Cabeçalho que contenha 'valor' e o token da referência
+    const containsOnValor = headers.find((h) => {
+      const nh = normalizeHeader(h)
+      return nh.includes('valor') && nh.includes(nRef)
+    })
+    if (containsOnValor) return containsOnValor
+
+    // 3) Qualquer cabeçalho que contenha a referência
+    const anyContains = headers.find((h) => normalizeHeader(h).includes(nRef))
+    if (anyContains) return anyContains
+
+    return null
+  }
+
+  // Retorna a lista de cabeçalhos de preço, na ordem em que aparecem na planilha
+  const getPriceHeaders = (headers: string[]): string[] => {
+    const normalized = headers.map((h) => ({ h, n: normalizeHeader(h) }))
+    // Considera colunas que contenham a palavra "valor" (ou preço) como colunas de preço
+    const price = normalized
+      .filter((x) => x.n.includes('valor') || x.n.includes('preco') || x.n.includes('preço'))
+      .map((x) => x.h)
+    return price
+  }
+
   return (
     <Layout>
       <div className="container-custom py-8 bg-background">
@@ -493,7 +639,7 @@ const CatalogPage: React.FC = () => {
             <Button
               variant="outline"
               size="sm"
-              onClick={() => downloadCatalogExcel()}
+              onClick={() => downloadCatalogExcel(codigo)}
               className="flex items-center gap-1 bg-green-50 hover:bg-green-100 text-green-700 border-green-200 hover:border-green-300"
             >
               <FileSpreadsheet className="h-4 w-4" />
@@ -750,6 +896,7 @@ const CatalogPage: React.FC = () => {
                       transition-all
                       duration-200
                       font-semibold
+                      whitespace-nowrap
                       ${
                         showPromocaoOnly
                           ? 'bg-gradient-to-r from-blue-600 to-blue-500 text-white border-transparent shadow-md hover:shadow-lg scale-105'
@@ -760,6 +907,50 @@ const CatalogPage: React.FC = () => {
                     >
                       🔥 Preço de Parceiro
                     </Badge>
+                    {/* Novo filtro: Código (estilo similar ao badge) */}
+                    <div
+                      className={`
+                        flex items-center gap-1.5 ml-2 min-w-0
+                        text-[10px] md:text-xs
+                        py-0.5 md:py-1
+                        px-2 md:px-2
+                        rounded-lg md:rounded-xl
+                        border-2
+                        transition-all
+                        duration-200
+                        font-medium
+                        ${
+                          codigo.trim()
+                            ? 'bg-white text-gray-900 border-blue-500 ring-1 ring-blue-200 dark:bg-gray-800 dark:text-gray-100 dark:border-blue-400 dark:ring-0'
+                            : 'bg-white text-gray-700 border-blue-300 hover:border-blue-400 dark:bg-gray-800 dark:text-gray-300 dark:border-blue-700'
+                        }
+                      `}
+                    >
+                      <KeyRound className="h-3 w-3 md:h-3.5 md:w-3.5 shrink-0 text-blue-500" />
+                      <input
+                        type="text"
+                        placeholder="Código"
+                        value={codigo}
+                        onChange={(e) => setCodigo(e.target.value)}
+                        className="
+                          h-5 md:h-6 w-20 md:w-28
+                          bg-transparent border-0 p-0 m-0
+                          outline-none ring-0 ring-offset-0 shadow-none
+                          focus:outline-none focus:ring-0 focus:ring-offset-0
+                          placeholder:text-gray-400 placeholder:font-normal
+                          text-current
+                        "
+                      />
+                      {codigo && (
+                        <button
+                          onClick={() => setCodigo('')}
+                          className="opacity-90 hover:opacity-100 transition-colors"
+                          title="Limpar código"
+                        >
+                          <X className="h-4 w-4" />
+                        </button>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
