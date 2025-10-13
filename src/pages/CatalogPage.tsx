@@ -46,6 +46,7 @@ const CatalogPage: React.FC = () => {
   const [showPromocaoOnly, setShowPromocaoOnly] = useState<boolean>(false)
   const [codigo, setCodigo] = useState<string>('')
   const [codePriceMapping, setCodePriceMapping] = useState<Record<string, string>>({})
+  const [lastNotifiedCode, setLastNotifiedCode] = useState<string>('')
 
   // Detecta se é um dispositivo touch (mobile/tablet)
   const isTouchDevice = () => {
@@ -402,6 +403,23 @@ const CatalogPage: React.FC = () => {
     codigo,
     codePriceMapping,
   ])
+
+  // Aviso quando um código válido for inserido e aplicado
+  useEffect(() => {
+    const normalized = normalizeKey(codigo)
+    if (!normalized) {
+      setLastNotifiedCode('')
+      return
+    }
+    const ref = codePriceMapping[normalized]
+    if (ref && lastNotifiedCode !== normalized) {
+      toast({
+        title: 'Código válido✅',
+        description: 'Desconto ativado com sucesso!',
+      })
+      setLastNotifiedCode(normalized)
+    }
+  }, [codigo, codePriceMapping])
 
   // Função para tentar novamente com delay se houver muitas tentativas
   const handleRetry = () => {
