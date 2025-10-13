@@ -8,6 +8,7 @@ interface CartContextType {
   updateQuantity: (product: Product, quantity: number) => void;
   removeFromCart: (productId: string) => void;
   clearCart: () => void;
+  updateProductPrices: (products: Product[]) => void;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -117,6 +118,23 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setCartItems([]);
   };
 
+  const updateProductPrices = (products: Product[]) => {
+    setCartItems(prevItems => {
+      return prevItems.map(item => {
+        // Encontra o produto atualizado na lista de produtos
+        const updatedProduct = products.find(p => p.id === item.product.id)
+        if (updatedProduct) {
+          // Atualiza o produto no carrinho com os novos valores
+          return {
+            ...item,
+            product: updatedProduct
+          }
+        }
+        return item
+      })
+    })
+  };
+
   return (
     <CartContext.Provider
       value={{
@@ -125,6 +143,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         updateQuantity,
         removeFromCart,
         clearCart,
+        updateProductPrices,
       }}
     >
       {children}

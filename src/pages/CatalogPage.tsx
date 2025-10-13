@@ -39,7 +39,7 @@ const CatalogPage: React.FC = () => {
   const [selectedBrands, setSelectedBrands] = useState<string[]>([])
   const [availableBrands, setAvailableBrands] = useState<string[]>([])
   const [searchTerm, setSearchTerm] = useState<string>('')
-  const { cartItems, updateQuantity, clearCart } = useCart()
+  const { cartItems, updateQuantity, clearCart, updateProductPrices } = useCart()
   const { toast } = useToast()
   const [selectedQualities, setSelectedQualities] = useState<string[]>([])
   const [availableQualities, setAvailableQualities] = useState<string[]>([])
@@ -394,6 +394,11 @@ const CatalogPage: React.FC = () => {
     }
 
     setFilteredProducts(filtered)
+    
+    // Atualizar preços dos produtos no carrinho quando código for aplicado
+    if (cartItems.length > 0) {
+      updateProductPrices(filtered)
+    }
   }, [
     selectedBrands,
     selectedQualities,
