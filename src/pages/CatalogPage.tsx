@@ -39,13 +39,16 @@ const CatalogPage: React.FC = () => {
   const [selectedBrands, setSelectedBrands] = useState<string[]>([])
   const [availableBrands, setAvailableBrands] = useState<string[]>([])
   const [searchTerm, setSearchTerm] = useState<string>('')
-  const { cartItems, updateQuantity, clearCart, updateProductPrices } = useCart()
+  const { cartItems, updateQuantity, clearCart, updateProductPrices } =
+    useCart()
   const { toast } = useToast()
   const [selectedQualities, setSelectedQualities] = useState<string[]>([])
   const [availableQualities, setAvailableQualities] = useState<string[]>([])
   const [showPromocaoOnly, setShowPromocaoOnly] = useState<boolean>(false)
   const [codigo, setCodigo] = useState<string>('')
-  const [codePriceMapping, setCodePriceMapping] = useState<Record<string, string>>({})
+  const [codePriceMapping, setCodePriceMapping] = useState<
+    Record<string, string>
+  >({})
   const [lastNotifiedCode, setLastNotifiedCode] = useState<string>('')
 
   // Detecta se é um dispositivo touch (mobile/tablet)
@@ -72,8 +75,18 @@ const CatalogPage: React.FC = () => {
       setProducts(data)
       setFilteredProducts(data)
 
-      // Extrair marcas únicas dos produtos
+      // Extrair marcas únicas apenas dos produtos ativos
       if (data.length > 0) {
+        // Primeiro, filtrar apenas produtos ativos
+        const activeProducts = data.filter((product) => {
+          const ativo = product.ativo
+            ? deburr(product.ativo).trim().toUpperCase()
+            : ''
+          return (
+            ativo === 'S' || ativo === 'ULTIMAS UNIDADES' || !product.ativo // fallback para produtos antigos sem campo
+          )
+        })
+
         // Mapeamento de prefixos para nomes de marcas
         const brandMapping: Record<string, string> = {
           ip: 'iPhone',
@@ -99,8 +112,8 @@ const CatalogPage: React.FC = () => {
           doc: 'DOC DE CARGA',
         }
 
-        // Extrair a marca do modelo com base nos prefixos conhecidos
-        const brands = data.map((product) => {
+        // Extrair a marca do modelo com base nos prefixos conhecidos (apenas produtos ativos)
+        const brands = activeProducts.map((product) => {
           const modelo = product.modelo
 
           // Verificar se o modelo existe e não está vazio
@@ -161,10 +174,10 @@ const CatalogPage: React.FC = () => {
         )
         setAvailableBrands(uniqueBrands)
 
-        // Após carregar produtos, extrair qualidades únicas
+        // Após carregar produtos, extrair qualidades únicas apenas dos produtos ativos
         setAvailableQualities([
           ...new Set(
-            data
+            activeProducts
               .map((p) => (p.qualidade === '-' ? 'LCD' : p.qualidade))
               .filter(Boolean)
           ),
@@ -172,7 +185,7 @@ const CatalogPage: React.FC = () => {
 
         toast({
           title: 'Catálogo carregado',
-          description: `${data.length} produtos encontrados.`,
+          description: `${activeProducts.length} produtos encontrados.`,
         })
       } else {
         setAvailableBrands([])
@@ -206,7 +219,10 @@ const CatalogPage: React.FC = () => {
     fetchCodePriceMapping()
       .then((mapping) => setCodePriceMapping(mapping))
       .catch((e) => {
-        console.warn('Falha ao carregar CODIGOPREÇO (continuando com preço base):', e)
+        console.warn(
+          'Falha ao carregar CODIGOPREÇO (continuando com preço base):',
+          e
+        )
       })
   }, [])
 
@@ -331,15 +347,17 @@ const CatalogPage: React.FC = () => {
             const parsed = normalizeCurrencyToNumber(cell)
             // Ajusta o valor via código, mas preserva o menor entre código e promoção
             const codeValue = parsed !== null ? parsed : p.valor
-            const finalValue = p.promocao && p.promocao > 0
-              ? Math.min(codeValue, p.promocao)
-              : codeValue
+            const finalValue =
+              p.promocao && p.promocao > 0
+                ? Math.min(codeValue, p.promocao)
+                : codeValue
             return { ...p, valor: finalValue }
           })
         } else {
           // Fallback: aplica percentual sobre a coluna base de Valor
           const priceHeaders = getPriceHeaders(headers)
-          const baseHeader = priceHeaders[0] || findHeaderForRef(headers, 'valor')
+          const baseHeader =
+            priceHeaders[0] || findHeaderForRef(headers, 'valor')
           if (baseHeader) {
             const factor = 1 - percent / 100 // positivo = desconto
             filtered = filtered.map((p) => {
@@ -347,9 +365,10 @@ const CatalogPage: React.FC = () => {
               const baseParsed = normalizeCurrencyToNumber(baseCell)
               if (baseParsed === null) return p
               const codeValue = Math.max(0, baseParsed * factor)
-              const finalValue = p.promocao && p.promocao > 0
-                ? Math.min(codeValue, p.promocao)
-                : codeValue
+              const finalValue =
+                p.promocao && p.promocao > 0
+                  ? Math.min(codeValue, p.promocao)
+                  : codeValue
               return { ...p, valor: finalValue }
             })
           }
@@ -374,27 +393,29 @@ const CatalogPage: React.FC = () => {
               const cell = (p.allColumns || {})[headerToUse] || ''
               const parsed = normalizeCurrencyToNumber(cell)
               const codeValue = parsed !== null ? parsed : p.valor
-              const finalValue = p.promocao && p.promocao > 0
-                ? Math.min(codeValue, p.promocao)
-                : codeValue
+              const finalValue =
+                p.promocao && p.promocao > 0
+                  ? Math.min(codeValue, p.promocao)
+                  : codeValue
               return { ...p, valor: finalValue }
             })
-          filtered = filtered.map((p) => {
-            const cell = (p.allColumns || {})[headerToUse] || ''
-            const parsed = normalizeCurrencyToNumber(cell)
-            const codeValue = parsed !== null ? parsed : p.valor
-            const finalValue = p.promocao && p.promocao > 0
-              ? Math.min(codeValue, p.promocao)
-              : codeValue
-            return { ...p, valor: finalValue }
-          })
+            filtered = filtered.map((p) => {
+              const cell = (p.allColumns || {})[headerToUse] || ''
+              const parsed = normalizeCurrencyToNumber(cell)
+              const codeValue = parsed !== null ? parsed : p.valor
+              const finalValue =
+                p.promocao && p.promocao > 0
+                  ? Math.min(codeValue, p.promocao)
+                  : codeValue
+              return { ...p, valor: finalValue }
+            })
           }
         }
       }
     }
 
     setFilteredProducts(filtered)
-    
+
     // Atualizar preços dos produtos no carrinho quando código for aplicado
     if (cartItems.length > 0) {
       updateProductPrices(filtered)
@@ -648,7 +669,12 @@ const CatalogPage: React.FC = () => {
     const normalized = headers.map((h) => ({ h, n: normalizeHeader(h) }))
     // Considera colunas que contenham a palavra "valor" (ou preço) como colunas de preço
     const price = normalized
-      .filter((x) => x.n.includes('valor') || x.n.includes('preco') || x.n.includes('preço'))
+      .filter(
+        (x) =>
+          x.n.includes('valor') ||
+          x.n.includes('preco') ||
+          x.n.includes('preço')
+      )
       .map((x) => x.h)
     return price
   }
