@@ -484,28 +484,10 @@ const CatalogPage: React.FC = () => {
       return
     }
 
-    // Em dispositivos touch (mobile/tablet), sempre alterna (multi-seleção por toque)
-    if (isTouchDevice()) {
-      setSelectedBrands((prev) =>
-        prev.includes(brand)
-          ? prev.filter((b) => b !== brand)
-          : [...prev, brand]
-      )
-      return
-    }
-
-    // Desktop: Ctrl/Cmd para multiseleção; clique simples mantém seleção única
-    if (event.ctrlKey || (event as any).metaKey) {
-      setSelectedBrands((prev) =>
-        prev.includes(brand)
-          ? prev.filter((b) => b !== brand)
-          : [...prev, brand]
-      )
-    } else {
-      setSelectedBrands((prev) =>
-        prev.length === 1 && prev[0] === brand ? [] : [brand]
-      )
-    }
+    // Sempre alterna (multi-seleção) tanto em mobile quanto desktop
+    setSelectedBrands((prev) =>
+      prev.includes(brand) ? prev.filter((b) => b !== brand) : [...prev, brand]
+    )
   }
 
   // Função para limpar filtro de marca
@@ -515,28 +497,12 @@ const CatalogPage: React.FC = () => {
 
   // Função para selecionar qualidade com suporte a múltipla seleção
   const handleSelectQuality = (quality: string, event: React.MouseEvent) => {
-    // Mobile/tablet: alterna sempre (multi-seleção por toque)
-    if (isTouchDevice()) {
-      setSelectedQualities((prev) =>
-        prev.includes(quality)
-          ? prev.filter((q) => q !== quality)
-          : [...prev, quality]
-      )
-      return
-    }
-
-    // Desktop: Ctrl/Cmd para multiseleção; clique simples mantém seleção única
-    if (event.ctrlKey || (event as any).metaKey) {
-      setSelectedQualities((prev) =>
-        prev.includes(quality)
-          ? prev.filter((q) => q !== quality)
-          : [...prev, quality]
-      )
-    } else {
-      setSelectedQualities((prev) =>
-        prev.length === 1 && prev[0] === quality ? [] : [quality]
-      )
-    }
+    // Sempre alterna (multi-seleção) tanto em mobile quanto desktop
+    setSelectedQualities((prev) =>
+      prev.includes(quality)
+        ? prev.filter((q) => q !== quality)
+        : [...prev, quality]
+    )
   }
 
   // Função para limpar filtro de qualidade
