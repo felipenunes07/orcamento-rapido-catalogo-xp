@@ -9,12 +9,20 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { formatCurrency } from '../../utils/formatters'
+import { Badge } from '@/components/ui/badge'
+import { CheckCircle } from 'lucide-react'
 
 interface QuoteSummaryProps {
   items: CartItem[]
+  appliedCode?: string
+  originalTotal?: number
 }
 
-const QuoteSummary: React.FC<QuoteSummaryProps> = ({ items }) => {
+const QuoteSummary: React.FC<QuoteSummaryProps> = ({
+  items,
+  appliedCode,
+  originalTotal,
+}) => {
   const stripQualityFromModel = (modelo: string, qualidade?: string) => {
     if (!modelo) return ''
     let name = modelo.trim()
@@ -44,11 +52,17 @@ const QuoteSummary: React.FC<QuoteSummaryProps> = ({ items }) => {
     return name
   }
   const subtotal = items.reduce((sum, item) => {
-    const unitPrice = item.product.promocao && item.product.promocao > 0
-      ? Math.min(item.product.valor, item.product.promocao)
-      : item.product.valor
+    const unitPrice =
+      item.product.promocao && item.product.promocao > 0
+        ? Math.min(item.product.valor, item.product.promocao)
+        : item.product.valor
     return sum + unitPrice * item.quantity
   }, 0)
+
+  // Calcular desconto se código foi aplicado
+  const discountAmount =
+    originalTotal && originalTotal > subtotal ? originalTotal - subtotal : 0
+  const hasDiscount = discountAmount > 0
 
   return (
     <div className="bg-background rounded-lg p-4 shadow-sm">
@@ -101,9 +115,9 @@ const QuoteSummary: React.FC<QuoteSummaryProps> = ({ items }) => {
                 </TableCell>
                 <TableCell className="text-right px-2 py-2 text-sm font-semibold">
                   {formatCurrency(
-                    ((item.product.promocao && item.product.promocao > 0
+                    (item.product.promocao && item.product.promocao > 0
                       ? Math.min(item.product.valor, item.product.promocao)
-                      : item.product.valor) * item.quantity)
+                      : item.product.valor) * item.quantity
                   )}
                 </TableCell>
               </TableRow>
@@ -146,9 +160,9 @@ const QuoteSummary: React.FC<QuoteSummaryProps> = ({ items }) => {
                 </TableCell>
                 <TableCell className="text-right font-semibold">
                   {formatCurrency(
-                    ((item.product.promocao && item.product.promocao > 0
+                    (item.product.promocao && item.product.promocao > 0
                       ? Math.min(item.product.valor, item.product.promocao)
-                      : item.product.valor) * item.quantity)
+                      : item.product.valor) * item.quantity
                   )}
                 </TableCell>
               </TableRow>
@@ -158,6 +172,19 @@ const QuoteSummary: React.FC<QuoteSummaryProps> = ({ items }) => {
       </div>
 
       <div className="mt-4 text-right">
+        {/* Badge de desconto ativo */}
+        {hasDiscount && appliedCode && (
+          <div className="mb-3 flex justify-end">
+            <Badge
+              variant="outline"
+              className="flex items-center gap-1 bg-green-50 text-green-700 border-green-200 px-2 py-1 text-xs font-medium"
+            >
+              <CheckCircle className="h-3 w-3" />
+              Desconto aplicado: {formatCurrency(discountAmount)}
+            </Badge>
+          </div>
+        )}
+
         <div className="text-lg font-bold">
           Total: {formatCurrency(subtotal)}
         </div>

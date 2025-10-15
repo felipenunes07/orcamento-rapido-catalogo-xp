@@ -6,12 +6,16 @@ import { useCart } from '../context/CartContext'
 import { Button } from '@/components/ui/button'
 import { shareCompleteQuote } from '../utils/pdf/exportFunctions'
 import { getNextQuoteNumber } from '../services/quoteService'
+import { fetchProducts } from '../services/sheetService'
+import { Product } from '../types'
 
 const QuoteSummaryPage: React.FC = () => {
   const { cartItems } = useCart()
   const navigate = useNavigate()
   const [nextQuoteNumber, setNextQuoteNumber] = useState<number | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [originalProducts, setOriginalProducts] = useState<Product[]>([])
+  const [appliedCode, setAppliedCode] = useState<string>('')
 
   // Load next quote number from Supabase
   useEffect(() => {
@@ -29,6 +33,26 @@ const QuoteSummaryPage: React.FC = () => {
     loadNextQuoteNumber()
   }, [])
 
+  // Carregar produtos originais para calcular desconto
+  useEffect(() => {
+    const loadOriginalProducts = async () => {
+      try {
+        const products = await fetchProducts()
+        setOriginalProducts(products)
+
+        // Verificar se há código aplicado no localStorage
+        const savedCode = localStorage.getItem('appliedCode')
+        if (savedCode) {
+          setAppliedCode(savedCode)
+        }
+      } catch (error) {
+        console.error('Error loading original products:', error)
+      }
+    }
+
+    loadOriginalProducts()
+  }, [])
+
   // Redirect to catalog if cart is empty
   useEffect(() => {
     if (cartItems.length === 0) {
@@ -43,6 +67,27 @@ const QuoteSummaryPage: React.FC = () => {
     } catch (error) {
       console.error('Erro ao compartilhar orçamento:', error)
     }
+  }
+
+  // Calcular total original (sem desconto)
+  const calculateOriginalTotal = () => {
+    if (originalProducts.length === 0) return 0
+
+    return cartItems.reduce((sum, item) => {
+      // Encontrar o produto original
+      const originalProduct = originalProducts.find(
+        (p) => p.id === item.product.id
+      )
+      if (!originalProduct) return sum
+
+      // Usar o preço original (sem desconto aplicado)
+      const unitPrice =
+        originalProduct.promocao && originalProduct.promocao > 0
+          ? Math.min(originalProduct.valor, originalProduct.promocao)
+          : originalProduct.valor
+
+      return sum + unitPrice * item.quantity
+    }, 0)
   }
 
   if (cartItems.length === 0) {
@@ -84,7 +129,11 @@ const QuoteSummaryPage: React.FC = () => {
           </p>
         </div>
 
-        <QuoteSummary items={cartItems} />
+        <QuoteSummary
+          items={cartItems}
+          appliedCode={appliedCode}
+          originalTotal={calculateOriginalTotal()}
+        />
 
         <div className="mt-8 flex justify-center">
           <Button onClick={handleShareWhatsApp} className="btn-accent">

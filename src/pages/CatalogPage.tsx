@@ -15,6 +15,7 @@ import {
   RefreshCw,
   KeyRound,
   X,
+  CheckCircle,
 } from 'lucide-react'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
@@ -50,6 +51,7 @@ const CatalogPage: React.FC = () => {
     Record<string, string>
   >({})
   const [lastNotifiedCode, setLastNotifiedCode] = useState<string>('')
+  const [compactView, setCompactView] = useState<boolean>(false)
 
   // Detecta se é um dispositivo touch (mobile/tablet)
   const isTouchDevice = () => {
@@ -224,6 +226,12 @@ const CatalogPage: React.FC = () => {
           e
         )
       })
+
+    // Carregar código aplicado do localStorage se existir
+    const savedCode = localStorage.getItem('appliedCode')
+    if (savedCode) {
+      setCodigo(savedCode)
+    }
   }, [])
 
   // Efeito para filtrar produtos quando as seleções mudarem
@@ -435,6 +443,8 @@ const CatalogPage: React.FC = () => {
     const normalized = normalizeKey(codigo)
     if (!normalized) {
       setLastNotifiedCode('')
+      // Limpar código do localStorage quando código for removido
+      localStorage.removeItem('appliedCode')
       return
     }
     const ref = codePriceMapping[normalized]
@@ -444,6 +454,8 @@ const CatalogPage: React.FC = () => {
         description: 'Desconto ativado com sucesso!',
       })
       setLastNotifiedCode(normalized)
+      // Salvar código aplicado no localStorage
+      localStorage.setItem('appliedCode', codigo)
     }
   }, [codigo, codePriceMapping])
 
@@ -651,6 +663,23 @@ const CatalogPage: React.FC = () => {
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
           <h1 className="text-2xl font-bold">Tabela de Produtos</h1>
           <div className="flex flex-wrap gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setCompactView(!compactView)}
+              className={`hidden md:flex items-center gap-1 ${
+                compactView
+                  ? 'bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-200 hover:border-blue-300'
+                  : ''
+              }`}
+            >
+              <div
+                className={`h-4 w-4 ${
+                  compactView ? 'bg-blue-600' : 'bg-gray-400'
+                } rounded-sm`}
+              ></div>
+              Visualização Compacta
+            </Button>
             <Button
               variant="outline"
               size="sm"
@@ -897,6 +926,17 @@ const CatalogPage: React.FC = () => {
                         </PopoverContent>
                       </Popover>
                     </div>
+                    {/* Badge de Desconto Ativo */}
+                    {codigo.trim() &&
+                      codePriceMapping[normalizeKey(codigo)] && (
+                        <Badge
+                          variant="outline"
+                          className="flex items-center gap-1 bg-green-50 text-green-700 border-green-200 hover:bg-green-100 px-2 py-1 text-xs font-medium"
+                        >
+                          <CheckCircle className="h-3 w-3" />
+                          Desconto Ativo
+                        </Badge>
+                      )}
                   </div>
                   <div className="flex flex-wrap gap-1.5 md:gap-2">
                     <Badge
@@ -946,7 +986,12 @@ const CatalogPage: React.FC = () => {
                         type="text"
                         placeholder="Código"
                         value={codigo}
-                        onChange={(e) => setCodigo(e.target.value)}
+                        onChange={(e) => {
+                          setCodigo(e.target.value)
+                          if (e.target.value === '') {
+                            localStorage.removeItem('appliedCode')
+                          }
+                        }}
                         className="
                           h-5 md:h-6 w-20 md:w-28
                           bg-transparent border-0 p-0 m-0
@@ -958,7 +1003,10 @@ const CatalogPage: React.FC = () => {
                       />
                       {codigo && (
                         <button
-                          onClick={() => setCodigo('')}
+                          onClick={() => {
+                            setCodigo('')
+                            localStorage.removeItem('appliedCode')
+                          }}
                           className="opacity-90 hover:opacity-100 transition-colors"
                           title="Limpar código"
                         >
@@ -1037,6 +1085,7 @@ const CatalogPage: React.FC = () => {
               products={filteredProducts}
               cartItems={cartItems}
               onUpdateQuantity={updateQuantity}
+              compactView={compactView}
             />
           </div>
         )}

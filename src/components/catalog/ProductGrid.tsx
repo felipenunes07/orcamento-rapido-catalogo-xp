@@ -18,12 +18,14 @@ interface ProductGridProps {
   products: Product[]
   cartItems: CartItem[]
   onUpdateQuantity: (product: Product, quantity: number) => void
+  compactView?: boolean
 }
 
 const ProductGrid: React.FC<ProductGridProps> = ({
   products,
   cartItems,
   onUpdateQuantity,
+  compactView = false,
 }) => {
   const getCartItem = (productId: string): CartItem | undefined => {
     return cartItems.find((item) => item.product.id === productId)
@@ -87,12 +89,34 @@ const ProductGrid: React.FC<ProductGridProps> = ({
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-[200px]">Modelo</TableHead>
-              <TableHead className="w-[150px]">Cor</TableHead>
-              <TableHead>Qualidade</TableHead>
-              <TableHead className="text-right">Valor</TableHead>
-              <TableHead className="text-center">Quantidade</TableHead>
-              <TableHead className="text-right">Subtotal</TableHead>
+              <TableHead
+                className={`w-[200px] ${compactView ? 'py-2 text-sm' : ''}`}
+              >
+                Modelo
+              </TableHead>
+              <TableHead
+                className={`w-[150px] ${compactView ? 'py-2 text-sm' : ''}`}
+              >
+                Cor
+              </TableHead>
+              <TableHead className={compactView ? 'py-2 text-sm' : ''}>
+                Qualidade
+              </TableHead>
+              <TableHead
+                className={`text-right ${compactView ? 'py-2 text-sm' : ''}`}
+              >
+                Valor
+              </TableHead>
+              <TableHead
+                className={`text-center ${compactView ? 'py-2 text-sm' : ''}`}
+              >
+                Quantidade
+              </TableHead>
+              <TableHead
+                className={`text-right ${compactView ? 'py-2 text-sm' : ''}`}
+              >
+                Subtotal
+              </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -104,9 +128,9 @@ const ProductGrid: React.FC<ProductGridProps> = ({
                 ? Math.min(product.valor, product.promocao as number)
                 : product.valor
               const otherPrice = hasPromo
-                ? (priceToUse === (product.promocao as number)
-                    ? product.valor
-                    : (product.promocao as number))
+                ? priceToUse === (product.promocao as number)
+                  ? product.valor
+                  : (product.promocao as number)
                 : null
               const subtotal = priceToUse * quantity
 
@@ -115,44 +139,72 @@ const ProductGrid: React.FC<ProductGridProps> = ({
                   key={product.id}
                   className="dark:border-gray-700 relative"
                 >
-                  <TableCell className="font-medium dark:text-gray-100">
+                  <TableCell
+                    className={`font-medium dark:text-gray-100 ${
+                      compactView ? 'py-1 text-sm' : ''
+                    }`}
+                  >
                     {product.modelo}
                     {isUltimasUnidades(product.ativo) && (
                       <UltimasUnidadesBadge />
                     )}
                   </TableCell>
-                  <TableCell className="dark:text-gray-300">
+                  <TableCell
+                    className={`dark:text-gray-300 ${
+                      compactView ? 'py-1 text-sm' : ''
+                    }`}
+                  >
                     {product.cor}
                   </TableCell>
-                  <TableCell className="dark:text-gray-300">
+                  <TableCell
+                    className={`dark:text-gray-300 ${
+                      compactView ? 'py-1 text-sm' : ''
+                    }`}
+                  >
                     {product.qualidade}
                   </TableCell>
-                  <TableCell className="text-right dark:text-gray-300">
+                  <TableCell
+                    className={`text-right dark:text-gray-300 ${
+                      compactView ? 'py-1 text-sm' : ''
+                    }`}
+                  >
                     {hasPromo ? (
                       <div className="flex flex-col items-end">
                         {otherPrice !== null && otherPrice > priceToUse ? (
-                          <span className="text-sm text-gray-400 line-through">
+                          <span
+                            className={`text-gray-400 line-through ${
+                              compactView ? 'text-xs' : 'text-sm'
+                            }`}
+                          >
                             {formatCurrency(otherPrice)}
                           </span>
                         ) : null}
-                        <span className="text-base font-bold text-blue-700 dark:text-blue-400">
+                        <span
+                          className={`font-bold text-blue-700 dark:text-blue-400 ${
+                            compactView ? 'text-sm' : 'text-base'
+                          }`}
+                        >
                           {formatCurrency(priceToUse)}
                         </span>
                       </div>
                     ) : (
-                      <span>{formatCurrency(priceToUse)}</span>
+                      <span className={compactView ? 'text-sm' : ''}>
+                        {formatCurrency(priceToUse)}
+                      </span>
                     )}
                   </TableCell>
-                  <TableCell>
+                  <TableCell className={compactView ? 'py-2' : ''}>
                     <div className="flex items-center justify-center">
                       <Button
                         variant="outline"
                         size="icon"
                         onClick={() => handleDecrement(product)}
                         disabled={quantity <= 0}
-                        className="h-8 w-8 dark:border-gray-600 dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-100"
+                        className={`dark:border-gray-600 dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-100 ${
+                          compactView ? 'h-7 w-7' : 'h-8 w-8'
+                        }`}
                       >
-                        <Minus size={16} />
+                        <Minus size={compactView ? 14 : 16} />
                       </Button>
 
                       <Input
@@ -163,20 +215,30 @@ const ProductGrid: React.FC<ProductGridProps> = ({
                           const newQuantity = parseInt(e.target.value) || 0
                           onUpdateQuantity(product, newQuantity)
                         }}
-                        className="h-8 mx-2 text-center w-16 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100"
+                        className={`text-center dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100 ${
+                          compactView
+                            ? 'h-7 mx-2 w-14 text-sm'
+                            : 'h-8 mx-2 w-16'
+                        }`}
                       />
 
                       <Button
                         variant="outline"
                         size="icon"
                         onClick={() => handleIncrement(product)}
-                        className="h-8 w-8 dark:border-gray-600 dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-100"
+                        className={`dark:border-gray-600 dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-100 ${
+                          compactView ? 'h-7 w-7' : 'h-8 w-8'
+                        }`}
                       >
-                        <Plus size={16} />
+                        <Plus size={compactView ? 14 : 16} />
                       </Button>
                     </div>
                   </TableCell>
-                  <TableCell className="text-right font-semibold dark:text-gray-100">
+                  <TableCell
+                    className={`text-right font-semibold dark:text-gray-100 ${
+                      compactView ? 'py-1 text-sm' : ''
+                    }`}
+                  >
                     {quantity > 0 ? formatCurrency(subtotal) : '-'}
                   </TableCell>
                 </TableRow>
@@ -196,9 +258,9 @@ const ProductGrid: React.FC<ProductGridProps> = ({
             ? Math.min(product.valor, product.promocao as number)
             : product.valor
           const otherPrice = hasPromo
-            ? (priceToUse === (product.promocao as number)
-                ? product.valor
-                : (product.promocao as number))
+            ? priceToUse === (product.promocao as number)
+              ? product.valor
+              : (product.promocao as number)
             : null
           const subtotal = priceToUse * quantity
           const isDocDeCarga = product.modelo

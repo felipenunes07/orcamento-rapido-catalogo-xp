@@ -14,9 +14,10 @@ interface QuoteCartProps {
 const QuoteCart: React.FC<QuoteCartProps> = ({ cartItems, onClearCart }) => {
   const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0)
   const totalValue = cartItems.reduce((sum, item) => {
-    const unitPrice = item.product.promocao && item.product.promocao > 0
-      ? Math.min(item.product.valor, item.product.promocao)
-      : item.product.valor
+    const unitPrice =
+      item.product.promocao && item.product.promocao > 0
+        ? Math.min(item.product.valor, item.product.promocao)
+        : item.product.valor
     return sum + unitPrice * item.quantity
   }, 0)
   const hasItems = cartItems.length > 0 && totalItems > 0
