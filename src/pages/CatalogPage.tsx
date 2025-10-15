@@ -16,6 +16,7 @@ import {
   KeyRound,
   X,
   CheckCircle,
+  Filter,
 } from 'lucide-react'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
@@ -53,6 +54,19 @@ const CatalogPage: React.FC = () => {
   const [lastNotifiedCode, setLastNotifiedCode] = useState<string>('')
   const [compactView, setCompactView] = useState<boolean>(false)
   const [showSelectedOnly, setShowSelectedOnly] = useState<boolean>(false)
+  // Desabilita visualização compacta em telas mobile (mantém "Selecionados")
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const handleResize = () => {
+      const isMobile = window.matchMedia('(max-width: 767px)').matches
+      if (isMobile) {
+        if (compactView) setCompactView(false)
+      }
+    }
+    handleResize()
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [compactView])
 
   // Detecta se é um dispositivo touch (mobile/tablet)
   const isTouchDevice = () => {
@@ -332,7 +346,7 @@ const CatalogPage: React.FC = () => {
     // Filtrar por itens selecionados (>1) se ativo
     if (showSelectedOnly) {
       const selectedIds = new Set(
-        cartItems.filter((ci) => ci.quantity > 1).map((ci) => ci.product.id)
+        cartItems.filter((ci) => ci.quantity > 0).map((ci) => ci.product.id)
       )
       filtered = filtered.filter((p) => selectedIds.has(p.id))
     }
@@ -668,8 +682,8 @@ const CatalogPage: React.FC = () => {
     return price
   }
 
-  // Itens selecionados com quantidade > 1
-  const selectedMoreThanOne = cartItems.filter((ci) => ci.quantity > 1)
+  // Itens selecionados com quantidade > 0
+  const selectedMoreThanOne = cartItems.filter((ci) => ci.quantity > 0)
   const selectedMoreThanOneUnits = selectedMoreThanOne.reduce(
     (sum, ci) => sum + ci.quantity,
     0
@@ -1023,12 +1037,12 @@ const CatalogPage: React.FC = () => {
 
         {/* Botão para selecionar 1 de cada modelo + Visualização Compacta (à direita) */}
         <div className="mt-8 mb-6">
-          <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center justify-between gap-3 md:gap-4">
             <Button
               variant="outline"
-              size="default"
+              size="sm"
               onClick={handleSelectOneOfEachModel}
-              className="flex items-center gap-3 h-12 px-6 text-sm font-medium text-gray-700 bg-background border-2 border-gray-200 hover:bg-gray-50 hover:text-gray-900 hover:border-blue-300 hover:shadow-md transition-all duration-200 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:text-gray-100 dark:hover:border-blue-400"
+              className="flex items-center gap-2 h-10 px-4 text-xs md:h-12 md:px-6 md:text-sm font-medium text-gray-700 bg-background border-2 border-gray-200 hover:bg-gray-50 hover:text-gray-900 hover:border-blue-300 hover:shadow-md transition-all duration-200 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:text-gray-100 dark:hover:border-blue-400"
             >
               <span className="relative flex h-3 w-3">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
@@ -1036,16 +1050,17 @@ const CatalogPage: React.FC = () => {
               </span>
               Selecionar 1 de cada modelo
             </Button>
-            <div className="hidden md:flex items-center gap-2 ml-auto">
+            <div className="flex items-center gap-2 ml-auto">
+              {/* Visualização Compacta - apenas desktop */}
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => setCompactView(!compactView)}
-                className={`${
+                className={`hidden md:flex items-center gap-1 ${
                   compactView
                     ? 'bg-blue-600 hover:bg-blue-700 text-white border-blue-600 hover:border-blue-700'
                     : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-50 hover:text-gray-900 hover:border-gray-400 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:text-gray-100 dark:hover:border-gray-500'
-                } flex items-center gap-1`}
+                }`}
               >
                 <div
                   className={`h-4 w-4 ${
@@ -1054,61 +1069,31 @@ const CatalogPage: React.FC = () => {
                 ></div>
                 Visualização Compacta
               </Button>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className={`flex items-center gap-2 ${
-                      selectedMoreThanOne.length > 0
-                        ? 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50 hover:border-gray-400 dark:bg-gray-800 dark:text-gray-100 dark:border-gray-600'
-                        : 'bg-white text-gray-500 border-gray-300 hover:bg-gray-50 hover:border-gray-400 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600'
-                    }`}
-                  >
-                    Selecionados
-                    <span
-                      className={`px-1.5 py-0.5 text-xs rounded-full ${
-                        selectedMoreThanOne.length > 0
-                          ? 'bg-blue-600 text-white'
-                          : 'bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-200'
-                      }`}
-                    >
-                      {selectedMoreThanOne.length}
-                    </span>
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-96 p-4 text-sm dark:bg-gray-800 dark:border-gray-700">
-                  {selectedMoreThanOne.length === 0 ? (
-                    <div className="text-gray-500 dark:text-gray-400">
-                      Nenhum produto com quantidade maior que 1.
-                    </div>
-                  ) : (
-                    <div className="max-h-72 overflow-auto space-y-2">
-                      {selectedMoreThanOne.map((item) => (
-                        <div
-                          key={item.product.id}
-                          className="flex items-center justify-between border-b border-gray-100 dark:border-gray-700 pb-2"
-                        >
-                          <div className="min-w-0 pr-2">
-                            <div className="font-medium text-gray-900 truncate dark:text-gray-100">
-                              {item.product.modelo}
-                            </div>
-                            <div className="text-xs text-gray-500 dark:text-gray-400 truncate">
-                              {item.product.cor} • {item.product.qualidade}
-                            </div>
-                          </div>
-                          <div className="text-right">
-                            <span className="text-xs text-gray-500 mr-2 dark:text-gray-400">Qtd</span>
-                            <span className="inline-flex items-center justify-center h-6 min-w-[2rem] px-2 rounded-md bg-blue-50 text-blue-700 border border-blue-200 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-800">
-                              {item.quantity}
-                            </span>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </PopoverContent>
-              </Popover>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowSelectedOnly((v) => !v)}
+                className={`flex items-center justify-center gap-1.5 h-10 px-3 text-xs md:h-10 md:px-4 md:text-sm font-medium ${
+                  showSelectedOnly
+                    ? 'bg-blue-600 hover:bg-blue-700 text-white border-blue-600 hover:border-blue-700 shadow-md'
+                    : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50 hover:text-gray-900 hover:border-gray-400 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:text-gray-100 dark:hover:border-gray-500'
+                }`}
+              >
+                <Filter className={`h-3.5 w-3.5 md:h-4 md:w-4 ${showSelectedOnly ? 'text-white' : 'text-blue-600 dark:text-blue-400'}`} />
+                <span className="md:inline hidden">Selecionados</span>
+                <span className="md:hidden inline whitespace-nowrap">Filtrar</span>
+                <span
+                  className={`px-1.5 py-0.5 text-[10px] md:text-xs font-semibold rounded-full min-w-[20px] text-center ${
+                    selectedMoreThanOneUnits > 0
+                      ? showSelectedOnly
+                        ? 'bg-white text-blue-700'
+                        : 'bg-blue-600 text-white'
+                      : 'bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-300'
+                  }`}
+                >
+                  {selectedMoreThanOneUnits}
+                </span>
+              </Button>
             </div>
           </div>
         </div>
