@@ -52,6 +52,7 @@ const CatalogPage: React.FC = () => {
   >({})
   const [lastNotifiedCode, setLastNotifiedCode] = useState<string>('')
   const [compactView, setCompactView] = useState<boolean>(false)
+  const [showSelectedOnly, setShowSelectedOnly] = useState<boolean>(false)
 
   // Detecta se é um dispositivo touch (mobile/tablet)
   const isTouchDevice = () => {
@@ -328,6 +329,14 @@ const CatalogPage: React.FC = () => {
       )
     }
 
+    // Filtrar por itens selecionados (>1) se ativo
+    if (showSelectedOnly) {
+      const selectedIds = new Set(
+        cartItems.filter((ci) => ci.quantity > 1).map((ci) => ci.product.id)
+      )
+      filtered = filtered.filter((p) => selectedIds.has(p.id))
+    }
+
     // Filtrar por termo de busca
     if (searchTerm.trim()) {
       const searchLower = searchTerm.toLowerCase().trim()
@@ -434,6 +443,8 @@ const CatalogPage: React.FC = () => {
     products,
     searchTerm,
     showPromocaoOnly,
+    showSelectedOnly,
+    cartItems,
     codigo,
     codePriceMapping,
   ])
@@ -657,29 +668,19 @@ const CatalogPage: React.FC = () => {
     return price
   }
 
+  // Itens selecionados com quantidade > 1
+  const selectedMoreThanOne = cartItems.filter((ci) => ci.quantity > 1)
+  const selectedMoreThanOneUnits = selectedMoreThanOne.reduce(
+    (sum, ci) => sum + ci.quantity,
+    0
+  )
+
   return (
     <Layout>
       <div className="container-custom py-8 bg-background">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
           <h1 className="text-2xl font-bold">Tabela de Produtos</h1>
           <div className="flex flex-wrap gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setCompactView(!compactView)}
-              className={`hidden md:flex items-center gap-1 ${
-                compactView
-                  ? 'bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-200 hover:border-blue-300'
-                  : ''
-              }`}
-            >
-              <div
-                className={`h-4 w-4 ${
-                  compactView ? 'bg-blue-600' : 'bg-gray-400'
-                } rounded-sm`}
-              ></div>
-              Visualização Compacta
-            </Button>
             <Button
               variant="outline"
               size="sm"
@@ -1020,20 +1021,96 @@ const CatalogPage: React.FC = () => {
             </div>
           )}
 
-        {/* Botão para selecionar 1 de cada modelo */}
+        {/* Botão para selecionar 1 de cada modelo + Visualização Compacta (à direita) */}
         <div className="mt-8 mb-6">
-          <Button
-            variant="outline"
-            size="default"
-            onClick={handleSelectOneOfEachModel}
-            className="flex items-center gap-3 h-12 px-6 text-sm font-medium text-gray-700 bg-background border-2 border-gray-200 hover:bg-gray-50 hover:text-gray-900 hover:border-blue-300 hover:shadow-md transition-all duration-200 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:text-gray-100 dark:hover:border-blue-400"
-          >
-            <span className="relative flex h-3 w-3">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-3 w-3 bg-blue-500"></span>
-            </span>
-            Selecionar 1 de cada modelo
-          </Button>
+          <div className="flex items-center justify-between gap-4">
+            <Button
+              variant="outline"
+              size="default"
+              onClick={handleSelectOneOfEachModel}
+              className="flex items-center gap-3 h-12 px-6 text-sm font-medium text-gray-700 bg-background border-2 border-gray-200 hover:bg-gray-50 hover:text-gray-900 hover:border-blue-300 hover:shadow-md transition-all duration-200 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:text-gray-100 dark:hover:border-blue-400"
+            >
+              <span className="relative flex h-3 w-3">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-3 w-3 bg-blue-500"></span>
+              </span>
+              Selecionar 1 de cada modelo
+            </Button>
+            <div className="hidden md:flex items-center gap-2 ml-auto">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setCompactView(!compactView)}
+                className={`${
+                  compactView
+                    ? 'bg-blue-600 hover:bg-blue-700 text-white border-blue-600 hover:border-blue-700'
+                    : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-50 hover:text-gray-900 hover:border-gray-400 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:text-gray-100 dark:hover:border-gray-500'
+                } flex items-center gap-1`}
+              >
+                <div
+                  className={`h-4 w-4 ${
+                    compactView ? 'bg-blue-400' : 'bg-gray-400'
+                  } rounded-sm`}
+                ></div>
+                Visualização Compacta
+              </Button>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className={`flex items-center gap-2 ${
+                      selectedMoreThanOne.length > 0
+                        ? 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50 hover:border-gray-400 dark:bg-gray-800 dark:text-gray-100 dark:border-gray-600'
+                        : 'bg-white text-gray-500 border-gray-300 hover:bg-gray-50 hover:border-gray-400 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600'
+                    }`}
+                  >
+                    Selecionados
+                    <span
+                      className={`px-1.5 py-0.5 text-xs rounded-full ${
+                        selectedMoreThanOne.length > 0
+                          ? 'bg-blue-600 text-white'
+                          : 'bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-200'
+                      }`}
+                    >
+                      {selectedMoreThanOne.length}
+                    </span>
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-96 p-4 text-sm dark:bg-gray-800 dark:border-gray-700">
+                  {selectedMoreThanOne.length === 0 ? (
+                    <div className="text-gray-500 dark:text-gray-400">
+                      Nenhum produto com quantidade maior que 1.
+                    </div>
+                  ) : (
+                    <div className="max-h-72 overflow-auto space-y-2">
+                      {selectedMoreThanOne.map((item) => (
+                        <div
+                          key={item.product.id}
+                          className="flex items-center justify-between border-b border-gray-100 dark:border-gray-700 pb-2"
+                        >
+                          <div className="min-w-0 pr-2">
+                            <div className="font-medium text-gray-900 truncate dark:text-gray-100">
+                              {item.product.modelo}
+                            </div>
+                            <div className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                              {item.product.cor} • {item.product.qualidade}
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <span className="text-xs text-gray-500 mr-2 dark:text-gray-400">Qtd</span>
+                            <span className="inline-flex items-center justify-center h-6 min-w-[2rem] px-2 rounded-md bg-blue-50 text-blue-700 border border-blue-200 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-800">
+                              {item.quantity}
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </PopoverContent>
+              </Popover>
+            </div>
+          </div>
         </div>
 
         {loading ? (
