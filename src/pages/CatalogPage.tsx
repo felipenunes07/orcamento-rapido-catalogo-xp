@@ -54,6 +54,7 @@ const CatalogPage: React.FC = () => {
   const [lastNotifiedCode, setLastNotifiedCode] = useState<string>('')
   const [compactView, setCompactView] = useState<boolean>(false)
   const [showSelectedOnly, setShowSelectedOnly] = useState<boolean>(false)
+  const [aroFilter, setAroFilter] = useState<string>('')
   // Desabilita visualização compacta em telas mobile (mantém "Selecionados")
   useEffect(() => {
     if (typeof window === 'undefined') return
@@ -337,6 +338,15 @@ const CatalogPage: React.FC = () => {
       })
     }
 
+    // Filtrar por Aro
+    if (aroFilter) {
+      const wantsComAro = aroFilter === 'Com Aro'
+      filtered = filtered.filter((product) => {
+        const hasComAro = product.modelo?.toUpperCase().includes('COM ARO')
+        return wantsComAro ? hasComAro : !hasComAro
+      })
+    }
+
     if (showPromocaoOnly) {
       filtered = filtered.filter(
         (product) => product.promocao && product.promocao > 0
@@ -461,6 +471,7 @@ const CatalogPage: React.FC = () => {
     cartItems,
     codigo,
     codePriceMapping,
+    aroFilter,
   ])
 
   // Aviso quando um código válido for inserido e aplicado
@@ -545,6 +556,11 @@ const CatalogPage: React.FC = () => {
   // Função para limpar filtro de qualidade
   const handleClearQualityFilter = () => {
     setSelectedQualities([])
+  }
+
+  // Função para alternar filtro Aro (permite deselecionar ao clicar novamente)
+  const handleChangeAro = (next: string) => {
+    setAroFilter((prev) => (prev === next ? '' : next))
   }
 
   // Nova função para selecionar 1 de cada modelo
@@ -911,6 +927,89 @@ const CatalogPage: React.FC = () => {
                     <div className="h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent dark:via-gray-700 mt-1"></div>
                   </div>
                 )}
+
+              {/* Filtro de Aro */}
+              <div className="flex flex-col gap-3">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-sm md:text-base font-semibold text-gray-900 dark:text-gray-100">Aro</h2>
+                  {aroFilter && (
+                    <button
+                      onClick={() => setAroFilter('')}
+                      className="text-[10px] md:text-xs text-blue-600 hover:text-blue-800 transition-colors duration-200 font-medium dark:text-blue-400 dark:hover:text-blue-300"
+                    >
+                      Limpar
+                    </button>
+                  )}
+                </div>
+                <div className="flex flex-wrap gap-1.5 md:gap-2">
+                  <Badge
+                    variant="outline"
+                    className={`
+                      cursor-pointer 
+                      text-[11px] md:text-xs
+                      py-1.5 md:py-2
+                      px-3 md:px-4
+                      rounded-lg md:rounded-xl
+                      border-2
+                      transition-all
+                      duration-200
+                      font-medium
+                      ${
+                        aroFilter === ''
+                          ? 'bg-gradient-to-r from-blue-600 to-blue-500 text-white border-transparent shadow-md hover:shadow-lg scale-105'
+                          : 'bg-white text-gray-700 border-gray-200 hover:border-blue-400 hover:text-blue-700 hover:shadow-sm hover:bg-blue-50 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:hover:border-blue-400 dark:hover:text-blue-400 dark:hover:bg-gray-700'
+                      }
+                    `}
+                    onClick={() => handleChangeAro('')}
+                  >
+                    Todos
+                  </Badge>
+                  <Badge
+                    variant="outline"
+                    className={`
+                      cursor-pointer 
+                      text-[11px] md:text-xs
+                      py-1.5 md:py-2
+                      px-3 md:px-4
+                      rounded-lg md:rounded-xl
+                      border-2
+                      transition-all
+                      duration-200
+                      font-medium
+                      ${
+                        aroFilter === 'Com Aro'
+                          ? 'bg-gradient-to-r from-blue-600 to-blue-500 text-white border-transparent shadow-md hover:shadow-lg scale-105'
+                          : 'bg-white text-gray-700 border-gray-200 hover:border-blue-400 hover:text-blue-700 hover:shadow-sm hover:bg-blue-50 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:hover:border-blue-400 dark:hover:text-blue-400 dark:hover:bg-gray-700'
+                      }
+                    `}
+                    onClick={() => handleChangeAro('Com Aro')}
+                  >
+                    Com Aro
+                  </Badge>
+                  <Badge
+                    variant="outline"
+                    className={`
+                      cursor-pointer 
+                      text-[11px] md:text-xs
+                      py-1.5 md:py-2
+                      px-3 md:px-4
+                      rounded-lg md:rounded-xl
+                      border-2
+                      transition-all
+                      duration-200
+                      font-medium
+                      ${
+                        aroFilter === 'Sem Aro'
+                          ? 'bg-gradient-to-r from-blue-600 to-blue-500 text-white border-transparent shadow-md hover:shadow-lg scale-105'
+                          : 'bg-white text-gray-700 border-gray-200 hover:border-blue-400 hover:text-blue-700 hover:shadow-sm hover:bg-blue-50 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:hover:border-blue-400 dark:hover:text-blue-400 dark:hover:bg-gray-700'
+                      }
+                    `}
+                    onClick={() => handleChangeAro('Sem Aro')}
+                  >
+                    Sem Aro
+                  </Badge>
+                </div>
+              </div>
 
                 {/* Novo filtro de promoção */}
                 <div className="flex flex-col gap-3">
