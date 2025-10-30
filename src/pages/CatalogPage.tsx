@@ -1024,6 +1024,7 @@ const CatalogPage: React.FC = () => {
                     Sem Aro
                   </Badge>
                 </div>
+                <div className="h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent dark:via-gray-700 mt-1"></div>
               </div>
 
                 {/* Novo filtro de promoção */}
