@@ -931,7 +931,22 @@ const CatalogPage: React.FC = () => {
               {/* Filtro de Aro */}
               <div className="flex flex-col gap-3">
                 <div className="flex items-center justify-between">
-                  <h2 className="text-sm md:text-base font-semibold text-gray-900 dark:text-gray-100">Aro</h2>
+                  <div className="flex items-center gap-1.5">
+                    <h2 className="text-sm md:text-base font-semibold text-gray-900 dark:text-gray-100">Aro</h2>
+                    <Popover>
+                      <PopoverTrigger>
+                        <Info className="h-3.5 w-3.5 md:h-4 md:w-4 text-gray-400 hover:text-blue-500 transition-colors cursor-help dark:text-gray-500 dark:hover:text-blue-400" />
+                      </PopoverTrigger>
+                      <PopoverContent className="w-80 p-4 text-sm dark:bg-gray-800 dark:border-gray-700">
+                        <div className="space-y-2">
+                          <p className="text-gray-600 dark:text-gray-400">
+                            Selecione se deseja ver peças com ou sem aro.
+                            "Todos" mostra ambos.
+                          </p>
+                        </div>
+                      </PopoverContent>
+                    </Popover>
+                  </div>
                   {aroFilter && (
                     <button
                       onClick={() => setAroFilter('')}
