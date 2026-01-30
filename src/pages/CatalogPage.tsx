@@ -122,6 +122,11 @@ const CatalogPage: React.FC = () => {
           Oppo: 'OPPO',
           oppo: 'OPPO',
           ZF: 'Asus',
+          ZF: 'Asus',
+          HONOR: 'Honor',
+          Honor: 'Honor',
+          HUAWEI: 'Huawei',
+          Huawei: 'Huawei',
           'DOC DE CARGA': 'DOC DE CARGA',
           'Doc de Carga': 'DOC DE CARGA',
           'doc de carga': 'DOC DE CARGA',
@@ -172,6 +177,16 @@ const CatalogPage: React.FC = () => {
             modelo.toUpperCase().startsWith('DOC')
           ) {
             return 'DOC DE CARGA'
+          }
+
+          // Verificação específica para HONOR
+          if (modelo.toUpperCase().startsWith('HONOR')) {
+            return 'Honor'
+          }
+
+          // Verificação específica para HUAWEI
+          if (modelo.toUpperCase().startsWith('HUAWEI')) {
+            return 'Huawei'
           }
 
           // Se não encontrar um prefixo conhecido, usar a primeira palavra como fallback
@@ -279,6 +294,8 @@ const CatalogPage: React.FC = () => {
           Realme: ['REALME'],
           OPPO: ['OPPO', 'Oppo', 'oppo'],
           Asus: ['ZF'],
+          Honor: ['HONOR', 'Honor'],
+          Huawei: ['HUAWEI', 'Huawei'],
           'DOC DE CARGA': [
             'DOC DE CARGA',
             'Doc de Carga',
@@ -312,6 +329,22 @@ const CatalogPage: React.FC = () => {
               selectedBrand === 'DOC DE CARGA' &&
               (product.modelo.toUpperCase().includes('DOC DE CARGA') ||
                 product.modelo.toUpperCase().startsWith('DOC'))
+            ) {
+              return true
+            }
+
+            // Verificação específica para HONOR
+            if (
+              selectedBrand === 'Honor' &&
+              product.modelo.toUpperCase().startsWith('HONOR')
+            ) {
+              return true
+            }
+
+            // Verificação específica para HUAWEI
+            if (
+              selectedBrand === 'Huawei' &&
+              product.modelo.toUpperCase().startsWith('HUAWEI')
             ) {
               return true
             }
@@ -522,7 +555,7 @@ const CatalogPage: React.FC = () => {
     // Recarregar mapeamento de códigos junto com a atualização da tabela
     fetchCodePriceMapping()
       .then((mapping) => setCodePriceMapping(mapping))
-      .catch(() => {})
+      .catch(() => { })
   }
 
   // Função para selecionar marca com suporte a múltipla seleção
@@ -598,9 +631,8 @@ const CatalogPage: React.FC = () => {
 
     toast({
       title: 'Produtos adicionados!',
-      description: `${totalProdutos} produto${
-        totalProdutos > 1 ? 's' : ''
-      } adicionado${totalProdutos > 1 ? 's' : ''}${buscaInfo}`,
+      description: `${totalProdutos} produto${totalProdutos > 1 ? 's' : ''
+        } adicionado${totalProdutos > 1 ? 's' : ''}${buscaInfo}`,
     })
   }
 
@@ -620,6 +652,8 @@ const CatalogPage: React.FC = () => {
       Nokia: 7,
       Infinix: 8,
       Asus: 9,
+      Honor: 10,
+      Huawei: 11,
     }
 
     // Sort brands by the custom order
@@ -808,11 +842,10 @@ const CatalogPage: React.FC = () => {
                             transition-all
                             duration-200
                             font-medium
-                            ${
-                              selectedBrands.includes(brand)
+                            ${selectedBrands.includes(brand)
                                 ? 'bg-gradient-to-r from-blue-600 to-blue-500 text-white border-transparent shadow-md hover:shadow-lg scale-105'
                                 : 'bg-white text-gray-700 border-gray-200 hover:border-blue-400 hover:text-blue-700 hover:shadow-sm hover:bg-blue-50 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:hover:border-blue-400 dark:hover:text-blue-400 dark:hover:bg-gray-700'
-                            }
+                              }
                           `}
                             onClick={(e) => handleSelectBrand(brand, e)}
                           >
@@ -912,11 +945,10 @@ const CatalogPage: React.FC = () => {
                           transition-all
                           duration-200
                           font-medium
-                          ${
-                            selectedQualities.includes(quality)
+                          ${selectedQualities.includes(quality)
                               ? 'bg-gradient-to-r from-blue-600 to-blue-500 text-white border-transparent shadow-md hover:shadow-lg scale-105'
                               : 'bg-white text-gray-700 border-gray-200 hover:border-blue-400 hover:text-blue-700 hover:shadow-sm hover:bg-blue-50 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:hover:border-blue-400 dark:hover:text-blue-400 dark:hover:bg-gray-700'
-                          }
+                            }
                         `}
                           onClick={(e) => handleSelectQuality(quality, e)}
                         >
@@ -928,104 +960,101 @@ const CatalogPage: React.FC = () => {
                   </div>
                 )}
 
-              {/* Filtro de Aro */}
-              <div className="flex flex-col gap-3">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-1.5">
-                    <h2 className="text-sm md:text-base font-semibold text-gray-900 dark:text-gray-100">Aro</h2>
-                    <Popover>
-                      <PopoverTrigger>
-                        <Info className="h-3.5 w-3.5 md:h-4 md:w-4 text-gray-400 hover:text-blue-500 transition-colors cursor-help dark:text-gray-500 dark:hover:text-blue-400" />
-                      </PopoverTrigger>
-                      <PopoverContent className="w-80 p-4 text-sm dark:bg-gray-800 dark:border-gray-700">
-                        <div className="space-y-2">
-                          <p className="text-gray-600 dark:text-gray-400">
-                            Selecione se deseja ver peças com ou sem aro.
-                            "Todos" mostra ambos.
-                          </p>
-                        </div>
-                      </PopoverContent>
-                    </Popover>
+                {/* Filtro de Aro */}
+                <div className="flex flex-col gap-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-1.5">
+                      <h2 className="text-sm md:text-base font-semibold text-gray-900 dark:text-gray-100">Aro</h2>
+                      <Popover>
+                        <PopoverTrigger>
+                          <Info className="h-3.5 w-3.5 md:h-4 md:w-4 text-gray-400 hover:text-blue-500 transition-colors cursor-help dark:text-gray-500 dark:hover:text-blue-400" />
+                        </PopoverTrigger>
+                        <PopoverContent className="w-80 p-4 text-sm dark:bg-gray-800 dark:border-gray-700">
+                          <div className="space-y-2">
+                            <p className="text-gray-600 dark:text-gray-400">
+                              Selecione se deseja ver peças com ou sem aro.
+                              "Todos" mostra ambos.
+                            </p>
+                          </div>
+                        </PopoverContent>
+                      </Popover>
+                    </div>
+                    {aroFilter && (
+                      <button
+                        onClick={() => setAroFilter('')}
+                        className="text-[10px] md:text-xs text-blue-600 hover:text-blue-800 transition-colors duration-200 font-medium dark:text-blue-400 dark:hover:text-blue-300"
+                      >
+                        Limpar
+                      </button>
+                    )}
                   </div>
-                  {aroFilter && (
-                    <button
-                      onClick={() => setAroFilter('')}
-                      className="text-[10px] md:text-xs text-blue-600 hover:text-blue-800 transition-colors duration-200 font-medium dark:text-blue-400 dark:hover:text-blue-300"
+                  <div className="flex flex-wrap gap-1.5 md:gap-2">
+                    <Badge
+                      variant="outline"
+                      className={`
+                      cursor-pointer 
+                      text-[11px] md:text-xs
+                      py-1.5 md:py-2
+                      px-3 md:px-4
+                      rounded-lg md:rounded-xl
+                      border-2
+                      transition-all
+                      duration-200
+                      font-medium
+                      ${aroFilter === ''
+                          ? 'bg-gradient-to-r from-blue-600 to-blue-500 text-white border-transparent shadow-md hover:shadow-lg scale-105'
+                          : 'bg-white text-gray-700 border-gray-200 hover:border-blue-400 hover:text-blue-700 hover:shadow-sm hover:bg-blue-50 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:hover:border-blue-400 dark:hover:text-blue-400 dark:hover:bg-gray-700'
+                        }
+                    `}
+                      onClick={() => handleChangeAro('')}
                     >
-                      Limpar
-                    </button>
-                  )}
+                      Todos
+                    </Badge>
+                    <Badge
+                      variant="outline"
+                      className={`
+                      cursor-pointer 
+                      text-[11px] md:text-xs
+                      py-1.5 md:py-2
+                      px-3 md:px-4
+                      rounded-lg md:rounded-xl
+                      border-2
+                      transition-all
+                      duration-200
+                      font-medium
+                      ${aroFilter === 'Com Aro'
+                          ? 'bg-gradient-to-r from-blue-600 to-blue-500 text-white border-transparent shadow-md hover:shadow-lg scale-105'
+                          : 'bg-white text-gray-700 border-gray-200 hover:border-blue-400 hover:text-blue-700 hover:shadow-sm hover:bg-blue-50 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:hover:border-blue-400 dark:hover:text-blue-400 dark:hover:bg-gray-700'
+                        }
+                    `}
+                      onClick={() => handleChangeAro('Com Aro')}
+                    >
+                      Com Aro
+                    </Badge>
+                    <Badge
+                      variant="outline"
+                      className={`
+                      cursor-pointer 
+                      text-[11px] md:text-xs
+                      py-1.5 md:py-2
+                      px-3 md:px-4
+                      rounded-lg md:rounded-xl
+                      border-2
+                      transition-all
+                      duration-200
+                      font-medium
+                      ${aroFilter === 'Sem Aro'
+                          ? 'bg-gradient-to-r from-blue-600 to-blue-500 text-white border-transparent shadow-md hover:shadow-lg scale-105'
+                          : 'bg-white text-gray-700 border-gray-200 hover:border-blue-400 hover:text-blue-700 hover:shadow-sm hover:bg-blue-50 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:hover:border-blue-400 dark:hover:text-blue-400 dark:hover:bg-gray-700'
+                        }
+                    `}
+                      onClick={() => handleChangeAro('Sem Aro')}
+                    >
+                      Sem Aro
+                    </Badge>
+                  </div>
+                  <div className="h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent dark:via-gray-700 mt-1"></div>
                 </div>
-                <div className="flex flex-wrap gap-1.5 md:gap-2">
-                  <Badge
-                    variant="outline"
-                    className={`
-                      cursor-pointer 
-                      text-[11px] md:text-xs
-                      py-1.5 md:py-2
-                      px-3 md:px-4
-                      rounded-lg md:rounded-xl
-                      border-2
-                      transition-all
-                      duration-200
-                      font-medium
-                      ${
-                        aroFilter === ''
-                          ? 'bg-gradient-to-r from-blue-600 to-blue-500 text-white border-transparent shadow-md hover:shadow-lg scale-105'
-                          : 'bg-white text-gray-700 border-gray-200 hover:border-blue-400 hover:text-blue-700 hover:shadow-sm hover:bg-blue-50 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:hover:border-blue-400 dark:hover:text-blue-400 dark:hover:bg-gray-700'
-                      }
-                    `}
-                    onClick={() => handleChangeAro('')}
-                  >
-                    Todos
-                  </Badge>
-                  <Badge
-                    variant="outline"
-                    className={`
-                      cursor-pointer 
-                      text-[11px] md:text-xs
-                      py-1.5 md:py-2
-                      px-3 md:px-4
-                      rounded-lg md:rounded-xl
-                      border-2
-                      transition-all
-                      duration-200
-                      font-medium
-                      ${
-                        aroFilter === 'Com Aro'
-                          ? 'bg-gradient-to-r from-blue-600 to-blue-500 text-white border-transparent shadow-md hover:shadow-lg scale-105'
-                          : 'bg-white text-gray-700 border-gray-200 hover:border-blue-400 hover:text-blue-700 hover:shadow-sm hover:bg-blue-50 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:hover:border-blue-400 dark:hover:text-blue-400 dark:hover:bg-gray-700'
-                      }
-                    `}
-                    onClick={() => handleChangeAro('Com Aro')}
-                  >
-                    Com Aro
-                  </Badge>
-                  <Badge
-                    variant="outline"
-                    className={`
-                      cursor-pointer 
-                      text-[11px] md:text-xs
-                      py-1.5 md:py-2
-                      px-3 md:px-4
-                      rounded-lg md:rounded-xl
-                      border-2
-                      transition-all
-                      duration-200
-                      font-medium
-                      ${
-                        aroFilter === 'Sem Aro'
-                          ? 'bg-gradient-to-r from-blue-600 to-blue-500 text-white border-transparent shadow-md hover:shadow-lg scale-105'
-                          : 'bg-white text-gray-700 border-gray-200 hover:border-blue-400 hover:text-blue-700 hover:shadow-sm hover:bg-blue-50 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:hover:border-blue-400 dark:hover:text-blue-400 dark:hover:bg-gray-700'
-                      }
-                    `}
-                    onClick={() => handleChangeAro('Sem Aro')}
-                  >
-                    Sem Aro
-                  </Badge>
-                </div>
-                <div className="h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent dark:via-gray-700 mt-1"></div>
-              </div>
 
                 {/* Novo filtro de promoção */}
                 <div className="flex flex-col gap-3">
@@ -1082,11 +1111,10 @@ const CatalogPage: React.FC = () => {
                       duration-200
                       font-semibold
                       whitespace-nowrap
-                      ${
-                        showPromocaoOnly
+                      ${showPromocaoOnly
                           ? 'bg-gradient-to-r from-blue-600 to-blue-500 text-white border-transparent shadow-md hover:shadow-lg scale-105'
                           : 'bg-white text-blue-700 border-blue-300 hover:bg-blue-50 hover:text-blue-800 hover:border-blue-400 hover:shadow-sm dark:bg-gray-800 dark:text-blue-300 dark:border-blue-700 dark:hover:bg-gray-700 dark:hover:text-blue-200'
-                      }
+                        }
                     `}
                       onClick={handleTogglePromocao}
                     >
@@ -1104,10 +1132,9 @@ const CatalogPage: React.FC = () => {
                         transition-all
                         duration-200
                         font-medium
-                        ${
-                          codigo.trim()
-                            ? 'bg-white text-gray-900 border-blue-500 ring-1 ring-blue-200 dark:bg-gray-800 dark:text-gray-100 dark:border-blue-400 dark:ring-0'
-                            : 'bg-white text-gray-700 border-blue-300 hover:border-blue-400 dark:bg-gray-800 dark:text-gray-300 dark:border-blue-700'
+                        ${codigo.trim()
+                          ? 'bg-white text-gray-900 border-blue-500 ring-1 ring-blue-200 dark:bg-gray-800 dark:text-gray-100 dark:border-blue-400 dark:ring-0'
+                          : 'bg-white text-gray-700 border-blue-300 hover:border-blue-400 dark:bg-gray-800 dark:text-gray-300 dark:border-blue-700'
                         }
                       `}
                     >
@@ -1171,16 +1198,14 @@ const CatalogPage: React.FC = () => {
                 variant="outline"
                 size="sm"
                 onClick={() => setCompactView(!compactView)}
-                className={`hidden md:flex items-center gap-1 ${
-                  compactView
-                    ? 'bg-blue-600 hover:bg-blue-700 text-white border-blue-600 hover:border-blue-700'
-                    : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-50 hover:text-gray-900 hover:border-gray-400 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:text-gray-100 dark:hover:border-gray-500'
-                }`}
+                className={`hidden md:flex items-center gap-1 ${compactView
+                  ? 'bg-blue-600 hover:bg-blue-700 text-white border-blue-600 hover:border-blue-700'
+                  : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-50 hover:text-gray-900 hover:border-gray-400 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:text-gray-100 dark:hover:border-gray-500'
+                  }`}
               >
                 <div
-                  className={`h-4 w-4 ${
-                    compactView ? 'bg-blue-400' : 'bg-gray-400'
-                  } rounded-sm`}
+                  className={`h-4 w-4 ${compactView ? 'bg-blue-400' : 'bg-gray-400'
+                    } rounded-sm`}
                 ></div>
                 Visualização Compacta
               </Button>
@@ -1188,23 +1213,21 @@ const CatalogPage: React.FC = () => {
                 variant="outline"
                 size="sm"
                 onClick={() => setShowSelectedOnly((v) => !v)}
-                className={`flex items-center justify-center gap-1.5 h-10 px-3 text-xs md:h-10 md:px-4 md:text-sm font-medium ${
-                  showSelectedOnly
-                    ? 'bg-blue-600 hover:bg-blue-700 text-white border-blue-600 hover:border-blue-700 shadow-md'
-                    : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50 hover:text-gray-900 hover:border-gray-400 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:text-gray-100 dark:hover:border-gray-500'
-                }`}
+                className={`flex items-center justify-center gap-1.5 h-10 px-3 text-xs md:h-10 md:px-4 md:text-sm font-medium ${showSelectedOnly
+                  ? 'bg-blue-600 hover:bg-blue-700 text-white border-blue-600 hover:border-blue-700 shadow-md'
+                  : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50 hover:text-gray-900 hover:border-gray-400 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:text-gray-100 dark:hover:border-gray-500'
+                  }`}
               >
                 <Filter className={`h-3.5 w-3.5 md:h-4 md:w-4 ${showSelectedOnly ? 'text-white' : 'text-blue-600 dark:text-blue-400'}`} />
                 <span className="md:inline hidden">Selecionados</span>
                 <span className="md:hidden inline whitespace-nowrap">Filtrar</span>
                 <span
-                  className={`px-1.5 py-0.5 text-[10px] md:text-xs font-semibold rounded-full min-w-[20px] text-center ${
-                    selectedMoreThanOneUnits > 0
-                      ? showSelectedOnly
-                        ? 'bg-white text-blue-700'
-                        : 'bg-blue-600 text-white'
-                      : 'bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-300'
-                  }`}
+                  className={`px-1.5 py-0.5 text-[10px] md:text-xs font-semibold rounded-full min-w-[20px] text-center ${selectedMoreThanOneUnits > 0
+                    ? showSelectedOnly
+                      ? 'bg-white text-blue-700'
+                      : 'bg-blue-600 text-white'
+                    : 'bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-300'
+                    }`}
                 >
                   {selectedMoreThanOneUnits}
                 </span>
