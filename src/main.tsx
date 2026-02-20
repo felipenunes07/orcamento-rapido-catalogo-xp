@@ -3,6 +3,11 @@ import { createRoot } from 'react-dom/client'
 import App from './App.tsx'
 import './index.css'
 import { registerServiceWorkerWithUpdates } from './utils/swUpdates'
+import { initDataFast } from 'datafast'
+
+initDataFast({
+  websiteId: 'dfid_uJsawYlsQKY0ZSDuamt2e',
+}).catch(console.error);
 
 // Error boundary para capturar erros de renderização
 class ErrorBoundary extends React.Component<
