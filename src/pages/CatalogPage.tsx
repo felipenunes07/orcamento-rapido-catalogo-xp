@@ -47,6 +47,8 @@ const CatalogPage: React.FC = () => {
   const [selectedQualities, setSelectedQualities] = useState<string[]>([])
   const [availableQualities, setAvailableQualities] = useState<string[]>([])
   const [showPromocaoOnly, setShowPromocaoOnly] = useState<boolean>(false)
+  const [showDestaqueOnly, setShowDestaqueOnly] = useState<boolean>(false)
+  const [showOutletOnly, setShowOutletOnly] = useState<boolean>(false)
   const [codigo, setCodigo] = useState<string>('')
   const [codePriceMapping, setCodePriceMapping] = useState<
     Record<string, string>
@@ -386,6 +388,22 @@ const CatalogPage: React.FC = () => {
       )
     }
 
+    if (showDestaqueOnly) {
+      filtered = filtered.filter(
+        (product) =>
+          product.modelo.toUpperCase().includes('[DESTAQUE]') ||
+          (product.qualidade && product.qualidade.toUpperCase().includes('DESTAQUE'))
+      )
+    }
+
+    if (showOutletOnly) {
+      filtered = filtered.filter(
+        (product) =>
+          product.modelo.toUpperCase().includes('[OUTLET]') ||
+          (product.qualidade && product.qualidade.toUpperCase().includes('OUTLET'))
+      )
+    }
+
     // Filtrar por itens selecionados (>1) se ativo
     if (showSelectedOnly) {
       const selectedIds = new Set(
@@ -500,6 +518,8 @@ const CatalogPage: React.FC = () => {
     products,
     searchTerm,
     showPromocaoOnly,
+    showDestaqueOnly,
+    showOutletOnly,
     showSelectedOnly,
     cartItems,
     codigo,
@@ -676,6 +696,14 @@ const CatalogPage: React.FC = () => {
 
   const handleTogglePromocao = () => {
     setShowPromocaoOnly(!showPromocaoOnly)
+  }
+
+  const handleToggleDestaque = () => {
+    setShowDestaqueOnly(!showDestaqueOnly)
+  }
+
+  const handleToggleOutlet = () => {
+    setShowOutletOnly(!showOutletOnly)
   }
 
   // Helpers (mantidos aqui para evitar dependência externa)
@@ -1074,13 +1102,35 @@ const CatalogPage: React.FC = () => {
                           </Button>
                         </PopoverTrigger>
                         <PopoverContent className="w-80 p-4">
-                          <div className="space-y-2">
-                            <h4 className="font-medium text-sm">
-                              Produtos com Preço de Parceiro
-                            </h4>
-                            <p className="text-xs text-gray-600 dark:text-gray-400">
-                              Mostra apenas produtos com preço de parceiro.
-                            </p>
+                          <div className="space-y-4">
+                            <div className="space-y-2">
+                              <h4 className="font-medium text-sm">
+                                Produtos com Preço de Parceiro
+                              </h4>
+                              <p className="text-xs text-gray-600 dark:text-gray-400">
+                                Mostra apenas produtos com preço de parceiro ou em promoção.
+                              </p>
+                            </div>
+
+                            <div className="space-y-2 pt-2 border-t border-gray-100 dark:border-gray-700">
+                              <h4 className="font-medium text-sm text-purple-700 dark:text-purple-400">
+                                O que é Outlet?
+                              </h4>
+                              <div className="text-[11px] text-gray-600 dark:text-gray-400 space-y-2 leading-relaxed">
+                                <p>
+                                  <strong>Recondicionado</strong> significa que o produto não é novo de fábrica, mas também não é usado.
+                                </p>
+                                <p>
+                                  São telas que retornaram por algum motivo (logística, troca, embalagem), passaram por uma nova triagem técnica, foram testadas novamente pela nossa equipe especializada e aprovadas para revenda.
+                                </p>
+                                <p>
+                                  A XP não recoloca esses produtos como "novos" no estoque, porque acreditamos que transparência é respeito ao cliente.
+                                </p>
+                                <p>
+                                  Por isso usamos a classificação RECONDICIONADO, para que o consumidor saiba exatamente o que está comprando.
+                                </p>
+                              </div>
+                            </div>
                           </div>
                         </PopoverContent>
                       </Popover>
@@ -1119,6 +1169,50 @@ const CatalogPage: React.FC = () => {
                       onClick={handleTogglePromocao}
                     >
                       🔥 Preço de Parceiro
+                    </Badge>
+                    <Badge
+                      variant="outline"
+                      className={`
+                      cursor-pointer 
+                      text-[11px] md:text-xs
+                      py-1.5 md:py-2
+                      px-3 md:px-4
+                      rounded-lg md:rounded-xl
+                      border-2
+                      transition-all
+                      duration-200
+                      font-semibold
+                      whitespace-nowrap
+                      ${showDestaqueOnly
+                          ? 'bg-gradient-to-r from-amber-500 to-amber-400 text-white border-transparent shadow-md hover:shadow-lg scale-105'
+                          : 'bg-white text-amber-600 border-amber-300 hover:bg-amber-50 hover:text-amber-700 hover:border-amber-400 hover:shadow-sm dark:bg-gray-800 dark:text-amber-400 dark:border-amber-700 dark:hover:bg-gray-700 dark:hover:text-amber-300'
+                        }
+                    `}
+                      onClick={handleToggleDestaque}
+                    >
+                      ⭐ Destaques
+                    </Badge>
+                    <Badge
+                      variant="outline"
+                      className={`
+                      cursor-pointer 
+                      text-[11px] md:text-xs
+                      py-1.5 md:py-2
+                      px-3 md:px-4
+                      rounded-lg md:rounded-xl
+                      border-2
+                      transition-all
+                      duration-200
+                      font-semibold
+                      whitespace-nowrap
+                      ${showOutletOnly
+                          ? 'bg-gradient-to-r from-purple-600 to-purple-500 text-white border-transparent shadow-md hover:shadow-lg scale-105'
+                          : 'bg-white text-purple-700 border-purple-300 hover:bg-purple-50 hover:text-purple-800 hover:border-purple-400 hover:shadow-sm dark:bg-gray-800 dark:text-purple-400 dark:border-purple-700 dark:hover:bg-gray-700 dark:hover:text-purple-300'
+                        }
+                    `}
+                      onClick={handleToggleOutlet}
+                    >
+                      🏷️ Outlet
                     </Badge>
                     {/* Novo filtro: Código (estilo similar ao badge) */}
                     <div

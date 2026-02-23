@@ -117,8 +117,7 @@ function parseCSV(csvText: string): Product[] {
       console.log(`  - Row completa:`, row)
       console.log(`  - valorIndex: ${valorIndex}`)
       console.log(
-        `  - Valor bruto da coluna: "${
-          valorIndex >= 0 ? row[valorIndex] : 'N/A'
+        `  - Valor bruto da coluna: "${valorIndex >= 0 ? row[valorIndex] : 'N/A'
         }"`
       )
     }
@@ -163,8 +162,7 @@ function parseCSV(csvText: string): Product[] {
 
           const parsedValue = normalizeCurrencyToNumber(rawValue)
           console.log(
-            `DEBUG - Valor parseado via helper: ${parsedValue}, isNaN: ${
-              parsedValue === null
+            `DEBUG - Valor parseado via helper: ${parsedValue}, isNaN: ${parsedValue === null
             }`
           )
 
