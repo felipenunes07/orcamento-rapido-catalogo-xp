@@ -8,6 +8,8 @@ import { shareCompleteQuoteWithSavedQuote } from '../utils/pdf/exportFunctions'
 import { saveQuote } from '../services/quoteService'
 import { fetchProducts } from '../services/sheetService'
 import { Product, QuoteData } from '../types'
+import { useToast } from '@/hooks/use-toast'
+import { CheckCircle } from 'lucide-react'
 
 const QuoteSummaryPage: React.FC = () => {
   const { cartItems } = useCart()
@@ -18,6 +20,7 @@ const QuoteSummaryPage: React.FC = () => {
   const [originalProducts, setOriginalProducts] = useState<Product[]>([])
   const [appliedCode, setAppliedCode] = useState<string>('')
   const hasSaved = useRef(false)
+  const { toast } = useToast()
 
   // Salvar orçamento no Supabase ao entrar na página
   useEffect(() => {
@@ -37,9 +40,32 @@ const QuoteSummaryPage: React.FC = () => {
         const quote = await saveQuote(cartItems)
         console.log('[QuoteSummary] Quote saved successfully:', quote.number, quote.id)
         setSavedQuote(quote)
+        toast({
+          title: (
+            <div className="flex items-center gap-2">
+              <div className="flex items-center justify-center w-6 h-6 rounded-full bg-green-100/50 mr-1 shadow-inner">
+                <CheckCircle className="h-4 w-4 text-green-600" />
+              </div>
+              <span className="text-slate-800 text-base font-semibold tracking-wide drop-shadow-sm">
+                Orçamento Salvo!
+              </span>
+            </div>
+          ),
+          description: (
+            <div className="mt-1 ml-9 text-slate-600 font-medium">
+              Orçamento <span className="text-green-700 font-bold">#{quote.number}</span> foi salvo com sucesso. Agora envie pelo WhatsApp para XP.
+            </div>
+          ),
+          className: "bg-white/40 backdrop-blur-xl border border-white/60 shadow-[0_8px_30px_rgb(0,0,0,0.12)] rounded-xl ring-1 ring-white/50",
+        })
       } catch (error) {
         console.error('[QuoteSummary] Error saving quote:', error)
         hasSaved.current = false
+        toast({
+          title: 'Erro ao salvar orçamento',
+          description: 'Não foi possível salvar o orçamento. Tente novamente.',
+          variant: 'destructive',
+        })
       } finally {
         setIsLoading(false)
       }
