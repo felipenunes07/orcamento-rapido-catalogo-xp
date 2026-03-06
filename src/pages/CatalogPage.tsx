@@ -219,8 +219,22 @@ const CatalogPage: React.FC = () => {
         ])
 
         toast({
-          title: 'Catálogo carregado',
-          description: `${activeProducts.length} produtos encontrados.`,
+          title: (
+            <div className="flex items-center gap-2">
+              <div className="flex items-center justify-center w-6 h-6 rounded-full bg-blue-100/50 mr-1 shadow-inner">
+                <CheckCircle className="h-4 w-4 text-blue-600" />
+              </div>
+              <span className="text-slate-800 text-base font-semibold tracking-wide drop-shadow-sm">
+                Catálogo Carregado
+              </span>
+            </div>
+          ),
+          description: (
+            <div className="mt-1 ml-9 text-slate-600 font-medium">
+              <span className="text-blue-700 font-bold">{activeProducts.length}</span> produtos encontrados e listados com sucesso.
+            </div>
+          ),
+          className: "bg-white/40 backdrop-blur-xl border border-white/60 shadow-[0_8px_30px_rgb(0,0,0,0.12)] rounded-xl ring-1 ring-white/50",
         })
       } else {
         setAvailableBrands([])
