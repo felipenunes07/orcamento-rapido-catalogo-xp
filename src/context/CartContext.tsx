@@ -120,7 +120,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const updateProductPrices = (products: Product[]) => {
     setCartItems(prevItems => {
-      return prevItems.map(item => {
+      const newItems = prevItems.map(item => {
         // Encontra o produto atualizado na lista de produtos
         const updatedProduct = products.find(p => p.id === item.product.id)
         if (updatedProduct) {
@@ -132,6 +132,18 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
         return item
       })
+
+      // Só atualiza o state se algum preço realmente mudou (evita loop infinito)
+      const hasChanges = newItems.some((newItem, index) => {
+        const oldItem = prevItems[index]
+        return (
+          newItem.product.valor !== oldItem.product.valor ||
+          newItem.product.promocao !== oldItem.product.promocao ||
+          newItem.product.qualidade !== oldItem.product.qualidade
+        )
+      })
+
+      return hasChanges ? newItems : prevItems
     })
   };
 

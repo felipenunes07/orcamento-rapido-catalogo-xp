@@ -1,37 +1,52 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import Layout from '../components/layout/Layout'
 import QuoteSummary from '../components/quote/QuoteSummary'
 import { useCart } from '../context/CartContext'
 import { Button } from '@/components/ui/button'
-import { shareCompleteQuote } from '../utils/pdf/exportFunctions'
-import { getNextQuoteNumber } from '../services/quoteService'
+import { shareCompleteQuoteWithSavedQuote } from '../utils/pdf/exportFunctions'
+import { saveQuote } from '../services/quoteService'
 import { fetchProducts } from '../services/sheetService'
-import { Product } from '../types'
+import { Product, QuoteData } from '../types'
 
 const QuoteSummaryPage: React.FC = () => {
   const { cartItems } = useCart()
   const navigate = useNavigate()
-  const [nextQuoteNumber, setNextQuoteNumber] = useState<number | null>(null)
+  const [savedQuote, setSavedQuote] = useState<QuoteData | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [isSending, setIsSending] = useState(false)
   const [originalProducts, setOriginalProducts] = useState<Product[]>([])
   const [appliedCode, setAppliedCode] = useState<string>('')
+  const hasSaved = useRef(false)
 
-  // Load next quote number from Supabase
+  // Salvar orçamento no Supabase ao entrar na página
   useEffect(() => {
-    const loadNextQuoteNumber = async () => {
+    const saveQuoteOnLoad = async () => {
+      console.log('[QuoteSummary] saveQuoteOnLoad called, cartItems:', cartItems.length, 'hasSaved:', hasSaved.current)
+      if (cartItems.length === 0 || hasSaved.current) {
+        console.log('[QuoteSummary] Skipping save - cartItems empty or already saved')
+        if (cartItems.length > 0 && hasSaved.current) {
+          setIsLoading(false)
+        }
+        return
+      }
+
       try {
-        const number = await getNextQuoteNumber()
-        setNextQuoteNumber(number)
+        hasSaved.current = true
+        console.log('[QuoteSummary] Calling saveQuote...')
+        const quote = await saveQuote(cartItems)
+        console.log('[QuoteSummary] Quote saved successfully:', quote.number, quote.id)
+        setSavedQuote(quote)
       } catch (error) {
-        console.error('Error fetching next quote number:', error)
+        console.error('[QuoteSummary] Error saving quote:', error)
+        hasSaved.current = false
       } finally {
         setIsLoading(false)
       }
     }
 
-    loadNextQuoteNumber()
-  }, [])
+    saveQuoteOnLoad()
+  }, [cartItems])
 
   // Carregar produtos originais para calcular desconto
   useEffect(() => {
@@ -61,11 +76,15 @@ const QuoteSummaryPage: React.FC = () => {
   }, [cartItems, navigate])
 
   const handleShareWhatsApp = async () => {
+    if (!savedQuote) return
     try {
-      await shareCompleteQuote(cartItems)
+      setIsSending(true)
+      await shareCompleteQuoteWithSavedQuote(savedQuote, cartItems)
       navigate('/obrigado')
     } catch (error) {
       console.error('Erro ao compartilhar orçamento:', error)
+    } finally {
+      setIsSending(false)
     }
   }
 
@@ -98,7 +117,7 @@ const QuoteSummaryPage: React.FC = () => {
     return (
       <Layout>
         <div className="container-custom py-8 text-center">
-          <p>Carregando...</p>
+          <p>Salvando orçamento...</p>
         </div>
       </Layout>
     )
@@ -116,14 +135,15 @@ const QuoteSummaryPage: React.FC = () => {
           <Button
             onClick={handleShareWhatsApp}
             size="sm"
+            disabled={!savedQuote || isSending}
             className="btn-accent h-8 px-3 text-xs md:h-9 md:px-4 md:text-sm rounded-md"
           >
-            Enviar via WhatsApp
+            {isSending ? 'Enviando...' : 'Enviar via WhatsApp'}
           </Button>
         </div>
 
         <div className="mb-6">
-          <h1 className="text-2xl font-bold">Orçamento #{nextQuoteNumber}</h1>
+          <h1 className="text-2xl font-bold">Orçamento #{savedQuote?.number}</h1>
           <p className="text-muted-foreground">
             Data: {new Date().toLocaleDateString('pt-BR')}
           </p>
@@ -136,8 +156,12 @@ const QuoteSummaryPage: React.FC = () => {
         />
 
         <div className="mt-8 flex justify-center">
-          <Button onClick={handleShareWhatsApp} className="btn-accent">
-            Enviar via WhatsApp
+          <Button
+            onClick={handleShareWhatsApp}
+            disabled={!savedQuote || isSending}
+            className="btn-accent"
+          >
+            {isSending ? 'Enviando...' : 'Enviar via WhatsApp'}
           </Button>
         </div>
       </div>
@@ -146,3 +170,4 @@ const QuoteSummaryPage: React.FC = () => {
 }
 
 export default QuoteSummaryPage
+

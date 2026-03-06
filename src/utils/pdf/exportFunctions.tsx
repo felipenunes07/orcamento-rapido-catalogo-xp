@@ -1,7 +1,7 @@
 
 import React from 'react'
 import { pdf } from '@react-pdf/renderer'
-import { CartItem, Product } from '../../types'
+import { CartItem, Product, QuoteData } from '../../types'
 import PdfOrcamento from './PdfOrcamento'
 import { formatCurrency } from '../formatters'
 import * as XLSX from 'xlsx'
@@ -145,6 +145,119 @@ export const shareCompleteQuote = async (items: CartItem[]): Promise<void> => {
     toast.error('Erro ao abrir WhatsApp. Tente novamente ou use o aplicativo diretamente.');
     
     // Último recurso - mostrar link clicável
+    toast.message(
+      <div>
+        <p>Clique no link abaixo para compartilhar:</p>
+        <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" 
+           style={{color: 'blue', textDecoration: 'underline'}}>
+          Abrir WhatsApp
+        </a>
+      </div>,
+      { duration: 10000 }
+    );
+  }
+}
+
+// Função para compartilhar via WhatsApp usando um orçamento já salvo (sem duplicar no Supabase)
+export const shareCompleteQuoteWithSavedQuote = async (quote: QuoteData, items: CartItem[]): Promise<void> => {
+  let message = `📋 *Orçamento #${quote.number} - Catálogo Orçamento Fácil* 📋\n\n`;
+
+  // Add items to the message
+  items.forEach((item) => {
+    const unitPrice = item.product.promocao && item.product.promocao > 0
+      ? Math.min(item.product.valor, item.product.promocao)
+      : item.product.valor
+    message += `*${item.product.modelo} ${item.product.cor}* (${item.product.qualidade})\n`;
+    message += `${item.quantity}x ${formatCurrency(
+      unitPrice
+    )} = ${formatCurrency(unitPrice * item.quantity)}\n\n`;
+  });
+
+  // Add total
+  const total = items.reduce((sum, item) => {
+    const unitPrice = item.product.promocao && item.product.promocao > 0
+      ? Math.min(item.product.valor, item.product.promocao)
+      : item.product.valor
+    return sum + unitPrice * item.quantity
+  }, 0);
+  message += `*Total: ${formatCurrency(total)}*\n\n`;
+
+  // Adicionar link do Excel se disponível
+  if (quote.excelLink) {
+    message += `\nAcesse o orçamento em Excel através do link:\n${quote.excelLink}\n`;
+  }
+
+  // URL encode the message
+  const encodedMessage = encodeURIComponent(message);
+  
+  // Detectar o navegador e dispositivo
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
+  const isAndroid = /Android/.test(navigator.userAgent);
+  const isMobile = isIOS || isAndroid || /webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  
+  // Criar URL do WhatsApp com base no dispositivo e navegador
+  let whatsappUrl;
+  
+  if (isIOS) {
+    whatsappUrl = `https://wa.me/?text=${encodedMessage}`;
+  } else if (isAndroid) {
+    whatsappUrl = `whatsapp://send?text=${encodedMessage}`;
+  } else if (isMobile) {
+    whatsappUrl = `whatsapp://send?text=${encodedMessage}`;
+  } else {
+    whatsappUrl = `https://web.whatsapp.com/send?text=${encodedMessage}`;
+  }
+
+  // Tentar abrir o WhatsApp - Versão melhorada para PWA
+  try {
+    if (navigator.share && isMobile) {
+      try {
+        await navigator.share({
+          title: `Orçamento #${quote.number} - Catálogo Orçamento Fácil`,
+          text: message
+        });
+        toast.success(`Orçamento #${quote.number} compartilhado`);
+        return;
+      } catch (shareError) {
+        console.log('Share API falhou, usando método alternativo', shareError);
+      }
+    }
+    
+    if (isAndroid && window.matchMedia('(display-mode: standalone)').matches) {
+      const intentUrl = `intent://send?text=${encodedMessage}#Intent;package=com.whatsapp;scheme=whatsapp;end`;
+      window.location.href = intentUrl;
+      toast.success(`Orçamento #${quote.number} compartilhado`);
+    }
+    else if (isIOS) {
+      const newWindow = window.open(whatsappUrl, '_system');
+      if (!newWindow) {
+        window.location.href = whatsappUrl;
+      }
+      toast.success(`Orçamento #${quote.number} compartilhado`);
+    } 
+    else {
+      const newWindow = window.open(whatsappUrl, '_blank');
+      
+      if (!newWindow || newWindow.closed || typeof newWindow.closed === 'undefined') {
+        toast.error('Não foi possível abrir o WhatsApp automaticamente. Tentando método alternativo...', { duration: 3000 });
+        
+        setTimeout(() => {
+          const a = document.createElement('a');
+          a.href = whatsappUrl;
+          a.setAttribute('target', '_blank');
+          a.setAttribute('rel', 'noopener noreferrer');
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+        }, 1000);
+      } else {
+        toast.success(`Orçamento #${quote.number} compartilhado`);
+      }
+    }
+  } catch (error) {
+    console.error('Erro ao abrir WhatsApp:', error);
+    toast.error('Erro ao abrir WhatsApp. Tente novamente ou use o aplicativo diretamente.');
+    
     toast.message(
       <div>
         <p>Clique no link abaixo para compartilhar:</p>
