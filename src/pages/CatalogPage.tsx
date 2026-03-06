@@ -388,20 +388,19 @@ const CatalogPage: React.FC = () => {
       )
     }
 
-    if (showDestaqueOnly) {
-      filtered = filtered.filter(
-        (product) =>
+    if (showDestaqueOnly || showOutletOnly) {
+      filtered = filtered.filter((product) => {
+        const isDestaque =
           product.modelo.toUpperCase().includes('[DESTAQUE]') ||
           (product.qualidade && product.qualidade.toUpperCase().includes('DESTAQUE'))
-      )
-    }
-
-    if (showOutletOnly) {
-      filtered = filtered.filter(
-        (product) =>
+        const isOutlet =
           product.modelo.toUpperCase().includes('[OUTLET]') ||
           (product.qualidade && product.qualidade.toUpperCase().includes('OUTLET'))
-      )
+
+        if (showDestaqueOnly && showOutletOnly) return isDestaque || isOutlet
+        if (showDestaqueOnly) return isDestaque
+        return isOutlet
+      })
     }
 
     // Filtrar por itens selecionados (>1) se ativo
