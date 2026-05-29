@@ -17,6 +17,8 @@ import {
   X,
   CheckCircle,
   Filter,
+  Sparkles,
+  Play,
 } from 'lucide-react'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
@@ -30,7 +32,35 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from '@/components/ui/dialog'
 import deburr from 'lodash/deburr'
+
+// Configuração do vídeo explicativo de qualidade VV
+const QUALITY_VIDEO_CONFIG = {
+  // Define o tipo do vídeo: 'youtube', 'supabase', 'instagram' ou 'drive'
+  type: 'drive' as 'youtube' | 'supabase' | 'instagram' | 'drive',
+
+  // URL do vídeo/embed ou link direto
+  // Se for youtube, use a URL de embed (ex: https://www.youtube.com/embed/dQw4w9WgXcQ)
+  // Se for supabase, use o link direto do arquivo MP4 (ex: https://your-supabase-url.supabase.co/storage/v1/object/public/videos/qualidade-vv.mp4)
+  // Se for instagram, use o link direto da postagem/reels (ex: https://www.instagram.com/reel/C4X...)
+  // Se for drive, use o link de visualização ou compartilhamento do Google Drive (ex: https://drive.google.com/file/d/1nUkGJKQ_FgUo8LFV1htjAujpv3bAF_Ak/view?usp=sharing)
+  url: 'https://drive.google.com/file/d/1nUkGJKQ_FgUo8LFV1htjAujpv3bAF_Ak/view?usp=sharing',
+
+  // Define se o vídeo é vertical (ex: formato de gravação em pé / Reels).
+  // Se for true, o modal se ajusta para o formato de smartphone vertical.
+  isVertical: true,
+
+  // Título e descrição que aparecerão no modal
+  title: 'Entenda a Qualidade VV 🛠️',
+  description: 'Confira no vídeo como nosso time técnico de especialistas realiza testes rigorosos de touch, brilho, cores e encaixe nas telas VV.',
+}
 
 const CatalogPage: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([])
@@ -57,6 +87,71 @@ const CatalogPage: React.FC = () => {
   const [compactView, setCompactView] = useState<boolean>(false)
   const [showSelectedOnly, setShowSelectedOnly] = useState<boolean>(false)
   const [aroFilter, setAroFilter] = useState<string>('')
+  const [isQualityVideoOpen, setIsQualityVideoOpen] = useState<boolean>(false)
+
+  // Helper para normalizar as URLs do Instagram para exibição em iframe (embed)
+  const getInstagramEmbedUrl = (url: string) => {
+    try {
+      const urlObj = new URL(url)
+      let pathname = urlObj.pathname
+      if (pathname.endsWith('/')) {
+        pathname = pathname.slice(0, -1)
+      }
+      if (!pathname.endsWith('/embed')) {
+        pathname = `${pathname}/embed`
+      }
+      return `${urlObj.origin}${pathname}/`
+    } catch (e) {
+      let cleanUrl = url.split('?')[0]
+      if (cleanUrl.endsWith('/')) {
+        cleanUrl = cleanUrl.slice(0, -1)
+      }
+      if (!cleanUrl.endsWith('/embed')) {
+        cleanUrl = `${cleanUrl}/embed`
+      }
+      return `${cleanUrl}/`
+    }
+  }
+
+  // Helper para normalizar as URLs do Google Drive para exibição em iframe (preview)
+  const getGoogleDrivePreviewUrl = (url: string) => {
+    try {
+      const fileIdMatch = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/) || url.match(/[?&]id=([a-zA-Z0-9_-]+)/)
+      let baseUrl = ''
+      if (fileIdMatch && fileIdMatch[1]) {
+        baseUrl = `https://drive.google.com/file/d/${fileIdMatch[1]}/preview`
+      } else {
+        let cleanUrl = url.split('?')[0]
+        if (cleanUrl.endsWith('/view')) {
+          cleanUrl = cleanUrl.replace(/\/view$/, '/preview')
+        } else if (!cleanUrl.endsWith('/preview')) {
+          cleanUrl = `${cleanUrl}/preview`
+        }
+        baseUrl = cleanUrl
+      }
+      return `${baseUrl}?autoplay=1`
+    } catch (e) {
+      return url
+    }
+  }
+
+  // Helper para obter o link direto de stream do Google Drive (para tag video nativa)
+  const getGoogleDriveDirectUrl = (url: string) => {
+    try {
+      const fileIdMatch = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/) || url.match(/[?&]id=([a-zA-Z0-9_-]+)/)
+      if (fileIdMatch && fileIdMatch[1]) {
+        return `https://docs.google.com/uc?export=download&id=${fileIdMatch[1]}`
+      }
+      return url
+    } catch (e) {
+      return url
+    }
+  }
+
+  const handleWatchVideo = () => {
+    setIsQualityVideoOpen(true)
+  }
+
   // Desabilita visualização compacta em telas mobile (mantém "Selecionados")
   useEffect(() => {
     if (typeof window === 'undefined') return
@@ -123,7 +218,6 @@ const CatalogPage: React.FC = () => {
           OPPO: 'OPPO',
           Oppo: 'OPPO',
           oppo: 'OPPO',
-          ZF: 'Asus',
           ZF: 'Asus',
           HONOR: 'Honor',
           Honor: 'Honor',
@@ -997,6 +1091,30 @@ const CatalogPage: React.FC = () => {
                         </Badge>
                       ))}
                     </div>
+
+                    {/* Banner explicativo de Qualidade VV */}
+                    {selectedQualities.some((q) => q.toUpperCase().includes('VV')) && (
+                      <div className="mt-3 px-4 py-3.5 bg-gradient-to-r from-blue-50/50 via-white to-blue-50/50 dark:from-blue-950/20 dark:via-gray-900/60 dark:to-blue-950/20 rounded-xl border border-blue-100/60 dark:border-blue-900/30 transition-all duration-200 animate-in fade-in slide-in-from-top-2 duration-300">
+                        <div className="flex items-center justify-between gap-4">
+                          <div className="flex gap-3 items-center text-left min-w-0">
+                            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-blue-50 dark:bg-blue-900/30 text-blue-500 dark:text-blue-400">
+                              <Sparkles className="h-4 w-4" />
+                            </div>
+                            <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+                              <span className="font-semibold text-slate-800 dark:text-slate-100">Conheça a linha VV</span> — saiba mais sobre a qualidade e os diferenciais dessas telas.
+                            </p>
+                          </div>
+                          <button
+                            onClick={handleWatchVideo}
+                            className="shrink-0 flex items-center gap-1.5 text-[11px] font-semibold text-white bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 px-3.5 py-1.5 rounded-full shadow-sm hover:shadow transition-all duration-200 whitespace-nowrap"
+                          >
+                            <Play className="h-3 w-3 fill-current" />
+                            Assistir
+                          </button>
+                        </div>
+                      </div>
+                    )}
+
                     <div className="h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent dark:via-gray-700 mt-1"></div>
                   </div>
                 )}
@@ -1398,6 +1516,68 @@ const CatalogPage: React.FC = () => {
         )}
 
         <QuoteCart cartItems={cartItems} onClearCart={clearCart} />
+
+        {/* Modal de Vídeo Explicativo de Qualidade VV (Lazy-Loaded) */}
+        <Dialog open={isQualityVideoOpen} onOpenChange={setIsQualityVideoOpen}>
+          <DialogContent className={`p-0 overflow-hidden bg-slate-950 border-slate-900 text-white shadow-2xl transition-all duration-300 ${QUALITY_VIDEO_CONFIG.isVertical
+            ? 'w-full h-full max-w-none rounded-none border-none sm:max-w-[440px] sm:w-[92vw] sm:h-auto sm:rounded-2xl sm:border'
+            : 'sm:max-w-2xl w-full'
+            }`}>
+            {!QUALITY_VIDEO_CONFIG.isVertical && (
+              <DialogHeader className="p-5 bg-slate-950/80 border-b border-slate-800 pr-12 flex flex-col items-start text-left sm:text-left">
+                <DialogTitle className="text-lg font-bold text-white flex items-center gap-2">
+                  <span className="flex h-2.5 w-2.5 rounded-full bg-blue-500 shadow-[0_0_8px_#3b82f6]"></span>
+                  {QUALITY_VIDEO_CONFIG.title}
+                </DialogTitle>
+                <DialogDescription className="text-xs text-slate-400 mt-1 text-left">
+                  {QUALITY_VIDEO_CONFIG.description}
+                </DialogDescription>
+              </DialogHeader>
+            )}
+            <div className={`relative bg-black w-full overflow-hidden ${QUALITY_VIDEO_CONFIG.isVertical ? 'h-full sm:h-auto sm:aspect-[3/5]' : 'aspect-video'
+              }`}>
+              {isQualityVideoOpen && QUALITY_VIDEO_CONFIG.type === 'youtube' && (
+                <iframe
+                  src={`${QUALITY_VIDEO_CONFIG.url}${QUALITY_VIDEO_CONFIG.url.includes('?') ? '&' : '?'}autoplay=1&rel=0`}
+                  title={QUALITY_VIDEO_CONFIG.title}
+                  className="w-full h-full absolute inset-0 border-0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  allowFullScreen
+                />
+              )}
+              {isQualityVideoOpen && QUALITY_VIDEO_CONFIG.type === 'supabase' && (
+                <video
+                  src={QUALITY_VIDEO_CONFIG.url}
+                  controls
+                  autoPlay
+                  preload="auto"
+                  playsInline
+                  className="w-full h-full absolute inset-0 object-contain"
+                />
+              )}
+              {isQualityVideoOpen && QUALITY_VIDEO_CONFIG.type === 'instagram' && (
+                <iframe
+                  src={getInstagramEmbedUrl(QUALITY_VIDEO_CONFIG.url)}
+                  title={QUALITY_VIDEO_CONFIG.title}
+                  className="w-full h-full absolute inset-0 border-0"
+                  scrolling="no"
+                  allowTransparency
+                  allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+                />
+              )}
+              {isQualityVideoOpen && QUALITY_VIDEO_CONFIG.type === 'drive' && (
+                <iframe
+                  src={getGoogleDrivePreviewUrl(QUALITY_VIDEO_CONFIG.url)}
+                  title={QUALITY_VIDEO_CONFIG.title}
+                  className="w-full h-[calc(100%+48px)] absolute left-0 -top-[48px] border-0"
+                  allow="autoplay; encrypted-media"
+                  allowFullScreen
+                />
+              )}
+            </div>
+          </DialogContent>
+        </Dialog>
+
         <ScrollToTop />
       </div>
     </Layout>
