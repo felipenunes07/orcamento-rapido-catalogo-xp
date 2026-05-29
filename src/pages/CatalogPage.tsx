@@ -43,15 +43,16 @@ import deburr from 'lodash/deburr'
 
 // Configuração do vídeo explicativo de qualidade VV
 const QUALITY_VIDEO_CONFIG = {
-  // Define o tipo do vídeo: 'youtube', 'supabase', 'instagram' ou 'drive'
-  type: 'drive' as 'youtube' | 'supabase' | 'instagram' | 'drive',
+  // Define o tipo do vídeo: 'youtube', 'supabase', 'instagram', 'drive' ou 'vimeo'
+  type: 'vimeo' as 'youtube' | 'supabase' | 'instagram' | 'drive' | 'vimeo',
 
   // URL do vídeo/embed ou link direto
   // Se for youtube, use a URL de embed (ex: https://www.youtube.com/embed/dQw4w9WgXcQ)
   // Se for supabase, use o link direto do arquivo MP4 (ex: https://your-supabase-url.supabase.co/storage/v1/object/public/videos/qualidade-vv.mp4)
   // Se for instagram, use o link direto da postagem/reels (ex: https://www.instagram.com/reel/C4X...)
   // Se for drive, use o link de visualização ou compartilhamento do Google Drive (ex: https://drive.google.com/file/d/1nUkGJKQ_FgUo8LFV1htjAujpv3bAF_Ak/view?usp=sharing)
-  url: 'https://drive.google.com/file/d/1nUkGJKQ_FgUo8LFV1htjAujpv3bAF_Ak/view?usp=sharing',
+  // Se for vimeo, use o link do Vimeo (ex: https://vimeo.com/1196709830)
+  url: 'https://vimeo.com/1196709830?share=copy&fl=sv&fe=ci',
 
   // Define se o vídeo é vertical (ex: formato de gravação em pé / Reels).
   // Se for true, o modal se ajusta para o formato de smartphone vertical.
@@ -61,6 +62,7 @@ const QUALITY_VIDEO_CONFIG = {
   title: 'Entenda a Qualidade VV 🛠️',
   description: 'Confira no vídeo como nosso time técnico de especialistas realiza testes rigorosos de touch, brilho, cores e encaixe nas telas VV.',
 }
+
 
 const CatalogPage: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([])
@@ -147,6 +149,21 @@ const CatalogPage: React.FC = () => {
       return url
     }
   }
+
+  // Helper para obter a URL de embed do Vimeo com autoplay, som ativado e loop otimizados
+  const getVimeoEmbedUrl = (url: string) => {
+    try {
+      const match = url.match(/(?:vimeo\.com\/|player\.vimeo\.com\/video\/)([0-9]+)/)
+      const videoId = match ? match[1] : url.trim()
+      // autoplay=1 (reproduz sozinho após clique do usuário), muted=0 (reproduz com som),
+      // playsinline=1 (toca inline no Safari iOS em vez de tela cheia nativa),
+      // loop=1 (repete o vídeo), badge=0 e autocontrols=0 (player minimalista e limpo)
+      return `https://player.vimeo.com/video/${videoId}?autoplay=1&muted=0&playsinline=1&loop=1&badge=0&autopause=0`
+    } catch (e) {
+      return url
+    }
+  }
+
 
   const handleWatchVideo = () => {
     // Dispensar todos os toasts ativos para não ficarem na frente do modal
@@ -1521,9 +1538,9 @@ const CatalogPage: React.FC = () => {
 
         {/* Modal de Vídeo Explicativo de Qualidade VV (Lazy-Loaded) */}
         <Dialog open={isQualityVideoOpen} onOpenChange={setIsQualityVideoOpen}>
-          <DialogContent className={`p-0 overflow-hidden bg-black border-black text-white shadow-2xl transition-all duration-300 ${
+          <DialogContent className={`p-0 overflow-hidden bg-black border-black text-white shadow-2xl transition-all duration-300 [&>button]:z-[100] [&>button]:bg-black/60 [&>button]:hover:bg-black/80 [&>button]:text-white [&>button]:border [&>button]:border-white/20 [&>button]:rounded-full [&>button]:p-2 [&>button]:w-9 [&>button]:h-9 [&>button]:flex [&>button]:items-center [&>button]:justify-center [&>button]:right-3 [&>button]:top-3 [&>button]:opacity-100 ${
             QUALITY_VIDEO_CONFIG.isVertical
-              ? 'w-[92vw] max-w-[440px] rounded-2xl sm:max-w-[440px]'
+              ? 'w-[92vw] max-w-[360px] rounded-2xl sm:max-w-[420px]'
               : 'sm:max-w-2xl w-full'
           }`}>
             {!QUALITY_VIDEO_CONFIG.isVertical && (
@@ -1538,7 +1555,7 @@ const CatalogPage: React.FC = () => {
               </DialogHeader>
             )}
             <div className={`relative bg-black w-full overflow-hidden ${
-              QUALITY_VIDEO_CONFIG.isVertical ? 'aspect-[3/5]' : 'aspect-video'
+              QUALITY_VIDEO_CONFIG.isVertical ? 'aspect-[9/16]' : 'aspect-video'
             }`}>
               {isQualityVideoOpen && QUALITY_VIDEO_CONFIG.type === 'youtube' && (
                 <iframe
@@ -1546,6 +1563,16 @@ const CatalogPage: React.FC = () => {
                   title={QUALITY_VIDEO_CONFIG.title}
                   className="w-full h-full absolute inset-0 border-0"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  allowFullScreen
+                />
+              )}
+              {isQualityVideoOpen && QUALITY_VIDEO_CONFIG.type === 'vimeo' && (
+                <iframe
+                  src={getVimeoEmbedUrl(QUALITY_VIDEO_CONFIG.url)}
+                  title={QUALITY_VIDEO_CONFIG.title}
+                  className="w-full h-full absolute inset-0 border-0"
+                  allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share"
+                  referrerPolicy="strict-origin-when-cross-origin"
                   allowFullScreen
                 />
               )}
