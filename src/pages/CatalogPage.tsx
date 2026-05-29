@@ -149,6 +149,8 @@ const CatalogPage: React.FC = () => {
   }
 
   const handleWatchVideo = () => {
+    // Dispensar todos os toasts ativos para não ficarem na frente do modal
+    dismiss()
     setIsQualityVideoOpen(true)
   }
 
@@ -1519,10 +1521,11 @@ const CatalogPage: React.FC = () => {
 
         {/* Modal de Vídeo Explicativo de Qualidade VV (Lazy-Loaded) */}
         <Dialog open={isQualityVideoOpen} onOpenChange={setIsQualityVideoOpen}>
-          <DialogContent className={`p-0 overflow-hidden bg-slate-950 border-slate-900 text-white shadow-2xl transition-all duration-300 ${QUALITY_VIDEO_CONFIG.isVertical
-            ? 'w-full h-full max-w-none rounded-none border-none sm:max-w-[440px] sm:w-[92vw] sm:h-auto sm:rounded-2xl sm:border'
-            : 'sm:max-w-2xl w-full'
-            }`}>
+          <DialogContent className={`p-0 overflow-hidden bg-black border-black text-white shadow-2xl transition-all duration-300 ${
+            QUALITY_VIDEO_CONFIG.isVertical
+              ? 'w-[92vw] max-w-[440px] rounded-2xl sm:max-w-[440px]'
+              : 'sm:max-w-2xl w-full'
+          }`}>
             {!QUALITY_VIDEO_CONFIG.isVertical && (
               <DialogHeader className="p-5 bg-slate-950/80 border-b border-slate-800 pr-12 flex flex-col items-start text-left sm:text-left">
                 <DialogTitle className="text-lg font-bold text-white flex items-center gap-2">
@@ -1534,8 +1537,9 @@ const CatalogPage: React.FC = () => {
                 </DialogDescription>
               </DialogHeader>
             )}
-            <div className={`relative bg-black w-full overflow-hidden ${QUALITY_VIDEO_CONFIG.isVertical ? 'h-full sm:h-auto sm:aspect-[3/5]' : 'aspect-video'
-              }`}>
+            <div className={`relative bg-black w-full overflow-hidden ${
+              QUALITY_VIDEO_CONFIG.isVertical ? 'aspect-[3/5]' : 'aspect-video'
+            }`}>
               {isQualityVideoOpen && QUALITY_VIDEO_CONFIG.type === 'youtube' && (
                 <iframe
                   src={`${QUALITY_VIDEO_CONFIG.url}${QUALITY_VIDEO_CONFIG.url.includes('?') ? '&' : '?'}autoplay=1&rel=0`}
@@ -1569,7 +1573,7 @@ const CatalogPage: React.FC = () => {
                 <iframe
                   src={getGoogleDrivePreviewUrl(QUALITY_VIDEO_CONFIG.url)}
                   title={QUALITY_VIDEO_CONFIG.title}
-                  className="w-full h-[calc(100%+48px)] absolute left-0 -top-[48px] border-0"
+                  className="w-full h-full absolute inset-0 border-0"
                   allow="autoplay; encrypted-media"
                   allowFullScreen
                 />
