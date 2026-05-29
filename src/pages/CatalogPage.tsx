@@ -157,8 +157,8 @@ const CatalogPage: React.FC = () => {
       const videoId = match ? match[1] : url.trim()
       // autoplay=1 (reproduz sozinho após clique do usuário), muted=0 (reproduz com som),
       // playsinline=1 (toca inline no Safari iOS em vez de tela cheia nativa),
-      // loop=1 (repete o vídeo), badge=0 e autocontrols=0 (player minimalista e limpo)
-      return `https://player.vimeo.com/video/${videoId}?autoplay=1&muted=0&playsinline=1&loop=1&badge=0&autopause=0`
+      // loop=1 (repete o vídeo), badge=0 e autocontrols=0 (player minimalista e limpo), api=1 (habilita controle via postMessage)
+      return `https://player.vimeo.com/video/${videoId}?autoplay=1&muted=0&playsinline=1&loop=1&badge=0&autopause=0&api=1`
     } catch (e) {
       return url
     }
@@ -1113,21 +1113,21 @@ const CatalogPage: React.FC = () => {
 
                     {/* Banner explicativo de Qualidade VV */}
                     {selectedQualities.some((q) => q.toUpperCase().includes('VV')) && (
-                      <div className="mt-3 px-4 py-3.5 bg-gradient-to-r from-blue-50/50 via-white to-blue-50/50 dark:from-blue-950/20 dark:via-gray-900/60 dark:to-blue-950/20 rounded-xl border border-blue-100/60 dark:border-blue-900/30 transition-all duration-200 animate-in fade-in slide-in-from-top-2 duration-300">
-                        <div className="flex items-center justify-between gap-4">
-                          <div className="flex gap-3 items-center text-left min-w-0">
-                            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-blue-50 dark:bg-blue-900/30 text-blue-500 dark:text-blue-400">
-                              <Sparkles className="h-4 w-4" />
+                      <div className="mt-3 px-2.5 py-2 sm:px-4 sm:py-3.5 bg-gradient-to-r from-blue-50/50 via-white to-blue-50/50 dark:from-blue-950/20 dark:via-gray-900/60 dark:to-blue-950/20 rounded-xl border border-blue-100/60 dark:border-blue-900/30 transition-all duration-200 animate-in fade-in slide-in-from-top-2 duration-300">
+                        <div className="flex items-center justify-between gap-2 sm:gap-4">
+                          <div className="flex gap-2 sm:gap-3 items-center text-left min-w-0">
+                            <div className="flex h-7 w-7 sm:h-9 sm:w-9 shrink-0 items-center justify-center rounded-full bg-blue-50 dark:bg-blue-900/30 text-blue-500 dark:text-blue-400">
+                              <Sparkles className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                             </div>
-                            <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+                            <p className="text-[10px] sm:text-xs text-slate-600 dark:text-slate-300 leading-normal sm:leading-relaxed">
                               <span className="font-semibold text-slate-800 dark:text-slate-100">Conheça a linha VV</span> — saiba mais sobre a qualidade e os diferenciais dessas telas.
                             </p>
                           </div>
                           <button
                             onClick={handleWatchVideo}
-                            className="shrink-0 flex items-center gap-1.5 text-[11px] font-semibold text-white bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 px-3.5 py-1.5 rounded-full shadow-sm hover:shadow transition-all duration-200 whitespace-nowrap"
+                            className="shrink-0 flex items-center gap-1 text-[10px] sm:text-[11px] font-semibold text-white bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 px-2.5 py-1 sm:px-3.5 sm:py-1.5 rounded-full shadow-sm hover:shadow transition-all duration-200 whitespace-nowrap"
                           >
-                            <Play className="h-3 w-3 fill-current" />
+                            <Play className="h-2.5 w-2.5 sm:h-3 sm:w-3 fill-current" />
                             Assistir
                           </button>
                         </div>
@@ -1574,6 +1574,22 @@ const CatalogPage: React.FC = () => {
                   allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share"
                   referrerPolicy="strict-origin-when-cross-origin"
                   allowFullScreen
+                  onLoad={(e) => {
+                    const iframe = e.currentTarget
+                    const triggerPlay = () => {
+                      try {
+                        // Envia comando para tirar do mudo (volume = 1) e tocar (play)
+                        iframe.contentWindow?.postMessage(JSON.stringify({ method: 'setVolume', value: 1 }), '*')
+                        iframe.contentWindow?.postMessage(JSON.stringify({ method: 'play' }), '*')
+                      } catch (err) {
+                        console.error('Erro ao controlar player do Vimeo:', err)
+                      }
+                    }
+                    // Dispara em intervalos para garantir que o player processe mesmo com delay de carregamento
+                    setTimeout(triggerPlay, 150)
+                    setTimeout(triggerPlay, 500)
+                    setTimeout(triggerPlay, 900)
+                  }}
                 />
               )}
               {isQualityVideoOpen && QUALITY_VIDEO_CONFIG.type === 'supabase' && (
