@@ -155,10 +155,10 @@ const CatalogPage: React.FC = () => {
     try {
       const match = url.match(/(?:vimeo\.com\/|player\.vimeo\.com\/video\/)([0-9]+)/)
       const videoId = match ? match[1] : url.trim()
-      // autoplay=1 (reproduz sozinho após clique do usuário), muted=0 (reproduz com som),
+      // autoplay=1 (reproduz sozinho), muted=0 (som ativo por padrão),
       // playsinline=1 (toca inline no Safari iOS em vez de tela cheia nativa),
-      // loop=1 (repete o vídeo), badge=0 e autocontrols=0 (player minimalista e limpo), api=1 (habilita controle via postMessage)
-      return `https://player.vimeo.com/video/${videoId}?autoplay=1&muted=0&playsinline=1&loop=1&badge=0&autopause=0&api=1`
+      // loop=1 (repete o vídeo), badge=0 e autocontrols=0 (player minimalista e limpo)
+      return `https://player.vimeo.com/video/${videoId}?autoplay=1&muted=0&playsinline=1&loop=1&badge=0&autopause=0`
     } catch (e) {
       return url
     }
@@ -1538,9 +1538,9 @@ const CatalogPage: React.FC = () => {
 
         {/* Modal de Vídeo Explicativo de Qualidade VV (Lazy-Loaded) */}
         <Dialog open={isQualityVideoOpen} onOpenChange={setIsQualityVideoOpen}>
-          <DialogContent className={`p-0 overflow-hidden bg-black border-black text-white shadow-2xl transition-all duration-300 [&>button]:z-[100] [&>button]:bg-black/60 [&>button]:hover:bg-black/80 [&>button]:text-white [&>button]:border [&>button]:border-white/20 [&>button]:rounded-full [&>button]:p-2 [&>button]:w-9 [&>button]:h-9 [&>button]:flex [&>button]:items-center [&>button]:justify-center [&>button]:right-3 [&>button]:top-3 [&>button]:opacity-100 ${
+          <DialogContent className={`p-0 overflow-hidden bg-transparent border-transparent text-white shadow-none transition-all duration-300 [&>button]:z-[100] [&>button]:bg-black/60 [&>button]:hover:bg-black/80 [&>button]:text-white [&>button]:border [&>button]:border-white/20 [&>button]:rounded-full [&>button]:p-2 [&>button]:w-9 [&>button]:h-9 [&>button]:flex [&>button]:items-center [&>button]:justify-center [&>button]:right-3 [&>button]:top-3 [&>button]:opacity-100 ${
             QUALITY_VIDEO_CONFIG.isVertical
-              ? 'w-[92vw] max-w-[360px] rounded-2xl sm:max-w-[420px]'
+              ? 'w-[92vw] max-w-[360px] rounded-2xl sm:max-w-[340px]'
               : 'sm:max-w-2xl w-full'
           }`}>
             {!QUALITY_VIDEO_CONFIG.isVertical && (
@@ -1554,7 +1554,7 @@ const CatalogPage: React.FC = () => {
                 </DialogDescription>
               </DialogHeader>
             )}
-            <div className={`relative bg-black w-full overflow-hidden ${
+            <div className={`relative bg-transparent w-full overflow-hidden rounded-2xl ${
               QUALITY_VIDEO_CONFIG.isVertical ? 'aspect-[9/16]' : 'aspect-video'
             }`}>
               {isQualityVideoOpen && QUALITY_VIDEO_CONFIG.type === 'youtube' && (
@@ -1570,26 +1570,10 @@ const CatalogPage: React.FC = () => {
                 <iframe
                   src={getVimeoEmbedUrl(QUALITY_VIDEO_CONFIG.url)}
                   title={QUALITY_VIDEO_CONFIG.title}
-                  className="w-full h-full absolute inset-0 border-0"
+                  className="w-full h-full absolute inset-0 border-0 rounded-2xl"
                   allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share"
                   referrerPolicy="strict-origin-when-cross-origin"
                   allowFullScreen
-                  onLoad={(e) => {
-                    const iframe = e.currentTarget
-                    const triggerPlay = () => {
-                      try {
-                        // Envia comando para tirar do mudo (volume = 1) e tocar (play)
-                        iframe.contentWindow?.postMessage(JSON.stringify({ method: 'setVolume', value: 1 }), '*')
-                        iframe.contentWindow?.postMessage(JSON.stringify({ method: 'play' }), '*')
-                      } catch (err) {
-                        console.error('Erro ao controlar player do Vimeo:', err)
-                      }
-                    }
-                    // Dispara em intervalos para garantir que o player processe mesmo com delay de carregamento
-                    setTimeout(triggerPlay, 150)
-                    setTimeout(triggerPlay, 500)
-                    setTimeout(triggerPlay, 900)
-                  }}
                 />
               )}
               {isQualityVideoOpen && QUALITY_VIDEO_CONFIG.type === 'supabase' && (
