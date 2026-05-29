@@ -73,7 +73,7 @@ const CatalogPage: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState<string>('')
   const { cartItems, updateQuantity, clearCart, updateProductPrices } =
     useCart()
-  const { toast } = useToast()
+  const { toast, dismiss } = useToast()
   const [selectedQualities, setSelectedQualities] = useState<string[]>([])
   const [availableQualities, setAvailableQualities] = useState<string[]>([])
   const [showPromocaoOnly, setShowPromocaoOnly] = useState<boolean>(false)
