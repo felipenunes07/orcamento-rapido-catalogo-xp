@@ -1090,6 +1090,7 @@ const CatalogPage: React.FC = () => {
                           key={quality}
                           variant="outline"
                           className={`
+                          relative overflow-hidden
                           cursor-pointer 
                           text-[11px] md:text-xs
                           py-1.5 md:py-2
@@ -1107,6 +1108,13 @@ const CatalogPage: React.FC = () => {
                           onClick={(e) => handleSelectQuality(quality, e)}
                         >
                           {quality}
+                          {quality.toUpperCase().includes('VV') && (
+                            <span
+                              className="absolute top-0 right-0 w-2.5 h-2.5 bg-red-500"
+                              style={{ clipPath: 'polygon(100% 0, 0 0, 100% 100%)' }}
+                              title="Possui vídeo de apresentação"
+                            />
+                          )}
                         </Badge>
                       ))}
                     </div>
