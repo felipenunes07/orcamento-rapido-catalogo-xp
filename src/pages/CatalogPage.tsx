@@ -1119,8 +1119,8 @@ const CatalogPage: React.FC = () => {
                             <div className="flex h-7 w-7 sm:h-9 sm:w-9 shrink-0 items-center justify-center rounded-full bg-blue-50 dark:bg-blue-900/30 text-blue-500 dark:text-blue-400">
                               <Sparkles className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                             </div>
-                            <p className="text-[10px] sm:text-xs text-slate-600 dark:text-slate-300 leading-normal sm:leading-relaxed">
-                              <span className="font-semibold text-slate-800 dark:text-slate-100">Conheça a linha VV</span> — saiba mais sobre a qualidade e os diferenciais dessas telas.
+                            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-normal sm:leading-relaxed">
+                              <span className="font-semibold text-slate-800 dark:text-slate-100">Conheça a linha VV</span> — Apresentação de Video Lili
                             </p>
                           </div>
                           <button
