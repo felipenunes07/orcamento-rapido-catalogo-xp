@@ -304,75 +304,80 @@ export const downloadExcel = async (items: CartItem[]): Promise<void> => {
 }
 
 // Função para baixar o catálogo completo em Excel
-export const downloadCatalogExcel = async (code?: string): Promise<void> => {
+export const downloadCatalogExcel = async (code?: string, productsToExport?: Product[]): Promise<void> => {
   try {
-    // Buscar todos os produtos do catálogo
-    let products = await fetchProducts();
+    // Se a lista de produtos filtrados foi passada, usamos ela diretamente (pois já está filtrada e com preços corretos)
+    let products = productsToExport;
     
-    // Filtrar apenas produtos ativos/estoque
-    const isActive = (ativo?: string) => {
-      const val = (ativo || '').normalize('NFD').replace(/\p{Diacritic}/gu, '').trim().toUpperCase()
-      return val === 'S' || val === 'ULTIMAS UNIDADES' || !ativo
-    }
-    products = products.filter((p) => isActive(p.ativo))
+    if (!products) {
+      // Buscar todos os produtos do catálogo caso não seja passada uma lista pré-filtrada
+      products = await fetchProducts();
+      
+      // Filtrar apenas produtos ativos/estoque
+      const isActive = (ativo?: string) => {
+        const val = (ativo || '').normalize('NFD').replace(/\p{Diacritic}/gu, '').trim().toUpperCase()
+        return val === 'S' || val === 'ULTIMAS UNIDADES' || !ativo
+      }
+      products = products.filter((p) => isActive(p.ativo))
 
-    // Se houver código, aplicar a coluna de preço correspondente
-    const normalizedCode = normalizeKey(code || '')
-    if (normalizedCode) {
-      try {
-        const mapping = await fetchCodePriceMapping()
-        const ref = mapping[normalizedCode]
-        if (ref) {
-          const headers = Object.keys(products[0]?.allColumns || {})
-          const percentMatch = ref.match(/^\s*(-?\d+(?:[\.,]\d+)?)\s*%\s*$/)
-          if (percentMatch) {
-            const percent = parseFloat(percentMatch[1].replace(',', '.'))
-            const byHeader = findHeaderForRef(headers, ref)
-            if (byHeader) {
-              products = products.map((p) => {
-                const cell = (p.allColumns || {})[byHeader] || ''
-                const parsed = normalizeCurrencyToNumber(cell)
-                return { ...p, valor: parsed !== null ? parsed : p.valor }
-              })
-            } else {
-              const priceHeaders = getPriceHeaders(headers)
-              const baseHeader = priceHeaders[0] || findHeaderForRef(headers, 'valor')
-              if (baseHeader) {
-                const factor = 1 - percent / 100
+      // Se houver código, aplicar a coluna de preço correspondente
+      const normalizedCode = normalizeKey(code || '')
+      if (normalizedCode) {
+        try {
+          const mapping = await fetchCodePriceMapping()
+          const ref = mapping[normalizedCode]
+          if (ref) {
+            const headers = Object.keys(products[0]?.allColumns || {})
+            const percentMatch = ref.match(/^\s*(-?\d+(?:[\.,]\d+)?)\s*%\s*$/)
+            if (percentMatch) {
+              const percent = parseFloat(percentMatch[1].replace(',', '.'))
+              const byHeader = findHeaderForRef(headers, ref)
+              if (byHeader) {
                 products = products.map((p) => {
-                  const baseCell = (p.allColumns || {})[baseHeader] || ''
-                  const baseParsed = normalizeCurrencyToNumber(baseCell)
-                  if (baseParsed === null) return p
-                  const adjusted = Math.max(0, baseParsed * factor)
-                  return { ...p, valor: adjusted }
+                  const cell = (p.allColumns || {})[byHeader] || ''
+                  const parsed = normalizeCurrencyToNumber(cell)
+                  return { ...p, valor: parsed !== null ? parsed : p.valor }
                 })
+              } else {
+                const priceHeaders = getPriceHeaders(headers)
+                const baseHeader = priceHeaders[0] || findHeaderForRef(headers, 'valor')
+                if (baseHeader) {
+                  const factor = 1 - percent / 100
+                  products = products.map((p) => {
+                    const baseCell = (p.allColumns || {})[baseHeader] || ''
+                    const baseParsed = normalizeCurrencyToNumber(baseCell)
+                    if (baseParsed === null) return p
+                    const adjusted = Math.max(0, baseParsed * factor)
+                    return { ...p, valor: adjusted }
+                  })
+                }
               }
-            }
-          } else {
-            const idx = parseInt(ref, 10)
-            const headersForIdx = getPriceHeaders(headers)
-            if (!Number.isNaN(idx) && headersForIdx.length > 0) {
-              const resolvedIndex = idx >= 0 ? idx : headersForIdx.length + idx
-              const headerToUse = headersForIdx[resolvedIndex] || headersForIdx[0]
-              products = products.map((p) => {
-                const cell = (p.allColumns || {})[headerToUse] || ''
-                const parsed = normalizeCurrencyToNumber(cell)
-                return { ...p, valor: parsed !== null ? parsed : p.valor }
-              })
             } else {
-              const headerToUse = findHeaderForRef(headers, ref)
-              if (headerToUse) {
+              const idx = parseInt(ref, 10)
+              const headersForIdx = getPriceHeaders(headers)
+              if (!Number.isNaN(idx) && headersForIdx.length > 0) {
+                const resolvedIndex = idx >= 0 ? idx : headersForIdx.length + idx
+                const headerToUse = headersForIdx[resolvedIndex] || headersForIdx[0]
                 products = products.map((p) => {
                   const cell = (p.allColumns || {})[headerToUse] || ''
                   const parsed = normalizeCurrencyToNumber(cell)
                   return { ...p, valor: parsed !== null ? parsed : p.valor }
                 })
+              } else {
+                const headerToUse = findHeaderForRef(headers, ref)
+                if (headerToUse) {
+                  products = products.map((p) => {
+                    const cell = (p.allColumns || {})[headerToUse] || ''
+                    const parsed = normalizeCurrencyToNumber(cell)
+                    return { ...p, valor: parsed !== null ? parsed : p.valor }
+                  })
+                }
               }
             }
           }
+        } catch (e) {
+          console.warn('Falha ao aplicar código no Excel, usando preço base:', e)
         }
-      } catch (e) {
-        console.warn('Falha ao aplicar código no Excel, usando preço base:', e)
       }
     }
     

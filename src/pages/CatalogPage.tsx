@@ -902,7 +902,7 @@ const CatalogPage: React.FC = () => {
             <Button
               variant="outline"
               size="sm"
-              onClick={() => downloadCatalogExcel(codigo)}
+              onClick={() => downloadCatalogExcel(codigo, filteredProducts)}
               className="flex items-center gap-1 bg-green-50 hover:bg-green-100 text-green-700 border-green-200 hover:border-green-300"
             >
               <FileSpreadsheet className="h-4 w-4" />
