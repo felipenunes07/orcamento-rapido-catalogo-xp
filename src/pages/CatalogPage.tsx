@@ -19,6 +19,7 @@ import {
   Filter,
   Sparkles,
   Play,
+  Search,
 } from 'lucide-react'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
@@ -1106,30 +1107,6 @@ const CatalogPage: React.FC<CatalogPageProps> = ({
           </div>
         </div>
 
-        {/* Campo de busca por modelo */}
-        {!loading && !error && (
-          <div className="mb-4">
-            <div className="flex items-center gap-2">
-              <Input
-                type="text"
-                placeholder="Pesquisar por modelo..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="max-w-sm md:max-w-md md:h-12 md:text-base"
-              />
-              {searchTerm && (
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setSearchTerm('')}
-                  className="h-10 w-10 md:h-12 md:w-12"
-                >
-                  <X className="h-4 w-4 md:h-5 md:w-5" />
-                </Button>
-              )}
-            </div>
-          </div>
-        )}
 
         {/* Container principal dos filtros com visual melhorado */}
         {!loading &&
@@ -1743,6 +1720,31 @@ const CatalogPage: React.FC<CatalogPageProps> = ({
             </div>
           </div>
         </div>
+
+        {/* Campo de busca por modelo */}
+        {!loading && !error && (
+          <div className="mb-6 max-w-sm md:max-w-md">
+            <div className="relative flex items-center">
+              <Input
+                type="text"
+                placeholder="Pesquisar por modelo..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pr-10 md:h-11 md:text-base rounded-xl border-gray-200 dark:border-gray-700 focus:border-blue-400 focus:ring-blue-100"
+              />
+              {searchTerm ? (
+                <button
+                  onClick={() => setSearchTerm('')}
+                  className="absolute right-3 text-gray-400 hover:text-gray-600 transition-colors"
+                >
+                  <X className="h-4 w-4 md:h-5 md:w-5" />
+                </button>
+              ) : (
+                <Search className="absolute right-3 h-4 w-4 text-gray-400" />
+              )}
+            </div>
+          </div>
+        )}
 
         {loading ? (
           <div className="space-y-4">
