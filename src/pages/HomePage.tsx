@@ -304,22 +304,46 @@ const HomePage: React.FC = () => {
                 Crie orçamentos rápidos e simples
               </p>
 
-              {/* Opções de catálogo (Botões compactos inline) */}
-              <div className="flex flex-row items-center justify-center gap-3 max-w-md mx-auto px-4 mt-2">
+              {/* Opções de catálogo (compactas) */}
+              <div className="grid grid-cols-2 gap-3 max-w-md mx-auto px-1 mt-2">
                 <Link
                   to="/catalogo"
-                  className="btn-neon-blue flex-1 flex items-center justify-center gap-2 py-2 px-3 text-xs sm:text-sm font-semibold rounded-lg shadow-sm"
+                  className="group flex items-center gap-2 sm:gap-3 bg-white dark:bg-gray-800/90 backdrop-blur-sm py-1.5 px-2 sm:p-3.5 rounded-lg sm:rounded-xl border border-slate-200 dark:border-gray-700 shadow-sm glow-card-blue animate-pulse-glow"
                 >
-                  <Smartphone className="h-4 w-4 shrink-0" />
-                  <span>Telas e Doc</span>
+                  <span
+                    className="flex items-center justify-center w-7 h-7 sm:w-9 h-9 rounded-md sm:rounded-lg text-white shrink-0 transition-transform duration-200 group-hover:scale-105"
+                    style={{ background: 'linear-gradient(135deg, #1e40af, #2563eb)' }}
+                  >
+                    <Smartphone className="h-3.5 w-3.5 sm:h-5 w-5" />
+                  </span>
+                  <span className="text-left leading-tight min-w-0">
+                    <span className="block font-bold text-xs sm:text-sm text-blue-800 dark:text-blue-300 truncate">
+                      Telas e Doc<span className="hidden sm:inline"> de Carga</span>
+                    </span>
+                    <span className="block text-[9px] sm:text-[11px] text-muted-foreground dark:text-gray-400 mt-0.5">
+                      Ver catálogo
+                    </span>
+                  </span>
                 </Link>
 
                 <Link
                   to="/baterias"
-                  className="btn-neon-sky flex-1 flex items-center justify-center gap-2 py-2 px-3 text-xs sm:text-sm font-semibold rounded-lg shadow-sm"
+                  className="group flex items-center gap-2 sm:gap-3 bg-white dark:bg-gray-800/90 backdrop-blur-sm py-1.5 px-2 sm:p-3.5 rounded-lg sm:rounded-xl border border-slate-200 dark:border-gray-700 shadow-sm glow-card-sky"
                 >
-                  <BatteryCharging className="h-4 w-4 shrink-0" />
-                  <span>Baterias</span>
+                  <span
+                    className="flex items-center justify-center w-7 h-7 sm:w-9 h-9 rounded-md sm:rounded-lg text-white shrink-0 transition-transform duration-200 group-hover:scale-105"
+                    style={{ background: 'linear-gradient(135deg, #0369a1, #0ea5e9)' }}
+                  >
+                    <BatteryCharging className="h-3.5 w-3.5 sm:h-5 w-5" />
+                  </span>
+                  <span className="text-left leading-tight min-w-0">
+                    <span className="block font-bold text-xs sm:text-sm text-sky-700 dark:text-sky-300 truncate">
+                      Baterias
+                    </span>
+                    <span className="block text-[9px] sm:text-[11px] text-muted-foreground dark:text-gray-400 mt-0.5">
+                      Ver catálogo
+                    </span>
+                  </span>
                 </Link>
               </div>
             </section>
@@ -371,21 +395,21 @@ const HomePage: React.FC = () => {
               </div>
             </section>
 
-            {/* Opções de catálogo inferiores (Botões compactos outline) */}
+            {/* Opções de catálogo inferiores (Botões coloridos inline) */}
             <div className="mt-8 flex flex-row items-center justify-center gap-3 max-w-md mx-auto px-4">
               <Link
                 to="/catalogo"
-                className="flex-1 flex items-center justify-center gap-2 py-2 px-3 text-xs sm:text-sm font-semibold rounded-lg border border-blue-200 hover:border-blue-500 dark:border-blue-900/50 dark:hover:border-blue-400 bg-white dark:bg-gray-800 text-blue-700 dark:text-blue-300 hover:bg-blue-50/50 dark:hover:bg-gray-700/50 shadow-sm transition-all duration-200"
+                className="btn-neon-blue flex-1 flex items-center justify-center gap-2 py-2 px-3 text-xs sm:text-sm font-semibold rounded-lg shadow-sm"
               >
-                <Smartphone className="h-4 w-4 shrink-0 text-blue-600 dark:text-blue-400" />
+                <Smartphone className="h-4 w-4 shrink-0" />
                 <span>Telas e Doc</span>
               </Link>
 
               <Link
                 to="/baterias"
-                className="flex-1 flex items-center justify-center gap-2 py-2 px-3 text-xs sm:text-sm font-semibold rounded-lg border border-sky-200 hover:border-sky-500 dark:border-sky-900/50 dark:hover:border-sky-400 bg-white dark:bg-gray-800 text-sky-700 dark:text-sky-300 hover:bg-sky-50/50 dark:hover:bg-gray-700/50 shadow-sm transition-all duration-200"
+                className="btn-neon-sky flex-1 flex items-center justify-center gap-2 py-2 px-3 text-xs sm:text-sm font-semibold rounded-lg shadow-sm"
               >
-                <BatteryCharging className="h-4 w-4 shrink-0 text-sky-600 dark:text-sky-400" />
+                <BatteryCharging className="h-4 w-4 shrink-0" />
                 <span>Baterias</span>
               </Link>
             </div>
