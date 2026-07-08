@@ -78,11 +78,64 @@ const BATERIA_BRAND_MAP: Record<string, string> = {
 // Extrai a marca de uma bateria a partir da primeira palavra do modelo.
 const getBateriaBrand = (modelo: string): string | null => {
   if (!modelo || modelo.trim() === '') return null
-  const first = modelo.trim().split(/[\s|]+/)[0].toUpperCase()
+  const clean = modelo.replace(/^\[[^\]]+\]\s*/g, '').replace(/^[|\s\-_/]+/g, '')
+  const first = clean.trim().split(/[\s|]+/)[0].toUpperCase()
   if (BATERIA_BRAND_MAP[first]) return BATERIA_BRAND_MAP[first]
   // Fallback: primeira palavra capitalizada (marcas futuras)
   return first.charAt(0) + first.slice(1).toLowerCase()
 }
+
+interface QualityGroup {
+  id: string
+  name: string
+  match: (q: string) => boolean
+}
+
+const QUALITY_GROUPS: QualityGroup[] = [
+  {
+    id: 'original',
+    name: 'Original (ORI)',
+    match: (q) => q.toUpperCase().includes('ORI') && !q.toUpperCase().includes('ORIGINAL'),
+  },
+  {
+    id: 'oled',
+    name: 'OLED',
+    match: (q) => q.toUpperCase().includes('OLED'),
+  },
+  {
+    id: 'select',
+    name: 'Select',
+    match: (q) => q.toUpperCase().includes('SELECT') && !q.toUpperCase().includes('OLED'),
+  },
+  {
+    id: 'premier',
+    name: 'Premier',
+    match: (q) => q.toUpperCase().includes('PREMIER'),
+  },
+  {
+    id: 'lcd',
+    name: 'LCD',
+    match: (q) =>
+      (q.toUpperCase().includes('LCD') || q.toUpperCase() === 'INCELL') &&
+      !q.toUpperCase().includes('SELECT') &&
+      !q.toUpperCase().includes('PREMIER'),
+  },
+  {
+    id: 'outros',
+    name: 'Outras Qualidades',
+    match: (q) => {
+      const upper = q.toUpperCase()
+      return (
+        !upper.includes('ORI') &&
+        !upper.includes('OLED') &&
+        !upper.includes('SELECT') &&
+        !upper.includes('PREMIER') &&
+        !upper.includes('LCD') &&
+        upper !== 'INCELL'
+      )
+    },
+  },
+]
 
 interface CatalogPageProps {
   // Função que busca os produtos (permite reutilizar a página para o catálogo de baterias)
@@ -303,53 +356,58 @@ const CatalogPage: React.FC<CatalogPageProps> = ({
             return getBateriaBrand(modelo)
           }
 
+          // Remover tags entre colchetes no início (ex: [OUTLET], [DESTAQUE]) para evitar falsos positivos
+          let cleanModelo = modelo.replace(/^\[[^\]]+\]\s*/g, '')
+          // Remover barras verticais, hífens, barras ou espaços extras do início
+          cleanModelo = cleanModelo.replace(/^[|\s\-_/]+/g, '')
+
           // Verificar prefixos conhecidos
           for (const [prefix, brandName] of Object.entries(brandMapping)) {
-            if (modelo.startsWith(prefix)) {
+            if (cleanModelo.startsWith(prefix)) {
               return brandName
             }
           }
 
           // Verificação específica para modelos Xiaomi (começam com MI)
-          if (modelo.startsWith('MI')) {
+          if (cleanModelo.startsWith('MI')) {
             return 'Xiaomi'
           }
 
           // Verificação específica para modelos Realme
-          if (modelo.startsWith('REALME')) {
+          if (cleanModelo.startsWith('REALME')) {
             return 'Realme'
           }
 
           // Verificação específica para modelos OPPO (qualquer variação)
-          if (modelo.toUpperCase().startsWith('OPPO')) {
+          if (cleanModelo.toUpperCase().startsWith('OPPO')) {
             return 'OPPO'
           }
 
           // Verificação específica para modelos Asus (começam com ZF)
-          if (modelo.startsWith('ZF')) {
+          if (cleanModelo.startsWith('ZF')) {
             return 'Asus'
           }
 
           // Verificação específica para DOC DE CARGA (qualquer variação)
           if (
-            modelo.toUpperCase().includes('DOC DE CARGA') ||
-            modelo.toUpperCase().startsWith('DOC')
+            cleanModelo.toUpperCase().includes('DOC DE CARGA') ||
+            cleanModelo.toUpperCase().startsWith('DOC')
           ) {
             return 'DOC DE CARGA'
           }
 
           // Verificação específica para HONOR
-          if (modelo.toUpperCase().startsWith('HONOR')) {
+          if (cleanModelo.toUpperCase().startsWith('HONOR')) {
             return 'Honor'
           }
 
           // Verificação específica para HUAWEI
-          if (modelo.toUpperCase().startsWith('HUAWEI')) {
+          if (cleanModelo.toUpperCase().startsWith('HUAWEI')) {
             return 'Huawei'
           }
 
           // Se não encontrar um prefixo conhecido, usar a primeira palavra como fallback
-          const modelParts = modelo.split(' ')
+          const modelParts = cleanModelo.split(' ')
           const firstPart = modelParts[0]
 
           // Verificar se a primeira parte não está vazia
@@ -543,6 +601,30 @@ const CatalogPage: React.FC<CatalogPageProps> = ({
       })
     }
 
+    // Extrair qualidades disponíveis com base nos filtros anteriores (como marcas selecionadas)
+    const dynamicQualities = [
+      ...new Set(
+        filtered
+          .map((p) => (p.qualidade === '-' ? 'LCD' : p.qualidade))
+          .filter(Boolean)
+      ),
+    ]
+
+    setAvailableQualities((prev) => {
+      const prevSorted = [...prev].sort()
+      const nextSorted = [...dynamicQualities].sort()
+      const different =
+        prevSorted.length !== nextSorted.length ||
+        prevSorted.some((v, i) => v !== nextSorted[i])
+      return different ? dynamicQualities : prev
+    })
+
+    // Se houver qualidades selecionadas que não existem mais nessa marca/filtros, desmarque-as
+    const validSelected = selectedQualities.filter((q) => dynamicQualities.includes(q))
+    if (validSelected.length !== selectedQualities.length) {
+      setSelectedQualities(validSelected)
+    }
+
     // Filtrar por qualidades selecionadas
     if (selectedQualities.length > 0) {
       filtered = filtered.filter((product) => {
@@ -702,6 +784,7 @@ const CatalogPage: React.FC<CatalogPageProps> = ({
     codigo,
     codePriceMapping,
     aroFilter,
+    isBateria,
   ])
 
   // Aviso quando um código válido for inserido e aplicado
@@ -1159,39 +1242,53 @@ const CatalogPage: React.FC<CatalogPageProps> = ({
                         </button>
                       )}
                     </div>
-                    <div className="flex flex-wrap gap-1.5 md:gap-2">
-                      {availableQualities.map((quality) => (
-                        <Badge
-                          key={quality}
-                          variant="outline"
-                          className={`
-                          relative overflow-hidden
-                          cursor-pointer 
-                          text-[11px] md:text-xs
-                          py-1.5 md:py-2
-                          px-3 md:px-4
-                          rounded-lg md:rounded-xl
-                          border-2
-                          transition-all
-                          duration-200
-                          font-medium
-                          ${selectedQualities.includes(quality)
-                              ? 'bg-gradient-to-r from-blue-600 to-blue-500 text-white border-transparent shadow-md hover:shadow-lg scale-105'
-                              : 'bg-white text-gray-700 border-gray-200 hover:border-blue-400 hover:text-blue-700 hover:shadow-sm hover:bg-blue-50 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:hover:border-blue-400 dark:hover:text-blue-400 dark:hover:bg-gray-700'
-                            }
-                        `}
-                          onClick={(e) => handleSelectQuality(quality, e)}
-                        >
-                          {quality}
-                          {quality.toUpperCase().includes('VV') && (
-                            <span
-                              className="absolute top-0 right-0 w-2.5 h-2.5 bg-red-500"
-                              style={{ clipPath: 'polygon(100% 0, 0 0, 100% 100%)' }}
-                              title="Possui vídeo de apresentação"
-                            />
-                          )}
-                        </Badge>
-                      ))}
+                    <div className="space-y-4">
+                      {QUALITY_GROUPS.map((group) => {
+                        const qualitiesInGroup = availableQualities.filter(group.match)
+                        if (qualitiesInGroup.length === 0) return null
+
+                        return (
+                          <div key={group.id} className="flex flex-col sm:flex-row sm:items-start gap-1.5 sm:gap-3 py-1.5 border-b border-gray-100/50 dark:border-gray-800/50 last:border-0">
+                            <span className="text-[10px] font-bold tracking-wider text-gray-400 dark:text-gray-500 uppercase shrink-0 sm:w-28 pl-0.5 sm:pt-1.5">
+                              {group.name}
+                            </span>
+                            <div className="flex flex-wrap gap-1.5 md:gap-2">
+                              {qualitiesInGroup.map((quality) => (
+                                <Badge
+                                  key={quality}
+                                  variant="outline"
+                                  className={`
+                                  relative overflow-hidden
+                                  cursor-pointer 
+                                  text-[11px] md:text-xs
+                                  py-1.5 md:py-2
+                                  px-3 md:px-4
+                                  rounded-lg md:rounded-xl
+                                  border-2
+                                  transition-all
+                                  duration-200
+                                  font-medium
+                                  ${selectedQualities.includes(quality)
+                                      ? 'bg-gradient-to-r from-blue-600 to-blue-500 text-white border-transparent shadow-md hover:shadow-lg scale-105'
+                                      : 'bg-white text-gray-700 border-gray-200 hover:border-blue-400 hover:text-blue-700 hover:shadow-sm hover:bg-blue-50 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:hover:border-blue-400 dark:hover:text-blue-400 dark:hover:bg-gray-700'
+                                    }
+                                `}
+                                  onClick={(e) => handleSelectQuality(quality, e)}
+                                >
+                                  {quality}
+                                  {quality.toUpperCase().includes('VV') && (
+                                    <span
+                                      className="absolute top-0 right-0 w-2.5 h-2.5 bg-red-500"
+                                      style={{ clipPath: 'polygon(100% 0, 0 0, 100% 100%)' }}
+                                      title="Possui vídeo de apresentação"
+                                    />
+                                  )}
+                                </Badge>
+                              ))}
+                            </div>
+                          </div>
+                        )
+                      })}
                     </div>
 
                     {/* Banner explicativo de Qualidade VV */}
