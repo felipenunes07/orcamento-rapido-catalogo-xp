@@ -64,7 +64,46 @@ const QUALITY_VIDEO_CONFIG = {
 }
 
 
-const CatalogPage: React.FC = () => {
+// Mapeamento de marcas para o catálogo de baterias.
+// Diferente das telas, os modelos de bateria vêm com o nome da marca por extenso
+// (ex.: "IPHONE 11", "SAMSUNG |A055| A05", "MOTOROLA |BL270| ...").
+const BATERIA_BRAND_MAP: Record<string, string> = {
+  IPHONE: 'iPhone',
+  SAMSUNG: 'Samsung',
+  MOTOROLA: 'Motorola',
+  XIAOMI: 'Xiaomi',
+  LG: 'LG',
+}
+
+// Extrai a marca de uma bateria a partir da primeira palavra do modelo.
+const getBateriaBrand = (modelo: string): string | null => {
+  if (!modelo || modelo.trim() === '') return null
+  const first = modelo.trim().split(/[\s|]+/)[0].toUpperCase()
+  if (BATERIA_BRAND_MAP[first]) return BATERIA_BRAND_MAP[first]
+  // Fallback: primeira palavra capitalizada (marcas futuras)
+  return first.charAt(0) + first.slice(1).toLowerCase()
+}
+
+interface CatalogPageProps {
+  // Função que busca os produtos (permite reutilizar a página para o catálogo de baterias)
+  fetchProductsFn?: () => Promise<Product[]>
+  // Caminho da página de resumo do orçamento
+  checkoutPath?: string
+  // Título exibido no topo da tabela
+  pageTitle?: string
+  // Tipo de catálogo: 'telas' (padrão) ou 'baterias'.
+  // Baterias usam detecção de marca própria e escondem filtros que não se aplicam
+  // (Aro, Destaques, Outlet, Preço de Parceiro).
+  catalogType?: 'telas' | 'baterias'
+}
+
+const CatalogPage: React.FC<CatalogPageProps> = ({
+  fetchProductsFn = fetchProducts,
+  checkoutPath = '/resumo',
+  pageTitle = 'Tabela de Produtos',
+  catalogType = 'telas',
+}) => {
+  const isBateria = catalogType === 'baterias'
   const [products, setProducts] = useState<Product[]>([])
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState<boolean>(true)
@@ -201,7 +240,7 @@ const CatalogPage: React.FC = () => {
 
     try {
       console.log(`Tentando carregar produtos (tentativa ${retryCount + 1})...`)
-      const data = await fetchProducts()
+      const data = await fetchProductsFn()
 
       // Log dos dados recebidos para depuração
       console.log('Dados recebidos:', data)
@@ -257,6 +296,11 @@ const CatalogPage: React.FC = () => {
           // Verificar se o modelo existe e não está vazio
           if (!modelo || modelo.trim() === '') {
             return null
+          }
+
+          // Baterias: marca vem por extenso no início do modelo
+          if (isBateria) {
+            return getBateriaBrand(modelo)
           }
 
           // Verificar prefixos conhecidos
@@ -409,7 +453,14 @@ const CatalogPage: React.FC = () => {
     })
 
     // Filtrar por marcas selecionadas
-    if (selectedBrands.length > 0) {
+    if (selectedBrands.length > 0 && isBateria) {
+      // Baterias: compara a marca extraída do início do modelo
+      filtered = filtered.filter((product) =>
+        selectedBrands
+          .filter((brand) => brand && brand.trim() !== '')
+          .includes(getBateriaBrand(product.modelo) || '')
+      )
+    } else if (selectedBrands.length > 0) {
       filtered = filtered.filter((product) => {
         // Mapeamento de marcas para prefixos
         const brandPrefixMap: Record<string, string[]> = {
@@ -897,7 +948,7 @@ const CatalogPage: React.FC = () => {
     <Layout>
       <div className="container-custom py-8 bg-background">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
-          <h1 className="text-2xl font-bold">Tabela de Produtos</h1>
+          <h1 className="text-2xl font-bold">{pageTitle}</h1>
           <div className="flex flex-wrap gap-2">
             <Button
               variant="outline"
@@ -1011,8 +1062,8 @@ const CatalogPage: React.FC = () => {
                   </div>
                 )}
 
-                {/* Filtro de qualidades */}
-                {availableQualities.length > 0 && (
+                {/* Filtro de qualidades (oculto em baterias: só existe "BATERIA") */}
+                {!isBateria && availableQualities.length > 0 && (
                   <div className="flex flex-col gap-3">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
@@ -1146,7 +1197,8 @@ const CatalogPage: React.FC = () => {
                   </div>
                 )}
 
-                {/* Filtro de Aro */}
+                {/* Filtro de Aro (não se aplica a baterias) */}
+                {!isBateria && (
                 <div className="flex flex-col gap-3">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-1.5">
@@ -1241,6 +1293,7 @@ const CatalogPage: React.FC = () => {
                   </div>
                   <div className="h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent dark:via-gray-700 mt-1"></div>
                 </div>
+                )}
 
                 {/* Novo filtro de promoção */}
                 <div className="flex flex-col gap-3">
@@ -1306,10 +1359,12 @@ const CatalogPage: React.FC = () => {
                       )}
                   </div>
                   <div className="flex flex-wrap gap-1.5 md:gap-2">
+                    {/* Preço de Parceiro / Destaques / Outlet não se aplicam a baterias */}
+                    {!isBateria && (<>
                     <Badge
                       variant="outline"
                       className={`
-                      cursor-pointer 
+                      cursor-pointer
                       text-[11px] md:text-xs
                       py-1.5 md:py-2
                       px-3 md:px-4
@@ -1372,6 +1427,7 @@ const CatalogPage: React.FC = () => {
                     >
                       🏷️ Outlet
                     </Badge>
+                    </>)}
                     {/* Novo filtro: Código (estilo similar ao badge) */}
                     <div
                       className={`
@@ -1542,7 +1598,7 @@ const CatalogPage: React.FC = () => {
           </div>
         )}
 
-        <QuoteCart cartItems={cartItems} onClearCart={clearCart} />
+        <QuoteCart cartItems={cartItems} onClearCart={clearCart} checkoutPath={checkoutPath} />
 
         {/* Modal de Vídeo Explicativo de Qualidade VV (Lazy-Loaded) */}
         <Dialog open={isQualityVideoOpen} onOpenChange={setIsQualityVideoOpen}>

@@ -4,7 +4,14 @@ import Layout from '../components/layout/Layout'
 import { Button } from '@/components/ui/button'
 import { CheckCircle } from 'lucide-react'
 
-const ThankYouPage: React.FC = () => {
+interface ThankYouPageProps {
+  // Caminho do catálogo para criar um novo orçamento
+  catalogPath?: string
+}
+
+const ThankYouPage: React.FC<ThankYouPageProps> = ({
+  catalogPath = '/catalogo',
+}) => {
   return (
     <Layout>
       <div className="container-custom py-16 bg-background">
@@ -21,7 +28,7 @@ const ThankYouPage: React.FC = () => {
 
           <div className="space-y-4">
             <Button asChild className="w-full btn-accent">
-              <Link to="/catalogo">Criar Novo Orçamento</Link>
+              <Link to={catalogPath}>Criar Novo Orçamento</Link>
             </Button>
 
             <Button asChild variant="outline" className="w-full">

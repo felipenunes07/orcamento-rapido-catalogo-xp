@@ -11,7 +11,20 @@ import { Product, QuoteData } from '../types'
 import { useToast } from '@/hooks/use-toast'
 import { CheckCircle } from 'lucide-react'
 
-const QuoteSummaryPage: React.FC = () => {
+interface QuoteSummaryPageProps {
+  // Função que busca os produtos originais (catálogo de telas/doc ou de baterias)
+  fetchProductsFn?: () => Promise<Product[]>
+  // Caminho do catálogo de origem (para voltar/redirecionar)
+  catalogPath?: string
+  // Caminho da página de agradecimento
+  thankYouPath?: string
+}
+
+const QuoteSummaryPage: React.FC<QuoteSummaryPageProps> = ({
+  fetchProductsFn = fetchProducts,
+  catalogPath = '/catalogo',
+  thankYouPath = '/obrigado',
+}) => {
   const { cartItems } = useCart()
   const navigate = useNavigate()
   const [savedQuote, setSavedQuote] = useState<QuoteData | null>(null)
@@ -78,7 +91,7 @@ const QuoteSummaryPage: React.FC = () => {
   useEffect(() => {
     const loadOriginalProducts = async () => {
       try {
-        const products = await fetchProducts()
+        const products = await fetchProductsFn()
         setOriginalProducts(products)
 
         // Verificar se há código aplicado no localStorage
@@ -97,16 +110,16 @@ const QuoteSummaryPage: React.FC = () => {
   // Redirect to catalog if cart is empty
   useEffect(() => {
     if (cartItems.length === 0) {
-      navigate('/catalogo')
+      navigate(catalogPath)
     }
-  }, [cartItems, navigate])
+  }, [cartItems, navigate, catalogPath])
 
   const handleShareWhatsApp = async () => {
     if (!savedQuote) return
     try {
       setIsSending(true)
       await shareCompleteQuoteWithSavedQuote(savedQuote, cartItems)
-      navigate('/obrigado')
+      navigate(thankYouPath)
     } catch (error) {
       console.error('Erro ao compartilhar orçamento:', error)
     } finally {
@@ -153,7 +166,7 @@ const QuoteSummaryPage: React.FC = () => {
     <Layout>
       <div className="container-custom py-8 bg-background">
         <div className="mb-6 flex items-center justify-between gap-3">
-          <Link to="/catalogo" className="text-accent hover:underline">
+          <Link to={catalogPath} className="text-accent hover:underline">
             ← Voltar ao catálogo
           </Link>
 

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import Layout from '../components/layout/Layout'
+import { Smartphone, BatteryCharging } from 'lucide-react'
 
 const HomePage: React.FC = () => {
   const [showPwaPrompt, setShowPwaPrompt] = useState(false)
@@ -302,9 +303,49 @@ const HomePage: React.FC = () => {
               <p className="text-base sm:text-lg text-muted-foreground mb-6 dark:text-gray-400">
                 Crie orçamentos rápidos e simples
               </p>
-              <Button asChild size="lg" className="btn-accent px-8">
-                <Link to="/catalogo">Ver Catálogo</Link>
-              </Button>
+
+              {/* Opções de catálogo (compactas) */}
+              <div className="grid grid-cols-2 gap-3 max-w-md mx-auto">
+                <Link
+                  to="/catalogo"
+                  className="group flex items-center gap-3 bg-white dark:bg-gray-800 p-3 rounded-xl border border-slate-200 dark:border-gray-700 shadow-sm transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 active:scale-[0.98] hover:border-blue-400 dark:hover:border-blue-500"
+                >
+                  <span
+                    className="flex items-center justify-center w-9 h-9 rounded-lg text-white shrink-0 transition-transform duration-200 group-hover:scale-105"
+                    style={{ background: 'linear-gradient(135deg, #1e40af, #2563eb)' }}
+                  >
+                    <Smartphone className="h-5 w-5" />
+                  </span>
+                  <span className="text-left leading-tight">
+                    <span className="block font-semibold text-sm text-blue-800 dark:text-blue-300">
+                      Telas e Doc de Carga
+                    </span>
+                    <span className="block text-[11px] text-muted-foreground dark:text-gray-400">
+                      Ver catálogo
+                    </span>
+                  </span>
+                </Link>
+
+                <Link
+                  to="/baterias"
+                  className="group flex items-center gap-3 bg-white dark:bg-gray-800 p-3 rounded-xl border border-slate-200 dark:border-gray-700 shadow-sm transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 active:scale-[0.98] hover:border-sky-400 dark:hover:border-sky-500"
+                >
+                  <span
+                    className="flex items-center justify-center w-9 h-9 rounded-lg text-white shrink-0 transition-transform duration-200 group-hover:scale-105"
+                    style={{ background: 'linear-gradient(135deg, #0369a1, #0ea5e9)' }}
+                  >
+                    <BatteryCharging className="h-5 w-5" />
+                  </span>
+                  <span className="text-left leading-tight">
+                    <span className="block font-semibold text-sm text-sky-700 dark:text-sky-300">
+                      Baterias
+                    </span>
+                    <span className="block text-[11px] text-muted-foreground dark:text-gray-400">
+                      Ver catálogo
+                    </span>
+                  </span>
+                </Link>
+              </div>
             </section>
 
             {/* Steps Section */}
@@ -354,9 +395,16 @@ const HomePage: React.FC = () => {
               </div>
             </section>
 
-            <div className="mt-8 text-center">
-              <Button asChild size="lg" className="btn-accent">
-                <Link to="/catalogo">Começar Agora</Link>
+            <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
+              <Button asChild size="lg" className="btn-accent w-full sm:w-auto transition-transform duration-200 hover:-translate-y-0.5 active:scale-[0.98]">
+                <Link to="/catalogo">Telas e Doc de Carga</Link>
+              </Button>
+              <Button
+                asChild
+                size="lg"
+                className="w-full sm:w-auto text-white bg-gradient-to-r from-sky-700 to-sky-500 hover:from-sky-800 hover:to-sky-600 transition-transform duration-200 hover:-translate-y-0.5 active:scale-[0.98]"
+              >
+                <Link to="/baterias">Baterias</Link>
               </Button>
             </div>
 

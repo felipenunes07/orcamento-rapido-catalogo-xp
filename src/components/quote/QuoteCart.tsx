@@ -9,9 +9,10 @@ import { X, ChevronUp, ChevronDown } from 'lucide-react'
 interface QuoteCartProps {
   cartItems: CartItem[]
   onClearCart: () => void
+  checkoutPath?: string
 }
 
-const QuoteCart: React.FC<QuoteCartProps> = ({ cartItems, onClearCart }) => {
+const QuoteCart: React.FC<QuoteCartProps> = ({ cartItems, onClearCart, checkoutPath = '/resumo' }) => {
   const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0)
   const totalValue = cartItems.reduce((sum, item) => {
     const unitPrice =
@@ -87,7 +88,7 @@ const QuoteCart: React.FC<QuoteCartProps> = ({ cartItems, onClearCart }) => {
                 disabled={!hasItems}
                 asChild
               >
-                <Link to={hasItems ? '/resumo' : '#'}>Finalizar Orçamento</Link>
+                <Link to={hasItems ? checkoutPath : '#'}>Finalizar Orçamento</Link>
               </Button>
             </div>
           </div>
@@ -134,7 +135,7 @@ const QuoteCart: React.FC<QuoteCartProps> = ({ cartItems, onClearCart }) => {
             disabled={!hasItems}
             asChild
           >
-            <Link to={hasItems ? '/resumo' : '#'}>Finalizar Orçamento</Link>
+            <Link to={hasItems ? checkoutPath : '#'}>Finalizar Orçamento</Link>
           </Button>
         </div>
       )}

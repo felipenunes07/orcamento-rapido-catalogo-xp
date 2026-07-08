@@ -4,12 +4,31 @@ import { Product } from '../types'
 const SPREADSHEET_ID = '1qAuw2ebWPJmcy_gl4Qf48GfmnSGLZumDfs62fpG2BGA'
 const SHEET_NAME = 'CATÁLOGO'
 const CODE_PRICE_SHEET_NAME = 'CODIGOPREÇO'
+// Aba de baterias (identificada pelo gid da URL da planilha)
+const BATERIA_SHEET_GID = '1316894528'
 
 // Using a public access approach instead of API key
 export async function fetchProducts(): Promise<Product[]> {
+  return fetchProductsFromSheet(
+    `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:csv&sheet=${SHEET_NAME}`,
+    'product'
+  )
+}
+
+// Busca os produtos da aba de baterias
+export async function fetchBateriaProducts(): Promise<Product[]> {
+  return fetchProductsFromSheet(
+    `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:csv&gid=${BATERIA_SHEET_GID}`,
+    'bateria'
+  )
+}
+
+async function fetchProductsFromSheet(
+  requestUrl: string,
+  idPrefix: string
+): Promise<Product[]> {
   try {
     // Using the public export CSV approach which doesn't require API key
-    const requestUrl = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:csv&sheet=${SHEET_NAME}`
     console.log('Buscando dados de:', requestUrl)
 
     const response = await fetch(requestUrl)
@@ -23,7 +42,7 @@ export async function fetchProducts(): Promise<Product[]> {
     const csvText = await response.text()
     console.log('CSV texto recebido:', csvText.substring(0, 200)) // Log primeiros 200 caracteres
 
-    const products = parseCSV(csvText)
+    const products = parseCSV(csvText, idPrefix)
 
     console.log('Produtos carregados:', products.length)
     return products
@@ -34,7 +53,7 @@ export async function fetchProducts(): Promise<Product[]> {
 }
 
 // Parse CSV data into Product objects
-function parseCSV(csvText: string): Product[] {
+function parseCSV(csvText: string, idPrefix: string = 'product'): Product[] {
   const rows = csvText.split('\n').filter((row) => row.trim() !== '')
 
   if (rows.length <= 1) {
@@ -257,7 +276,7 @@ function parseCSV(csvText: string): Product[] {
 
     // Create product object
     const product: Product = {
-      id: `product-${i}`,
+      id: `${idPrefix}-${i}`,
       sku: sku.trim(),
       modelo: modelo.trim(),
       cor: cor.trim() || '-',
