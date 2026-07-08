@@ -395,21 +395,21 @@ const HomePage: React.FC = () => {
               </div>
             </section>
 
-            {/* Opções de catálogo inferiores (Botões coloridos inline) */}
+            {/* Opções de catálogo inferiores (Botões compactos outline) */}
             <div className="mt-8 flex flex-row items-center justify-center gap-3 max-w-md mx-auto px-4">
               <Link
                 to="/catalogo"
-                className="btn-neon-blue flex-1 flex items-center justify-center gap-2 py-2 px-3 text-xs sm:text-sm font-semibold rounded-lg shadow-sm"
+                className="flex-1 flex items-center justify-center gap-2 py-2 px-3 text-xs sm:text-sm font-semibold rounded-lg border border-blue-200 hover:border-blue-500 dark:border-blue-900/50 dark:hover:border-blue-400 bg-white dark:bg-gray-800 text-blue-700 dark:text-blue-300 hover:bg-blue-50/50 dark:hover:bg-gray-700/50 shadow-sm transition-all duration-200"
               >
-                <Smartphone className="h-4 w-4 shrink-0" />
+                <Smartphone className="h-4 w-4 shrink-0 text-blue-600 dark:text-blue-400" />
                 <span>Telas e Doc</span>
               </Link>
 
               <Link
                 to="/baterias"
-                className="btn-neon-sky flex-1 flex items-center justify-center gap-2 py-2 px-3 text-xs sm:text-sm font-semibold rounded-lg shadow-sm"
+                className="flex-1 flex items-center justify-center gap-2 py-2 px-3 text-xs sm:text-sm font-semibold rounded-lg border border-sky-200 hover:border-sky-500 dark:border-sky-900/50 dark:hover:border-sky-400 bg-white dark:bg-gray-800 text-sky-700 dark:text-sky-300 hover:bg-sky-50/50 dark:hover:bg-gray-700/50 shadow-sm transition-all duration-200"
               >
-                <BatteryCharging className="h-4 w-4 shrink-0" />
+                <BatteryCharging className="h-4 w-4 shrink-0 text-sky-600 dark:text-sky-400" />
                 <span>Baterias</span>
               </Link>
             </div>
