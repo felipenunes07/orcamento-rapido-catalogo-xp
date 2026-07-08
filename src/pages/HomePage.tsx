@@ -308,19 +308,19 @@ const HomePage: React.FC = () => {
               <div className="grid grid-cols-2 gap-3 max-w-md mx-auto px-1 mt-2">
                 <Link
                   to="/catalogo"
-                  className="group flex items-center gap-2 sm:gap-3 bg-white dark:bg-gray-800/90 backdrop-blur-sm py-1.5 px-2 sm:p-3.5 rounded-lg sm:rounded-xl border border-slate-200 dark:border-gray-700 shadow-sm glow-card-blue animate-pulse-glow"
+                  className="group flex items-center gap-2.5 sm:gap-3 bg-white dark:bg-gray-800/90 backdrop-blur-sm p-3 sm:p-3.5 rounded-xl border border-slate-200 dark:border-gray-700 shadow-sm glow-card-blue animate-pulse-glow"
                 >
                   <span
-                    className="flex items-center justify-center w-7 h-7 sm:w-9 h-9 rounded-md sm:rounded-lg text-white shrink-0 transition-transform duration-200 group-hover:scale-105"
+                    className="flex items-center justify-center w-9 h-9 rounded-lg text-white shrink-0 transition-transform duration-200 group-hover:scale-105"
                     style={{ background: 'linear-gradient(135deg, #1e40af, #2563eb)' }}
                   >
-                    <Smartphone className="h-3.5 w-3.5 sm:h-5 w-5" />
+                    <Smartphone className="h-5 w-5" />
                   </span>
                   <span className="text-left leading-tight min-w-0">
                     <span className="block font-bold text-xs sm:text-sm text-blue-800 dark:text-blue-300 truncate">
                       Telas e Doc<span className="hidden sm:inline"> de Carga</span>
                     </span>
-                    <span className="block text-[9px] sm:text-[11px] text-muted-foreground dark:text-gray-400 mt-0.5">
+                    <span className="block text-[10px] sm:text-[11px] text-muted-foreground dark:text-gray-400 mt-0.5">
                       Ver catálogo
                     </span>
                   </span>
@@ -328,19 +328,19 @@ const HomePage: React.FC = () => {
 
                 <Link
                   to="/baterias"
-                  className="group flex items-center gap-2 sm:gap-3 bg-white dark:bg-gray-800/90 backdrop-blur-sm py-1.5 px-2 sm:p-3.5 rounded-lg sm:rounded-xl border border-slate-200 dark:border-gray-700 shadow-sm glow-card-sky"
+                  className="group flex items-center gap-2.5 sm:gap-3 bg-white dark:bg-gray-800/90 backdrop-blur-sm p-3 sm:p-3.5 rounded-xl border border-slate-200 dark:border-gray-700 shadow-sm glow-card-sky"
                 >
                   <span
-                    className="flex items-center justify-center w-7 h-7 sm:w-9 h-9 rounded-md sm:rounded-lg text-white shrink-0 transition-transform duration-200 group-hover:scale-105"
+                    className="flex items-center justify-center w-9 h-9 rounded-lg text-white shrink-0 transition-transform duration-200 group-hover:scale-105"
                     style={{ background: 'linear-gradient(135deg, #0369a1, #0ea5e9)' }}
                   >
-                    <BatteryCharging className="h-3.5 w-3.5 sm:h-5 w-5" />
+                    <BatteryCharging className="h-5 w-5" />
                   </span>
                   <span className="text-left leading-tight min-w-0">
                     <span className="block font-bold text-xs sm:text-sm text-sky-700 dark:text-sky-300 truncate">
                       Baterias
                     </span>
-                    <span className="block text-[9px] sm:text-[11px] text-muted-foreground dark:text-gray-400 mt-0.5">
+                    <span className="block text-[10px] sm:text-[11px] text-muted-foreground dark:text-gray-400 mt-0.5">
                       Ver catálogo
                     </span>
                   </span>
