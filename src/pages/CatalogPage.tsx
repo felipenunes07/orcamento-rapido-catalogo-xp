@@ -150,6 +150,19 @@ const QUALITY_GROUPS: QualityGroup[] = [
   },
 ]
 
+const sortQualitiesByGroup = (qualities: string[]): string[] => {
+  return [...qualities].sort((a, b) => {
+    const aGroupIndex = QUALITY_GROUPS.findIndex((group) => group.match(a))
+    const bGroupIndex = QUALITY_GROUPS.findIndex((group) => group.match(b))
+    const aIdx = aGroupIndex === -1 ? QUALITY_GROUPS.length : aGroupIndex
+    const bIdx = bGroupIndex === -1 ? QUALITY_GROUPS.length : bGroupIndex
+    if (aIdx !== bIdx) {
+      return aIdx - bIdx
+    }
+    return a.localeCompare(b)
+  })
+}
+
 interface CatalogPageProps {
   // Função que busca os produtos (permite reutilizar a página para o catálogo de baterias)
   fetchProductsFn?: () => Promise<Product[]>
@@ -438,14 +451,16 @@ const CatalogPage: React.FC<CatalogPageProps> = ({
         )
         setAvailableBrands(uniqueBrands)
 
-        // Após carregar produtos, extrair qualidades únicas apenas dos produtos ativos
-        setAvailableQualities([
-          ...new Set(
-            activeProducts
-              .map((p) => (p.qualidade === '-' ? 'LCD' : p.qualidade))
-              .filter(Boolean)
-          ),
-        ])
+        // Após carregar produtos, extrair qualidades únicas apenas dos produtos ativos e ordenar
+        setAvailableQualities(
+          sortQualitiesByGroup([
+            ...new Set(
+              activeProducts
+                .map((p) => (p.qualidade === '-' ? 'LCD' : p.qualidade))
+                .filter(Boolean)
+            ),
+          ])
+        )
 
         toast({
           title: (
@@ -615,14 +630,14 @@ const CatalogPage: React.FC<CatalogPageProps> = ({
       })
     }
 
-    // Extrair qualidades disponíveis com base nos filtros anteriores (como marcas selecionadas)
-    const dynamicQualities = [
+    // Extrair qualidades disponíveis com base nos filtros anteriores (como marcas selecionadas) e ordenar
+    const dynamicQualities = sortQualitiesByGroup([
       ...new Set(
         filtered
           .map((p) => (p.qualidade === '-' ? 'LCD' : p.qualidade))
           .filter(Boolean)
       ),
-    ]
+    ])
 
     setAvailableQualities((prev) => {
       const prevSorted = [...prev].sort()
