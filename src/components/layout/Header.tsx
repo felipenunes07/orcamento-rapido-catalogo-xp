@@ -6,7 +6,7 @@ const Header: React.FC = () => {
   const location = useLocation()
 
   return (
-    <header className="bg-background shadow-sm py-3 sm:py-4 md:sticky md:top-0 md:z-10 border-b">
+    <header className="bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 shadow-sm py-3 sm:py-4 sticky top-0 z-40 border-b">
       <div className="container-custom">
         <div className="flex flex-nowrap justify-between items-center gap-2">
           <Link to="/" className="flex items-center gap-2 sm:gap-3 min-w-0">
