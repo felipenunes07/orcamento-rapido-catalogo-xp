@@ -170,6 +170,7 @@ const CatalogPage: React.FC<CatalogPageProps> = ({
   const { toast, dismiss } = useToast()
   const [selectedQualities, setSelectedQualities] = useState<string[]>([])
   const [availableQualities, setAvailableQualities] = useState<string[]>([])
+  const [activeQualityTab, setActiveQualityTab] = useState<string>('all')
   const [showPromocaoOnly, setShowPromocaoOnly] = useState<boolean>(false)
   const [showDestaqueOnly, setShowDestaqueOnly] = useState<boolean>(false)
   const [showOutletOnly, setShowOutletOnly] = useState<boolean>(false)
@@ -619,6 +620,15 @@ const CatalogPage: React.FC<CatalogPageProps> = ({
       return different ? dynamicQualities : prev
     })
 
+    // Se a aba de qualidade ativa não tem nenhuma qualidade disponível na nova marca/filtros, volte para 'Tudo'
+    if (activeQualityTab !== 'all') {
+      const activeGroup = QUALITY_GROUPS.find((g) => g.id === activeQualityTab)
+      const hasAny = activeGroup ? dynamicQualities.some(activeGroup.match) : false
+      if (!hasAny) {
+        setActiveQualityTab('all')
+      }
+    }
+
     // Se houver qualidades selecionadas que não existem mais nessa marca/filtros, desmarque-as
     const validSelected = selectedQualities.filter((q) => dynamicQualities.includes(q))
     if (validSelected.length !== selectedQualities.length) {
@@ -785,6 +795,7 @@ const CatalogPage: React.FC<CatalogPageProps> = ({
     codePriceMapping,
     aroFilter,
     isBateria,
+    activeQualityTab,
   ])
 
   // Aviso quando um código válido for inserido e aplicado
@@ -1242,53 +1253,91 @@ const CatalogPage: React.FC<CatalogPageProps> = ({
                         </button>
                       )}
                     </div>
-                    <div className="space-y-1.5 sm:space-y-3">
+                    {/* Abas de Categorias de Qualidade */}
+                    <div className="flex overflow-x-auto gap-1 pb-1 scrollbar-none -mx-4 px-4 sm:mx-0 sm:px-0">
+                      <button
+                        onClick={() => setActiveQualityTab('all')}
+                        className={`
+                          shrink-0 text-[11px] sm:text-xs py-1 px-3 rounded-full font-semibold transition-all
+                          ${activeQualityTab === 'all'
+                            ? 'bg-blue-600 text-white shadow-sm'
+                            : 'bg-gray-100 hover:bg-gray-200 text-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
+                          }
+                        `}
+                      >
+                        Tudo
+                      </button>
                       {QUALITY_GROUPS.map((group) => {
-                        const qualitiesInGroup = availableQualities.filter(group.match)
-                        if (qualitiesInGroup.length === 0) return null
+                        const hasQualities = availableQualities.some(group.match)
+                        if (!hasQualities) return null
 
                         return (
-                          <div key={group.id} className="flex flex-row items-center sm:items-start gap-2 sm:gap-3 py-1 sm:py-1.5 border-b border-gray-100/50 dark:border-gray-800/50 last:border-0">
-                            <span className="text-[9px] sm:text-[10px] font-bold tracking-wider text-gray-400 dark:text-gray-500 uppercase shrink-0 w-20 sm:w-28 pl-0.5 pt-0.5 sm:pt-1.5">
-                              {group.name}
-                            </span>
-                            <div className="flex flex-wrap gap-1.5 md:gap-2">
-                              {qualitiesInGroup.map((quality) => (
-                                <Badge
-                                  key={quality}
-                                  variant="outline"
-                                  className={`
-                                  relative overflow-hidden
-                                  cursor-pointer 
-                                  text-[11px] md:text-xs
-                                  py-1 md:py-2
-                                  px-2.5 md:px-4
-                                  rounded-lg md:rounded-xl
-                                  border-2
-                                  transition-all
-                                  duration-200
-                                  font-medium
-                                  ${selectedQualities.includes(quality)
-                                      ? 'bg-gradient-to-r from-blue-600 to-blue-500 text-white border-transparent shadow-md hover:shadow-lg scale-105'
-                                      : 'bg-white text-gray-700 border-gray-200 hover:border-blue-400 hover:text-blue-700 hover:shadow-sm hover:bg-blue-50 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:hover:border-blue-400 dark:hover:text-blue-400 dark:hover:bg-gray-700'
-                                    }
-                                `}
-                                  onClick={(e) => handleSelectQuality(quality, e)}
-                                >
-                                  {quality}
-                                  {quality.toUpperCase().includes('VV') && (
-                                    <span
-                                      className="absolute top-0 right-0 w-2.5 h-2.5 bg-red-500"
-                                      style={{ clipPath: 'polygon(100% 0, 0 0, 100% 100%)' }}
-                                      title="Possui vídeo de apresentação"
-                                    />
-                                  )}
-                                </Badge>
-                              ))}
-                            </div>
-                          </div>
+                          <button
+                            key={group.id}
+                            onClick={() => setActiveQualityTab(group.id)}
+                            className={`
+                              shrink-0 text-[11px] sm:text-xs py-1 px-3 rounded-full font-semibold transition-all
+                              ${activeQualityTab === group.id
+                                ? 'bg-blue-600 text-white shadow-sm'
+                                : 'bg-gray-100 hover:bg-gray-200 text-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
+                              }
+                            `}
+                          >
+                            {group.name}
+                          </button>
                         )
                       })}
+                    </div>
+
+                    {/* Botões (Badges) da Categoria Selecionada */}
+                    <div className="flex flex-wrap gap-1.5 md:gap-2 min-h-[44px] items-center bg-gray-50/40 dark:bg-gray-900/10 p-2.5 rounded-xl border border-gray-100/50 dark:border-gray-800/40">
+                      {(() => {
+                        const targetGroup = QUALITY_GROUPS.find(g => g.id === activeQualityTab)
+                        const qualitiesToShow = targetGroup 
+                          ? availableQualities.filter(targetGroup.match)
+                          : availableQualities
+
+                        if (qualitiesToShow.length === 0) {
+                          return (
+                            <span className="text-xs text-gray-400 pl-1 py-1">
+                              Nenhuma qualidade disponível para esta categoria
+                            </span>
+                          )
+                        }
+
+                        return qualitiesToShow.map((quality) => (
+                          <Badge
+                            key={quality}
+                            variant="outline"
+                            className={`
+                              relative overflow-hidden
+                              cursor-pointer 
+                              text-[11px] md:text-xs
+                              py-1.5 md:py-2
+                              px-3 md:px-4
+                              rounded-lg md:rounded-xl
+                              border-2
+                              transition-all
+                              duration-200
+                              font-medium
+                              ${selectedQualities.includes(quality)
+                                ? 'bg-gradient-to-r from-blue-600 to-blue-500 text-white border-transparent shadow-md hover:shadow-lg scale-105'
+                                : 'bg-white text-gray-700 border-gray-200 hover:border-blue-400 hover:text-blue-700 hover:shadow-sm hover:bg-blue-50 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:hover:border-blue-400 dark:hover:text-blue-400 dark:hover:bg-gray-700'
+                              }
+                            `}
+                            onClick={(e) => handleSelectQuality(quality, e)}
+                          >
+                            {quality}
+                            {quality.toUpperCase().includes('VV') && (
+                              <span
+                                className="absolute top-0 right-0 w-2.5 h-2.5 bg-red-500"
+                                style={{ clipPath: 'polygon(100% 0, 0 0, 100% 100%)' }}
+                                title="Possui vídeo de apresentação"
+                              />
+                            )}
+                          </Badge>
+                        ))
+                      })()}
                     </div>
 
                     {/* Banner explicativo de Qualidade VV */}
