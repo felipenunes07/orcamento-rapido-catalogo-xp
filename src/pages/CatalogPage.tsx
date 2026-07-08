@@ -1662,6 +1662,7 @@ const CatalogPage: React.FC<CatalogPageProps> = ({
             </div>
           )}
 
+
         {/* Botão para selecionar 1 de cada modelo + Visualização Compacta (à direita) */}
         <div className="mt-8 mb-6">
           <div className="flex items-center justify-between gap-3 md:gap-4">
@@ -1721,10 +1722,10 @@ const CatalogPage: React.FC<CatalogPageProps> = ({
           </div>
         </div>
 
-        {/* Campo de busca por modelo */}
+        {/* Campo de busca por modelo - sticky abaixo do header */}
         {!loading && !error && (
-          <div className="mb-4 max-w-sm md:max-w-md">
-            <div className="relative flex items-center">
+          <div className="sticky top-[52px] sm:top-[60px] z-30 bg-background/95 backdrop-blur-md py-3 border-b border-gray-100 dark:border-gray-800 -mx-4 px-4 sm:mx-0 sm:px-0 mb-4">
+            <div className="relative flex items-center max-w-sm md:max-w-md">
               <Input
                 type="text"
                 placeholder="Pesquisar por modelo..."
@@ -1790,15 +1791,13 @@ const CatalogPage: React.FC<CatalogPageProps> = ({
             )}
           </div>
         ) : (
-          <div className="bg-background rounded-lg shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
-            <div className="max-h-[70vh] overflow-y-auto">
-              <ProductGrid
-                products={filteredProducts}
-                cartItems={cartItems}
-                onUpdateQuantity={updateQuantity}
-                compactView={compactView}
-              />
-            </div>
+          <div className="bg-background rounded-lg shadow-sm dark:border-gray-700">
+            <ProductGrid
+              products={filteredProducts}
+              cartItems={cartItems}
+              onUpdateQuantity={updateQuantity}
+              compactView={compactView}
+            />
           </div>
         )}
 
