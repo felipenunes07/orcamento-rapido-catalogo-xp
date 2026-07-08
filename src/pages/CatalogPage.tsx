@@ -948,7 +948,15 @@ const CatalogPage: React.FC<CatalogPageProps> = ({
     <Layout>
       <div className="container-custom py-8 bg-background">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
-          <h1 className="text-2xl font-bold">{pageTitle}</h1>
+          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
+            <span className={
+              isBateria 
+                ? "bg-gradient-to-r from-sky-700 via-sky-500 to-sky-400 bg-clip-text text-transparent"
+                : "bg-gradient-to-r from-blue-800 via-blue-600 to-blue-500 bg-clip-text text-transparent dark:from-blue-300 dark:via-blue-400 dark:to-blue-500"
+            }>
+              {pageTitle}
+            </span>
+          </h1>
           <div className="flex flex-wrap gap-2">
             <Button
               variant="outline"
@@ -1005,7 +1013,11 @@ const CatalogPage: React.FC<CatalogPageProps> = ({
         {!loading &&
           !error &&
           (availableBrands.length > 0 || availableQualities.length > 0) && (
-            <div className="bg-gradient-to-br from-slate-50 to-blue-50 dark:from-gray-900 dark:to-gray-800 rounded-2xl p-4 md:p-6 shadow-sm border border-gray-100 dark:border-gray-700 mb-6">
+            <div className={`bg-gradient-to-br from-slate-50 to-blue-50 dark:from-gray-900 dark:to-gray-800 rounded-2xl p-4 md:p-6 shadow-sm border border-gray-100 dark:border-gray-700 mb-6 transition-all duration-300 ${
+              isBateria
+                ? "hover:shadow-[0_4px_25px_rgba(14,165,233,0.08)]"
+                : "hover:shadow-[0_4px_25px_rgba(37,99,235,0.08)]"
+            }`}>
               <div className="flex flex-col gap-5">
                 {/* Filtro de marcas */}
                 {availableBrands.length > 0 && (
@@ -1016,7 +1028,11 @@ const CatalogPage: React.FC<CatalogPageProps> = ({
                           Marcas
                         </h2>
                         {selectedBrands.length > 0 && (
-                          <span className="text-[10px] md:text-xs font-bold text-white bg-gradient-to-r from-blue-600 to-blue-500 px-2 py-0.5 rounded-full shadow-sm">
+                          <span className={`text-[10px] md:text-xs font-bold text-white px-2 py-0.5 rounded-full shadow-sm ${
+                            isBateria
+                              ? "bg-gradient-to-r from-sky-600 to-sky-500"
+                              : "bg-gradient-to-r from-blue-600 to-blue-500"
+                          }`}>
                             {selectedBrands.length}
                           </span>
                         )}
@@ -1024,7 +1040,11 @@ const CatalogPage: React.FC<CatalogPageProps> = ({
                       {selectedBrands.length > 0 && (
                         <button
                           onClick={handleClearFilter}
-                          className="text-[10px] md:text-xs text-blue-600 hover:text-blue-800 transition-colors duration-200 font-medium dark:text-blue-400 dark:hover:text-blue-300"
+                          className={`text-[10px] md:text-xs font-medium transition-colors duration-200 ${
+                            isBateria
+                              ? "text-sky-600 hover:text-sky-800 dark:text-sky-400 dark:hover:text-sky-300"
+                              : "text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+                          }`}
                         >
                           Limpar
                         </button>
@@ -1048,8 +1068,12 @@ const CatalogPage: React.FC<CatalogPageProps> = ({
                             duration-200
                             font-medium
                             ${selectedBrands.includes(brand)
-                                ? 'bg-gradient-to-r from-blue-600 to-blue-500 text-white border-transparent shadow-md hover:shadow-lg scale-105'
-                                : 'bg-white text-gray-700 border-gray-200 hover:border-blue-400 hover:text-blue-700 hover:shadow-sm hover:bg-blue-50 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:hover:border-blue-400 dark:hover:text-blue-400 dark:hover:bg-gray-700'
+                                ? isBateria
+                                  ? 'bg-gradient-to-r from-sky-600 to-sky-500 text-white border-transparent shadow-md hover:shadow-lg scale-105'
+                                  : 'bg-gradient-to-r from-blue-600 to-blue-500 text-white border-transparent shadow-md hover:shadow-lg scale-105'
+                                : isBateria
+                                  ? 'bg-white text-gray-700 border-gray-200 hover:border-sky-400 hover:text-sky-700 hover:shadow-sm hover:bg-sky-50 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:hover:border-sky-400 dark:hover:text-sky-400 dark:hover:bg-gray-700'
+                                  : 'bg-white text-gray-700 border-gray-200 hover:border-blue-400 hover:text-blue-700 hover:shadow-sm hover:bg-blue-50 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:hover:border-blue-400 dark:hover:text-blue-400 dark:hover:bg-gray-700'
                               }
                           `}
                             onClick={(e) => handleSelectBrand(brand, e)}
