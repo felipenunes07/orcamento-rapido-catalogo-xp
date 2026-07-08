@@ -1724,7 +1724,7 @@ const CatalogPage: React.FC<CatalogPageProps> = ({
 
         {/* Campo de busca por modelo - sticky abaixo do header */}
         {!loading && !error && (
-          <div className="sticky top-[52px] sm:top-[60px] z-30 bg-background/95 backdrop-blur-md py-3 border-b border-gray-100 dark:border-gray-800 -mx-4 px-4 sm:mx-0 sm:px-0 mb-4">
+          <div className="sticky top-0 z-30 bg-background/95 backdrop-blur-md py-3 border-b border-gray-100 dark:border-gray-800 -mx-4 px-4 sm:mx-0 sm:px-0 mb-4">
             <div className="relative flex items-center max-w-sm md:max-w-md">
               <Input
                 type="text"
