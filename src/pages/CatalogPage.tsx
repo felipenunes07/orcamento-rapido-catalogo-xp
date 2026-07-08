@@ -619,17 +619,22 @@ const CatalogPage: React.FC<CatalogPageProps> = ({
       return different ? dynamicQualities : prev
     })
 
-    // Se houver qualidades selecionadas que não existem mais nessa marca/filtros, desmarque-as
-    const validSelected = selectedQualities.filter((q) => dynamicQualities.includes(q))
+    // Se houver categorias selecionadas que não possuem mais nenhuma qualidade nessa marca/filtros, desmarque-as
+    const validSelected = selectedQualities.filter((groupId) => {
+      const group = QUALITY_GROUPS.find((g) => g.id === groupId)
+      return group && dynamicQualities.some(group.match)
+    })
     if (validSelected.length !== selectedQualities.length) {
       setSelectedQualities(validSelected)
     }
 
-    // Filtrar por qualidades selecionadas
+    // Filtrar por categorias de qualidades selecionadas
     if (selectedQualities.length > 0) {
       filtered = filtered.filter((product) => {
         const qual = product.qualidade === '-' ? 'LCD' : product.qualidade
-        return selectedQualities.includes(qual)
+        const matchedGroup = QUALITY_GROUPS.find((g) => g.match(qual))
+        const groupId = matchedGroup ? matchedGroup.id : 'outros'
+        return selectedQualities.includes(groupId)
       })
     }
 
@@ -1242,57 +1247,43 @@ const CatalogPage: React.FC<CatalogPageProps> = ({
                         </button>
                       )}
                     </div>
-                    <div className="space-y-1.5 sm:space-y-3">
-                      {QUALITY_GROUPS.map((group) => {
-                        const qualitiesInGroup = availableQualities.filter(group.match)
-                        if (qualitiesInGroup.length === 0) return null
-
+                    <div className="flex flex-wrap gap-1.5 md:gap-2">
+                      {QUALITY_GROUPS.filter((group) =>
+                        availableQualities.some(group.match)
+                      ).map((group) => {
+                        const isSelected = selectedQualities.includes(group.id)
                         return (
-                          <div key={group.id} className="flex flex-row items-center sm:items-start gap-2 sm:gap-3 py-1 sm:py-1.5 border-b border-gray-100/50 dark:border-gray-800/50 last:border-0">
-                            <span className="text-[9px] sm:text-[10px] font-bold tracking-wider text-gray-400 dark:text-gray-500 uppercase shrink-0 w-20 sm:w-28 pl-0.5 pt-0.5 sm:pt-1.5">
-                              {group.name}
-                            </span>
-                            <div className="flex flex-wrap gap-1.5 md:gap-2">
-                              {qualitiesInGroup.map((quality) => (
-                                <Badge
-                                  key={quality}
-                                  variant="outline"
-                                  className={`
-                                  relative overflow-hidden
-                                  cursor-pointer 
-                                  text-[11px] md:text-xs
-                                  py-1 md:py-2
-                                  px-2.5 md:px-4
-                                  rounded-lg md:rounded-xl
-                                  border-2
-                                  transition-all
-                                  duration-200
-                                  font-medium
-                                  ${selectedQualities.includes(quality)
-                                      ? 'bg-gradient-to-r from-blue-600 to-blue-500 text-white border-transparent shadow-md hover:shadow-lg scale-105'
-                                      : 'bg-white text-gray-700 border-gray-200 hover:border-blue-400 hover:text-blue-700 hover:shadow-sm hover:bg-blue-50 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:hover:border-blue-400 dark:hover:text-blue-400 dark:hover:bg-gray-700'
-                                    }
-                                `}
-                                  onClick={(e) => handleSelectQuality(quality, e)}
-                                >
-                                  {quality}
-                                  {quality.toUpperCase().includes('VV') && (
-                                    <span
-                                      className="absolute top-0 right-0 w-2.5 h-2.5 bg-red-500"
-                                      style={{ clipPath: 'polygon(100% 0, 0 0, 100% 100%)' }}
-                                      title="Possui vídeo de apresentação"
-                                    />
-                                  )}
-                                </Badge>
-                              ))}
-                            </div>
-                          </div>
+                          <Badge
+                            key={group.id}
+                            variant="outline"
+                            className={`
+                              relative overflow-hidden cursor-pointer text-[11px] md:text-xs py-1.5 md:py-2 px-3 md:px-4 rounded-lg md:rounded-xl border-2 transition-all duration-200 font-medium
+                              ${isSelected
+                                ? 'bg-gradient-to-r from-blue-600 to-blue-500 text-white border-transparent shadow-md hover:shadow-lg scale-105'
+                                : 'bg-white text-gray-700 border-gray-200 hover:border-blue-400 hover:text-blue-700 hover:shadow-sm hover:bg-blue-50 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:hover:border-blue-400 dark:hover:text-blue-400 dark:hover:bg-gray-700'
+                              }
+                            `}
+                            onClick={(e) => handleSelectQuality(group.id, e)}
+                          >
+                            {group.name}
+                            {/* Mostrar badge se esta categoria possuir qualidades VV */}
+                            {availableQualities.filter(group.match).some((q) => q.toUpperCase().includes('VV')) && (
+                              <span
+                                className="absolute top-0 right-0 w-2.5 h-2.5 bg-red-500"
+                                style={{ clipPath: 'polygon(100% 0, 0 0, 100% 100%)' }}
+                                title="Possui variação com vídeo"
+                              />
+                            )}
+                          </Badge>
                         )
                       })}
                     </div>
 
                     {/* Banner explicativo de Qualidade VV */}
-                    {selectedQualities.some((q) => q.toUpperCase().includes('VV')) && (
+                    {selectedQualities.some((groupId) => {
+                      const group = QUALITY_GROUPS.find((g) => g.id === groupId)
+                      return group && availableQualities.filter(group.match).some((q) => q.toUpperCase().includes('VV'))
+                    }) && (
                       <div className="mt-3 px-2.5 py-2 sm:px-4 sm:py-3.5 bg-gradient-to-r from-blue-50/50 via-white to-blue-50/50 dark:from-blue-950/20 dark:via-gray-900/60 dark:to-blue-950/20 rounded-xl border border-blue-100/60 dark:border-blue-900/30 transition-all duration-200 animate-in fade-in slide-in-from-top-2 duration-300">
                         <div className="flex items-center justify-between gap-2 sm:gap-4">
                           <div className="flex gap-2 sm:gap-3 items-center text-left min-w-0">
