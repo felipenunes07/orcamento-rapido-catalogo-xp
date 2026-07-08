@@ -121,6 +121,16 @@ const QUALITY_GROUPS: QualityGroup[] = [
       !q.toUpperCase().includes('PREMIER'),
   },
   {
+    id: 'nacional',
+    name: 'Nacional',
+    match: (q) => q.toUpperCase().includes('NACIONAL') || q.toUpperCase().includes('VIVID'),
+  },
+  {
+    id: 'conector',
+    name: 'Conector',
+    match: (q) => q.toUpperCase().includes('CONECTOR'),
+  },
+  {
     id: 'outros',
     name: 'Outras',
     match: (q) => {
@@ -131,7 +141,10 @@ const QUALITY_GROUPS: QualityGroup[] = [
         !upper.includes('SELECT') &&
         !upper.includes('PREMIER') &&
         !upper.includes('LCD') &&
-        upper !== 'INCELL'
+        upper !== 'INCELL' &&
+        !upper.includes('NACIONAL') &&
+        !upper.includes('VIVID') &&
+        !upper.includes('CONECTOR')
       )
     },
   },
