@@ -304,23 +304,23 @@ const HomePage: React.FC = () => {
                 Crie orçamentos rápidos e simples
               </p>
 
-              {/* Opções de catálogo (compactas) */}
-              <div className="grid grid-cols-2 gap-4 max-w-md mx-auto">
+              {/* Opções de catálogo (compactas e responsivas) */}
+              <div className="grid grid-cols-2 gap-3 max-w-md mx-auto px-2">
                 <Link
                   to="/catalogo"
-                  className="group flex items-center gap-3 bg-white dark:bg-gray-800/90 backdrop-blur-sm p-4 rounded-xl border border-slate-200 dark:border-gray-700 shadow-sm glow-card-blue"
+                  className="group flex flex-col sm:flex-row items-center gap-2 sm:gap-3 bg-white dark:bg-gray-800/90 backdrop-blur-sm p-3 sm:p-3.5 rounded-xl border border-slate-200 dark:border-gray-700 shadow-sm glow-card-blue animate-pulse-glow"
                 >
                   <span
-                    className="flex items-center justify-center w-10 h-10 rounded-xl text-white shrink-0 transition-all duration-300 group-hover:scale-110 shadow-[0_4px_10px_rgba(37,99,235,0.25)]"
+                    className="flex items-center justify-center w-9 h-9 rounded-lg text-white shrink-0 transition-transform duration-200 group-hover:scale-105"
                     style={{ background: 'linear-gradient(135deg, #1e40af, #2563eb)' }}
                   >
                     <Smartphone className="h-5 w-5" />
                   </span>
-                  <span className="text-left leading-tight">
-                    <span className="block font-bold text-sm text-blue-800 dark:text-blue-300 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-                      Telas e Doc
+                  <span className="flex flex-col items-center sm:items-start text-center sm:text-left leading-tight">
+                    <span className="block font-semibold text-xs sm:text-sm text-blue-800 dark:text-blue-300">
+                      Telas e Doc de Carga
                     </span>
-                    <span className="block text-[11px] text-muted-foreground dark:text-gray-400 mt-0.5">
+                    <span className="block text-[10px] text-muted-foreground dark:text-gray-400 mt-0.5">
                       Ver catálogo
                     </span>
                   </span>
@@ -328,19 +328,19 @@ const HomePage: React.FC = () => {
 
                 <Link
                   to="/baterias"
-                  className="group flex items-center gap-3 bg-white dark:bg-gray-800/90 backdrop-blur-sm p-4 rounded-xl border border-slate-200 dark:border-gray-700 shadow-sm glow-card-sky"
+                  className="group flex flex-col sm:flex-row items-center gap-2 sm:gap-3 bg-white dark:bg-gray-800/90 backdrop-blur-sm p-3 sm:p-3.5 rounded-xl border border-slate-200 dark:border-gray-700 shadow-sm glow-card-sky"
                 >
                   <span
-                    className="flex items-center justify-center w-10 h-10 rounded-xl text-white shrink-0 transition-all duration-300 group-hover:scale-110 shadow-[0_4px_10px_rgba(14,165,233,0.25)]"
+                    className="flex items-center justify-center w-9 h-9 rounded-lg text-white shrink-0 transition-transform duration-200 group-hover:scale-105"
                     style={{ background: 'linear-gradient(135deg, #0369a1, #0ea5e9)' }}
                   >
                     <BatteryCharging className="h-5 w-5" />
                   </span>
-                  <span className="text-left leading-tight">
-                    <span className="block font-bold text-sm text-sky-700 dark:text-sky-300 group-hover:text-sky-500 dark:group-hover:text-sky-400 transition-colors">
+                  <span className="flex flex-col items-center sm:items-start text-center sm:text-left leading-tight">
+                    <span className="block font-semibold text-xs sm:text-sm text-sky-700 dark:text-sky-300">
                       Baterias
                     </span>
-                    <span className="block text-[11px] text-muted-foreground dark:text-gray-400 mt-0.5">
+                    <span className="block text-[10px] text-muted-foreground dark:text-gray-400 mt-0.5">
                       Ver catálogo
                     </span>
                   </span>
@@ -395,13 +395,19 @@ const HomePage: React.FC = () => {
               </div>
             </section>
 
-            <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
-              <Button asChild size="lg" className="btn-neon-blue w-full sm:w-auto">
-                <Link to="/catalogo">Telas e Doc de Carga</Link>
-              </Button>
-              <Button asChild size="lg" className="btn-neon-sky w-full sm:w-auto">
-                <Link to="/baterias">Baterias</Link>
-              </Button>
+            <div className="mt-8 flex flex-row items-center justify-center gap-3 max-w-md mx-auto px-4">
+              <Link 
+                to="/catalogo" 
+                className="btn-neon-blue flex-1 text-center py-2 px-3 text-xs sm:text-sm font-semibold rounded-lg shadow-sm"
+              >
+                Telas e Doc
+              </Link>
+              <Link 
+                to="/baterias" 
+                className="btn-neon-sky flex-1 text-center py-2 px-3 text-xs sm:text-sm font-semibold rounded-lg shadow-sm"
+              >
+                Baterias
+              </Link>
             </div>
 
             {/* Botão de contato WhatsApp */}
