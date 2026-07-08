@@ -1723,8 +1723,8 @@ const CatalogPage: React.FC<CatalogPageProps> = ({
 
         {/* Campo de busca por modelo */}
         {!loading && !error && (
-          <div className="mb-6 max-w-sm md:max-w-md">
-            <div className="relative flex items-center">
+          <div className="sticky top-0 md:top-[68px] z-30 bg-background/95 backdrop-blur-md py-3 border-b border-gray-100 dark:border-gray-800 -mx-4 px-4 sm:mx-0 sm:px-0 mb-6">
+            <div className="relative flex items-center max-w-sm md:max-w-md">
               <Input
                 type="text"
                 placeholder="Pesquisar por modelo..."

@@ -87,33 +87,33 @@ const ProductGrid: React.FC<ProductGridProps> = ({
       {/* Versão para Desktop */}
       <div className="hidden md:block overflow-x-auto">
         <Table>
-          <TableHeader>
-            <TableRow>
+          <TableHeader className="z-20">
+            <TableRow className="hover:bg-transparent">
               <TableHead
-                className={`w-[200px] ${compactView ? 'py-2 text-sm' : ''}`}
+                className={`sticky top-[68px] md:top-[132px] z-20 w-[200px] bg-background dark:bg-slate-900 border-b ${compactView ? 'py-2 text-sm' : ''}`}
               >
                 Modelo
               </TableHead>
               <TableHead
-                className={`w-[150px] ${compactView ? 'py-2 text-sm' : ''}`}
+                className={`sticky top-[68px] md:top-[132px] z-20 w-[150px] bg-background dark:bg-slate-900 border-b ${compactView ? 'py-2 text-sm' : ''}`}
               >
                 Cor
               </TableHead>
-              <TableHead className={compactView ? 'py-2 text-sm' : ''}>
+              <TableHead className={`sticky top-[68px] md:top-[132px] z-20 bg-background dark:bg-slate-900 border-b ${compactView ? 'py-2 text-sm' : ''}`}>
                 Qualidade
               </TableHead>
               <TableHead
-                className={`text-right ${compactView ? 'py-2 text-sm' : ''}`}
+                className={`sticky top-[68px] md:top-[132px] z-20 text-right bg-background dark:bg-slate-900 border-b ${compactView ? 'py-2 text-sm' : ''}`}
               >
                 Valor
               </TableHead>
               <TableHead
-                className={`text-center ${compactView ? 'py-2 text-sm' : ''}`}
+                className={`sticky top-[68px] md:top-[132px] z-20 text-center bg-background dark:bg-slate-900 border-b ${compactView ? 'py-2 text-sm' : ''}`}
               >
                 Quantidade
               </TableHead>
               <TableHead
-                className={`text-right ${compactView ? 'py-2 text-sm' : ''}`}
+                className={`sticky top-[68px] md:top-[132px] z-20 text-right bg-background dark:bg-slate-900 border-b ${compactView ? 'py-2 text-sm' : ''}`}
               >
                 Subtotal
               </TableHead>
