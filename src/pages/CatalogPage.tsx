@@ -1326,49 +1326,51 @@ const CatalogPage: React.FC<CatalogPageProps> = ({
                       <h2 className="text-sm md:text-base font-semibold text-gray-900 dark:text-gray-100">
                         Preço
                       </h2>
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-5 w-5 p-0 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300"
-                          >
-                            <Info className="h-3 w-3" />
-                          </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-80 p-4">
-                          <div className="space-y-4">
-                            <div className="space-y-2">
-                              <h4 className="font-medium text-sm">
-                                Produtos com Preço de Parceiro
-                              </h4>
-                              <p className="text-xs text-gray-600 dark:text-gray-400">
-                                Mostra apenas produtos com preço de parceiro ou em promoção.
-                              </p>
-                            </div>
-
-                            <div className="space-y-2 pt-2 border-t border-gray-100 dark:border-gray-700">
-                              <h4 className="font-medium text-sm text-purple-700 dark:text-purple-400">
-                                O que é Outlet?
-                              </h4>
-                              <div className="text-[11px] text-gray-600 dark:text-gray-400 space-y-2 leading-relaxed">
-                                <p>
-                                  <strong>Recondicionado</strong> significa que o produto não é novo de fábrica, mas também não é usado.
-                                </p>
-                                <p>
-                                  São telas que retornaram por algum motivo (logística, troca, embalagem), passaram por uma nova triagem técnica, foram testadas novamente pela nossa equipe especializada e aprovadas para revenda.
-                                </p>
-                                <p>
-                                  A XP não recoloca esses produtos como "novos" no estoque, porque acreditamos que transparência é respeito ao cliente.
-                                </p>
-                                <p>
-                                  Por isso usamos a classificação RECONDICIONADO, para que o consumidor saiba exatamente o que está comprando.
+                      {!isBateria && (
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-5 w-5 p-0 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300"
+                            >
+                              <Info className="h-3 w-3" />
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-80 p-4">
+                            <div className="space-y-4">
+                              <div className="space-y-2">
+                                <h4 className="font-medium text-sm">
+                                  Produtos com Preço de Parceiro
+                                </h4>
+                                <p className="text-xs text-gray-600 dark:text-gray-400">
+                                  Mostra apenas produtos com preço de parceiro ou em promoção.
                                 </p>
                               </div>
+
+                              <div className="space-y-2 pt-2 border-t border-gray-100 dark:border-gray-700">
+                                <h4 className="font-medium text-sm text-purple-700 dark:text-purple-400">
+                                  O que é Outlet?
+                                </h4>
+                                <div className="text-[11px] text-gray-600 dark:text-gray-400 space-y-2 leading-relaxed">
+                                  <p>
+                                    <strong>Recondicionado</strong> significa que o produto não é novo de fábrica, mas também não é usado.
+                                  </p>
+                                  <p>
+                                    São telas que retornaram por algum motivo (logística, troca, embalagem), passaram por uma nova triagem técnica, foram testadas novamente pela nossa equipe especializada e aprovadas para revenda.
+                                  </p>
+                                  <p>
+                                    A XP não recoloca esses produtos como "novos" no estoque, porque acreditamos que transparência é respeito ao cliente.
+                                  </p>
+                                  <p>
+                                    Por isso usamos a classificação RECONDICIONADO, para que o consumidor saiba exatamente o que está comprando.
+                                  </p>
+                                </div>
+                              </div>
                             </div>
-                          </div>
-                        </PopoverContent>
-                      </Popover>
+                          </PopoverContent>
+                        </Popover>
+                      )}
                     </div>
                     {/* Badge de Desconto Ativo */}
                     {codigo.trim() &&
