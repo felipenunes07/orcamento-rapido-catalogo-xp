@@ -122,7 +122,7 @@ const QUALITY_GROUPS: QualityGroup[] = [
   },
   {
     id: 'outros',
-    name: 'Outras Qualidades',
+    name: 'Outras',
     match: (q) => {
       const upper = q.toUpperCase()
       return (
@@ -1242,14 +1242,14 @@ const CatalogPage: React.FC<CatalogPageProps> = ({
                         </button>
                       )}
                     </div>
-                    <div className="space-y-4">
+                    <div className="space-y-1.5 sm:space-y-3">
                       {QUALITY_GROUPS.map((group) => {
                         const qualitiesInGroup = availableQualities.filter(group.match)
                         if (qualitiesInGroup.length === 0) return null
 
                         return (
-                          <div key={group.id} className="flex flex-col sm:flex-row sm:items-start gap-1.5 sm:gap-3 py-1.5 border-b border-gray-100/50 dark:border-gray-800/50 last:border-0">
-                            <span className="text-[10px] font-bold tracking-wider text-gray-400 dark:text-gray-500 uppercase shrink-0 sm:w-28 pl-0.5 sm:pt-1.5">
+                          <div key={group.id} className="flex flex-row items-center sm:items-start gap-2 sm:gap-3 py-1 sm:py-1.5 border-b border-gray-100/50 dark:border-gray-800/50 last:border-0">
+                            <span className="text-[9px] sm:text-[10px] font-bold tracking-wider text-gray-400 dark:text-gray-500 uppercase shrink-0 w-20 sm:w-28 pl-0.5 pt-0.5 sm:pt-1.5">
                               {group.name}
                             </span>
                             <div className="flex flex-wrap gap-1.5 md:gap-2">
@@ -1261,8 +1261,8 @@ const CatalogPage: React.FC<CatalogPageProps> = ({
                                   relative overflow-hidden
                                   cursor-pointer 
                                   text-[11px] md:text-xs
-                                  py-1.5 md:py-2
-                                  px-3 md:px-4
+                                  py-1 md:py-2
+                                  px-2.5 md:px-4
                                   rounded-lg md:rounded-xl
                                   border-2
                                   transition-all
