@@ -1723,8 +1723,8 @@ const CatalogPage: React.FC<CatalogPageProps> = ({
 
         {/* Campo de busca por modelo */}
         {!loading && !error && (
-          <div className="sticky top-0 md:top-[68px] z-30 bg-background/95 backdrop-blur-md py-3 border-b border-gray-100 dark:border-gray-800 -mx-4 px-4 sm:mx-0 sm:px-0 mb-6">
-            <div className="relative flex items-center max-w-sm md:max-w-md">
+          <div className="mb-4 max-w-sm md:max-w-md">
+            <div className="relative flex items-center">
               <Input
                 type="text"
                 placeholder="Pesquisar por modelo..."
@@ -1790,13 +1790,15 @@ const CatalogPage: React.FC<CatalogPageProps> = ({
             )}
           </div>
         ) : (
-          <div className="bg-background p-4 rounded-lg shadow-sm dark:border-gray-700">
-            <ProductGrid
-              products={filteredProducts}
-              cartItems={cartItems}
-              onUpdateQuantity={updateQuantity}
-              compactView={compactView}
-            />
+          <div className="bg-background rounded-lg shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+            <div className="max-h-[70vh] overflow-y-auto">
+              <ProductGrid
+                products={filteredProducts}
+                cartItems={cartItems}
+                onUpdateQuantity={updateQuantity}
+                compactView={compactView}
+              />
+            </div>
           </div>
         )}
 
